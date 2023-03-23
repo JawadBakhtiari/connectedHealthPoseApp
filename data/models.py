@@ -19,12 +19,34 @@ class User(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+class Session(models.Model):
+    """Represent Sessions between a client and a health professional."""
+    date = models.DateTimeField(help_text='Enter date and time that this session started: ')
+
+    def __str__(self) -> str:
+        """String for representing the Model object."""
+        return f"Session #{self.id} on {self.date}"
+
+
+class InvolvedInSession(models.Model):
+    """Map Sessions to Users, since multiple Users may participate in a given Session and
+        a given User may participate in multiple Sessions."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='Enter the id of the user who participated in this session: ')
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, help_text='Enter the id of the session that this user participated in: ')
+
+    def __str__(self) -> str:
+        """String for representing the Model object."""
+        user_info = User.objects.get(id=self.user)
+        session_info = Session.objects.get(id=self.session)
+        return f"{user_info.first_name} {user_info.last_name} (user id #{user_info.id}) "\
+                f"was involved in session #{session_info.id} on {session_info.date}"
+
+
 class Frame(models.Model):
     """Represent a Frame in the database."""
     name = models.TextField(max_length=100, help_text='Enter name of frame: ')
     description = models.TextField(max_length=1000, help_text='Enter description of frame: ')
-    date_created = models.DateTimeField(help_text='Enter date and time that this frame was created: ')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='Enter the id of the user who owns this frame: ')
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, help_text='Enter the id of the session that this frame belongs to: ')
 
     def __str__(self) -> str:
         """String for representing the Model object."""
