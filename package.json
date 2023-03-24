@@ -1,8 +1,11 @@
 {
   "dependencies": {
+    "@mediapipe/pose": "^0.5.1675469404",
     "@react-native-async-storage/async-storage": "~1.17.3",
     "@tensorflow-models/mobilenet": "^2.1.0",
+    "@tensorflow-models/pose-detection": "^2.1.0",
     "@tensorflow/tfjs": "^3.10.0",
+    "@tensorflow/tfjs-backend-webgpu": "^0.0.1-alpha.17",
     "@tensorflow/tfjs-react-native": "^0.7.0",
     "expo": "^46.0.0",
     "expo-camera": "~12.5.0",
