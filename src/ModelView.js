@@ -7,9 +7,10 @@ import { CustomTensorCamera } from './CustomTensorCamera';
 import { LoadingView } from './LoadingView';
 import { PredictionList } from './PredictionList';
 import { useTensorFlowModel } from './useTensorFlow';
+import * as movenet from '@tensorflow-models/pose-detection'
 
 export function ModelView() {
-  const model = useTensorFlowModel(mobilenet);
+  const model = movenet.SupportedModels.MoveNet;
   const [predictions, setPredictions] = React.useState([]);
 
   if (!model) {
@@ -42,7 +43,9 @@ function ModelCamera({ model, setPredictions }) {
     (images) => {
       const loop = async () => {
         const nextImageTensor = images.next().value;
-        const predictions = await model.classify(nextImageTensor);
+        const detector = await movenet.createDetector(model);
+        const predictions = await detector.estimatePoses(nextImageTensor);
+        console.log(predictions);
         setPredictions(predictions);
         raf.current = requestAnimationFrame(loop);
       };
