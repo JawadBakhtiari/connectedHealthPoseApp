@@ -8,9 +8,14 @@ const TENSOR_WIDTH = 152;
 
 const CAMERA_RATIO = TEXTURE_SIZE.height / TEXTURE_SIZE.width;
 
+//const TENSOR_SIZE = {
+//  width: TENSOR_WIDTH,
+//  height: TENSOR_WIDTH * CAMERA_RATIO,
+//};
+
 const TENSOR_SIZE = {
-  width: TENSOR_WIDTH,
-  height: TENSOR_WIDTH * CAMERA_RATIO,
+  width: 300,
+  height: 300,
 };
 
 const TensorCamera = cameraWithTensors(Camera);

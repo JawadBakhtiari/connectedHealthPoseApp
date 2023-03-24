@@ -46,6 +46,8 @@ function ModelCamera({ model, setPredictions }) {
         const detector = await movenet.createDetector(model);
         const predictions = await detector.estimatePoses(nextImageTensor);
         console.log(predictions);
+        let test = predictions.find(predictions => predictions.keypoints)
+        console.log(test)
         setPredictions(predictions);
         raf.current = requestAnimationFrame(loop);
       };
