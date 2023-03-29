@@ -10,7 +10,7 @@ import { useTensorFlowModel } from './useTensorFlow';
 import * as movenet from '@tensorflow-models/pose-detection'
 
 export function ModelView() {
-  const model = movenet.SupportedModels.MoveNet;
+  const model = movenet.SupportedModels.BlazePose;
   const [predictions, setPredictions] = React.useState([]);
 
   if (!model) {
@@ -43,11 +43,17 @@ function ModelCamera({ model, setPredictions }) {
     (images) => {
       const loop = async () => {
         const nextImageTensor = images.next().value;
-        const detector = await movenet.createDetector(model);
+        const detectorConfig = {
+          modelType: 'lite',
+          runtime: 'tfjs'
+        };
+        const detector = await movenet.createDetector(model, detectorConfig);
         const predictions = await detector.estimatePoses(nextImageTensor);
-        console.log(predictions);
-        let test = predictions.find(predictions => predictions.keypoints)
-        console.log(test)
+        let keypointArr = predictions.find(predictions => predictions.keypoints3D)
+        let score  = predictions.find(predictions => predictions.score)
+        //console.log(keypointArr)
+        //console.log("\n")
+        console.log(score)
         setPredictions(predictions);
         raf.current = requestAnimationFrame(loop);
       };
