@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'framestore_test.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'HumanPose3D.settings')
 
 application = get_wsgi_application()
