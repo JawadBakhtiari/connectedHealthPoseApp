@@ -10,7 +10,7 @@ import { useTensorFlowModel } from './useTensorFlow';
 import * as movenet from '@tensorflow-models/pose-detection'
 
 export function ModelView() {
-  const model = movenet.SupportedModels.MoveNet;
+  const model = movenet.SupportedModels.BlazePose;
   const [predictions, setPredictions] = React.useState([]);
 
   if (!model) {
@@ -43,17 +43,21 @@ function ModelCamera({ model, setPredictions }) {
     (images) => {
       const loop = async () => {
         const nextImageTensor = images.next().value;
-        const detector = await movenet.createDetector(model);
-        const predictions = await detector.estimatePoses(nextImageTensor);
-        console.log(predictions);
-        let test = predictions.find(predictions => predictions.keypoints)
-        console.log(test)
-        setPredictions(predictions);
+        const detectorConfig = {
+          modelType: 'lite',
+          runtime: 'tfjs'
+        };
+        const timestamp = performance.now();
+        const detector = await movenet.createDetector(model, detectorConfig);
+        const predictions = await detector.estimatePoses(nextImageTensor, undefined, timestamp);
+        let poses  = predictions.find(predictions => predictions.score)
+        console.log(poses)
+        //setPredictions(predictions);
         raf.current = requestAnimationFrame(loop);
       };
       loop();
     },
-    [setPredictions]
+    //[setPredictions]
   );
 
   return React.useMemo(
@@ -61,7 +65,7 @@ function ModelCamera({ model, setPredictions }) {
       <CustomTensorCamera
         width={size.width}
         style={styles.camera}
-        type={Camera.Constants.Type.back}
+        type={Camera.Constants.Type.front}
         onReady={onReady}
         autorender
       />
