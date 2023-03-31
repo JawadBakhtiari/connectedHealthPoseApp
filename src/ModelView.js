@@ -47,19 +47,17 @@ function ModelCamera({ model, setPredictions }) {
           modelType: 'lite',
           runtime: 'tfjs'
         };
+        const timestamp = performance.now();
         const detector = await movenet.createDetector(model, detectorConfig);
-        const predictions = await detector.estimatePoses(nextImageTensor);
-        let keypointArr = predictions.find(predictions => predictions.keypoints3D)
-        let score  = predictions.find(predictions => predictions.score)
-        //console.log(keypointArr)
-        //console.log("\n")
-        console.log(score)
-        setPredictions(predictions);
+        const predictions = await detector.estimatePoses(nextImageTensor, undefined, timestamp);
+        let poses  = predictions.find(predictions => predictions.score)
+        console.log(poses)
+        //setPredictions(predictions);
         raf.current = requestAnimationFrame(loop);
       };
       loop();
     },
-    [setPredictions]
+    //[setPredictions]
   );
 
   return React.useMemo(
@@ -67,7 +65,7 @@ function ModelCamera({ model, setPredictions }) {
       <CustomTensorCamera
         width={size.width}
         style={styles.camera}
-        type={Camera.Constants.Type.back}
+        type={Camera.Constants.Type.front}
         onReady={onReady}
         autorender
       />
