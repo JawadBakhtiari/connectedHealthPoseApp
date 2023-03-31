@@ -82,16 +82,12 @@ export default function App() {
   const renderPose = () => {
     if (poses != null && poses.length > 0) {
       const keypoints = poses[0].keypoints
-        .filter((k) => (k.score ?? 0) > MIN_KEYPOINT_SCORE)
         .map((k) => {
-          const x = k.x;
-          const y = k.y;
-          const z = k.z
-          const name = k.name
-          console.log({x}, {y}, {z}, {name})
+          const date = Date.now()
+          k["timestamp"] = date
+          console.log(k)
           return (
             <Text>
-              {x} {y} {z}
             </Text>
           );
         });
