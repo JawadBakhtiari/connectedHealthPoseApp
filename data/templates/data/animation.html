@@ -1,0 +1,37 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Animation{% endblock %}
+
+{% block content %}
+    <div class="plot-container">
+        <img id="animation" alt="Animation" />
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        const frameData = JSON.parse('{{ frames|safe }}');
+        let currentFrame = 0;
+
+        function updateFrame() {
+            const base64Img = frameData[currentFrame];
+            if (!base64Img) {
+                console.error('Invalid base64 image data:', base64Img);
+                console.error('Current frame:', currentFrame);
+                console.error('Frame data:', frameData);
+                return;
+            }
+
+            const img = document.getElementById("animation");
+            img.src = "data:image/png;base64," + base64Img;
+
+            currentFrame++;
+            if (currentFrame >= frameData.length) {
+                currentFrame = 0;
+            }
+        }
+
+        setInterval(updateFrame, 100);  // Adjust the interval (in milliseconds) to control the animation speed
+    </script>
+{% endblock %}
