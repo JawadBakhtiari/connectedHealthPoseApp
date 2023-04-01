@@ -8,19 +8,24 @@ from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
 import tensorflow as tf
-import json
+from datastore.datastore import data_store
 
 
 def visualise_coordinates(request):
-    json_path = os.path.abspath("data/static/data/data.json")
+    eg_user_id = "1"
+    eg_session_id = "1"
+    eg_frame_id = "1"
 
-    # load in json data
-    with open(json_path, "r") as f:
-        data = json.load(f)
+    data = data_store.get()
+    eg_keypoints3D = data.get(eg_user_id) \
+                        .get("sessions") \
+                        .get(eg_session_id) \
+                        .get("frames") \
+                        .get(eg_frame_id) \
 
     # create a list of numpy arrays for each keypoint
     keypoints3D_arrays = []
-    for kp in data['keypoints3D']:
+    for kp in eg_keypoints3D:
         keypoints3D_arrays.append(np.array([kp['x'], kp['y'], kp['z']]))
 
     # extract x, y, and z coordinates from keypoints3D_arrays
