@@ -23,5 +23,6 @@ from django.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('data/', include('data.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('', RedirectView.as_view(url='data/')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
