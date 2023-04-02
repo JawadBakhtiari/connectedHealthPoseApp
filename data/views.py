@@ -10,24 +10,24 @@ import plotly.graph_objs as go
 from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
+import tensorflow as tf
+from datastore.datastore import data_store
 import json
 
-
 def visualise_coordinates(request):
-    json_dir = os.path.abspath("data/static/data/")
-    json_files = [f for f in os.listdir(json_dir) if f.endswith('.json')]
-    json_files.sort()
+    eg_user_id = "1"
+    eg_session_id = "1"
 
+    data = data_store.get()
+    eg_frames = data.get(eg_user_id) \
+                        .get("sessions") \
+                        .get(eg_session_id) \
+                        .get("frames")
     frames = []
 
-    for json_file in json_files:
-        json_path = os.path.join(json_dir, json_file)
-
-        with open(json_path, "r") as f:
-            data = json.load(f)
-
+    for eg_frame in eg_frames.values():
         keypoints3D_arrays = []
-        for kp in data['keypoints3D']:
+        for kp in eg_frame:
             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
 
         keypoints2D_arrays = [(int(kp[0] * 100 + 300), int(kp[1] * 100 + 300)) for kp in keypoints3D_arrays]
