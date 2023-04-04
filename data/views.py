@@ -1,7 +1,5 @@
 import base64
-import os
 import cv2
-from django.http import HttpResponse
 from django.shortcuts import render
 import numpy as np
 import plotly.graph_objs as go
@@ -10,7 +8,6 @@ import plotly.graph_objs as go
 from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
-import tensorflow as tf
 from datastore.datastore import data_store
 import json
 
