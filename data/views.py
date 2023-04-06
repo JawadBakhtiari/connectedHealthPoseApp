@@ -15,19 +15,30 @@ from datastore.datastore import data_store
 import json
 
 def visualise_coordinates(request):
-    eg_user_id = "1"
-    eg_session_id = "1"
+    # Assume that we want session and user both with id "1"
+    # These would actually be contained within the request
+    session_id = "1"
+    user_id = "1"
+    users = data_store.get_users()
+    user = users.get(user_id)
+    
+    if not user:
+        # user with this id does not exist ...
+        pass
+    if not user['sessions'].get(session_id):
+        # this session doesn't exist, or it does but this user wasn't part of it
+        pass
+    if not data_store.populate_session(session_id):
+        # session file could not be located, ignore this case currently.
+        # above check should prevent this ever being true
+        pass
 
-    data = data_store.get()
-    eg_frames = data.get(eg_user_id) \
-                        .get("sessions") \
-                        .get(eg_session_id) \
-                        .get("frames")
+    session_frames = data_store.get_session()
     frames = []
 
-    for eg_frame in eg_frames.values():
+    for session_frame in session_frames.values():
         keypoints3D_arrays = []
-        for kp in eg_frame:
+        for kp in session_frame:
             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
 
         keypoints2D_arrays = [(int(kp[0] * 100 + 300), int(kp[1] * 100 + 300)) for kp in keypoints3D_arrays]

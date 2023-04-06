@@ -1,0 +1,13 @@
+{
+    "1": {
+        "first_name": "Jane",
+        "last_name": "Doe",
+        "sessions": {
+            "1": {
+                "name": "my first session",
+                "description": "some description",
+                "date": "04/01/2023, 12:20:16"
+            }
+        }
+    }
+}

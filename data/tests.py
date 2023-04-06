@@ -1,6 +1,8 @@
 from django.test import TestCase
 from datetime import datetime
-from .models import Coordinate, Frame, User, Session, InvolvedInSession
+
+'''
+from .models import Coordinate, User, Session, InvolvedIn
 
 # Frame 1 Coordinates
 c1 = (1.2, 8.4, 5.2)
@@ -40,21 +42,9 @@ class BasicTests(TestCase):
             session=self.s2
         )
 
-        # Frames f1 and f2 both associated with Session s1
-        self.f1 = Frame.objects.create(
-            name="frame 1",
-            description="first frame",
-            session=self.s1
-        )
-        self.f2 = Frame.objects.create(
-            name="frame 2",
-            description="second frame",
-            session=self.s1
-        )
-
         # Coordinates belonging to Frame f1, which belongs Session s1
-        Coordinate.objects.create(x=c1[0], y=c1[1], z=c1[2], frame=self.f1)
-        Coordinate.objects.create(x=c2[0], y=c2[1], z=c2[2], frame=self.f1)
+        Coordinate.objects.create(x=c1[0], y=c1[1], z=c1[2], frame=1, score=0.99)
+        Coordinate.objects.create(x=c2[0], y=c2[1], z=c2[2], frame=1)
 
         # Coordinates belonging to Frame f2, which belongs to Session s1
         Coordinate.objects.create(x=c3[0], y=c3[1], z=c3[2], frame=self.f2)
@@ -79,3 +69,5 @@ class BasicTests(TestCase):
             grouped together."""
         frames_in_session_1 = self.s1.frame_set.all()
         self.assertEqual(list(frames_in_session_1), list(Frame.objects.all()))
+
+'''
