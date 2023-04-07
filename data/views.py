@@ -14,6 +14,30 @@ import tensorflow as tf
 from datastore.datastore import data_store
 import json
 
+def frames_upload(request):
+    # Testing phase, assume that the session is being written to for the first time (
+    # we are not appending frames, just adding whatever frames received to the session
+    # file and closing it).
+
+    # Output request to server terminal for testing
+    data = json.loads(request.body)
+    print(data)
+
+    user_id = data.get('user_id')       # Should be "1" for testing (note that this is a string)
+    session_id = data.get('session_id') # Should be "2" for testing (again, this is a string)
+
+    assert(user_id == "1")
+    assert(session_id == "2")
+
+    session_data = data.get('frames')   # Assuming this is a dictionary of frames, where
+                                        # keys are frame number and values are a list of
+                                        # 3D coordinates. Could also be a list of frames
+                                        # if prefered
+
+    data_store.set_session(session_data)
+    data_store.write_session(session_id)
+
+
 def visualise_coordinates(request):
     # Assume that we want session and user both with id "1"
     # These would actually be contained within the request
