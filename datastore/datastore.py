@@ -1,7 +1,6 @@
 import os
+import orjson
 import json
-from datetime import datetime
-import uuid
 
 users = {}
 session = {}
@@ -24,8 +23,8 @@ class Datastore:
         path = os.path.dirname(__file__)
         try:
             with open(path + "/users.json", "r") as f:
-                self.users = json.loads(f.read())
-        except:
+                self.users = orjson.loads(f.read())
+        except FileNotFoundError:
             self.users = {}
 
     def write_users(self):
@@ -51,9 +50,9 @@ class Datastore:
         path = os.path.dirname(__file__)
         try:
             with open(path + "/sessions/session_" + session_id + ".json", "r") as f:
-                self.session = json.loads(f.read())
+                self.session = orjson.loads(f.read())
             return True
-        except:
+        except FileNotFoundError:
             self.session = {}
             return False
 
@@ -84,6 +83,11 @@ def temp_add_example_user():
                 "name": "my first session",
                 "description": "some description",
                 "date": "04/01/2023, 12:20:16",
+            },
+            "2": {
+                "name": "my second session",
+                "description": "some description",
+                "date": "07/04/2023, 10:20:16",
             }
         }
     }
@@ -93,7 +97,7 @@ def temp_add_example_user():
 
 def temp_add_example_session():
     '''Session is owned by example user created above'''
-    json_dir = os.path.abspath("data/static/data/")
+    json_dir = os.path.abspath("../data/static/data/")
     json_files = [f for f in os.listdir(json_dir) if f.endswith('.json')]
     json_files.sort()
 
@@ -108,7 +112,7 @@ def temp_add_example_session():
             session_store[str(i + 1)] = data['keypoints3D']
 
     data_store.set_session(session_store)
-    
+
     # This is the id of the session as defined in temp_add_example_user()
     data_store.write_session("1")
 
@@ -116,5 +120,3 @@ def temp_add_example_session():
 global data_store
 data_store = Datastore()
 data_store.populate_users()
-#temp_add_example_session()
-#temp_add_example_user()
