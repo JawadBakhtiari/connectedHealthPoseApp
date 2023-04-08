@@ -11,20 +11,55 @@ import numpy as np
 from datastore.datastore import data_store
 import json
 
-def visualise_coordinates(request):
-    eg_user_id = "1"
-    eg_session_id = "1"
+def frames_upload(request):
+    # Testing phase, assume that the session is being written to for the first time (
+    # we are not appending frames, just adding whatever frames received to the session
+    # file and closing it).
 
-    data = data_store.get()
-    eg_frames = data.get(eg_user_id) \
-                        .get("sessions") \
-                        .get(eg_session_id) \
-                        .get("frames")
+    # Output request to server terminal for testing
+    data = json.loads(request.body)
+    print(data)
+
+    user_id = data.get('user_id')       # Should be "1" for testing (note that this is a string)
+    session_id = data.get('session_id') # Should be "2" for testing (again, this is a string)
+
+    assert(user_id == "1")
+    assert(session_id == "2")
+
+    session_data = data.get('frames')   # Assuming this is a dictionary of frames, where
+                                        # keys are frame number and values are a list of
+                                        # 3D coordinates. Could also be a list of frames
+                                        # if prefered
+
+    data_store.set_session(session_data)
+    data_store.write_session(session_id)
+
+
+def visualise_coordinates(request):
+    # Assume that we want session and user both with id "1"
+    # These would actually be contained within the request
+    session_id = "1"
+    user_id = "1"
+    users = data_store.get_users()
+    user = users.get(user_id)
+    
+    if not user:
+        # user with this id does not exist ...
+        pass
+    if not user['sessions'].get(session_id):
+        # this session doesn't exist, or it does but this user wasn't part of it
+        pass
+    if not data_store.populate_session(session_id):
+        # session file could not be located, ignore this case currently.
+        # above check should prevent this ever being true
+        pass
+
+    session_frames = data_store.get_session()
     frames = []
 
-    for eg_frame in eg_frames.values():
+    for session_frame in session_frames.values():
         keypoints3D_arrays = []
-        for kp in eg_frame:
+        for kp in session_frame:
             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
 
         keypoints2D_arrays = [(int(kp[0] * 100 + 300), int(kp[1] * 100 + 300)) for kp in keypoints3D_arrays]
