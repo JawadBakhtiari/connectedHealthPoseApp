@@ -1,7 +1,5 @@
 import base64
-import os
 import cv2
-from django.http import HttpResponse
 from django.shortcuts import render
 import numpy as np
 import plotly.graph_objs as go
