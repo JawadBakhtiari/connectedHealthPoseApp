@@ -2,46 +2,21 @@ import os
 import orjson
 import json
 
-users = {}
 session = {}
 
-class Datastore:
+class Sessionstore:
     def __init__(self):
-        self.users = users
         self.session = session
 
-    def get_users(self):
-        return self.users
-
-    def set_users(self, store):
-        if not isinstance(store, dict):
-            raise TypeError('store must be of type dictionary')
-        self.users = store
-
-    def populate_users(self):
-        '''Reads data from user json file and add it to data store'''
-        path = os.path.dirname(__file__)
-        try:
-            with open(path + "/users.json", "r") as f:
-                self.users = orjson.loads(f.read())
-        except FileNotFoundError:
-            self.users = {}
-
-    def write_users(self):
-        '''Writes data from users data store to users json file'''
-        path = os.path.dirname(__file__)
-        with open(path + "/users.json", "w") as f:
-            json.dump(self.users, f, indent=4)
-
-    def get_session(self):
+    def get(self):
         return self.session
 
-    def set_session(self, store):
+    def set(self, store):
         if not isinstance(store, dict):
             raise TypeError('store must be of type dictionary')
         self.session = store
     
-    def populate_session(self, session_id):
+    def populate(self, session_id):
         '''Populate session dict with the contents of a specific session file.
         Return true if session file already existed, false otherwise.
 
@@ -49,60 +24,32 @@ class Datastore:
         '''
         path = os.path.dirname(__file__)
         try:
-            with open(path + "/sessions/session_" + session_id + ".json", "r") as f:
+            with open(path + "/sessions/session_" + str(session_id) + ".json", "r") as f:
                 self.session = orjson.loads(f.read())
             return True
         except FileNotFoundError:
             self.session = {}
             return False
 
-    def write_session(self, session_id):
+    def write(self, session_id):
         '''Write contents of session data store to corresponding session json file
 
         Args:   session_file (str)  - the uuid of the session being written         
         '''
         path = os.path.dirname(__file__)
-        with open(path + "/sessions/session_" + session_id + ".json", "w") as f:
+        with open(path + "/sessions/session_" + str(session_id) + ".json", "w") as f:
             json.dump(self.session, f, indent=4)
 
 
-
-# Some temporary functions for loading sample data into the data store
-def temp_add_example_user():
-    users_store = data_store.get_users()
-
-    # use "1" for simplicity at this point, can switch later to using uuid
-    users_store["1"] = {
-        'first_name': "Jane",
-        'last_name': "Doe",
-
-        # a dict of sessions containing session metadata, indexed by session id
-        # again, session id may be switched to uuid later
-        'sessions': {
-            "1": {
-                "name": "my first session",
-                "description": "some description",
-                "date": "04/01/2023, 12:20:16",
-            },
-            "2": {
-                "name": "my second session",
-                "description": "some description",
-                "date": "07/04/2023, 10:20:16",
-            }
-        }
-    }
-    data_store.set_users(users_store)
-    data_store.write_users()
-
-
 def temp_add_example_session():
-    '''Session is owned by example user created above'''
+    '''Session is owned by example user already inserted in the database.
+    Run django admin site to see example user and session.'''
     json_dir = os.path.abspath("../data/static/data/")
     json_files = [f for f in os.listdir(json_dir) if f.endswith('.json')]
     json_files.sort()
 
-    data_store.populate_session("1")
-    session_store = data_store.get_session()
+    session_store.populate(1)
+    session_store = session_store.get()
 
     for i, json_file in enumerate(json_files):
         json_path = os.path.join(json_dir, json_file)
@@ -111,12 +58,7 @@ def temp_add_example_session():
             data = json.load(f)
             session_store[str(i + 1)] = data['keypoints3D']
 
-    data_store.set_session(session_store)
+    session_store.set(session_store)
 
     # This is the id of the session as defined in temp_add_example_user()
-    data_store.write_session("1")
-
-
-global data_store
-data_store = Datastore()
-data_store.populate_users()
+    session_store.write(1)
