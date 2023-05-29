@@ -57,8 +57,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'data/templates/visualise_coordinates'),
-            os.path.join(BASE_DIR, 'data/templates'),
+            os.path.join(BASE_DIR, 'templates/visualise_coordinates'),
             os.path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,
