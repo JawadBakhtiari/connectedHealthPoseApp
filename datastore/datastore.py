@@ -2,11 +2,9 @@ import os
 import orjson
 import json
 
-session = {}
-
 class Sessionstore:
     def __init__(self):
-        self.session = session
+        self.session = {}
 
     def get(self):
         return self.session
@@ -28,7 +26,6 @@ class Sessionstore:
                 self.session = orjson.loads(f.read())
             return True
         except FileNotFoundError:
-            self.session = {}
             return False
 
     def write(self, session_id):
