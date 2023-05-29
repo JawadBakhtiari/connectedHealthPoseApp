@@ -20,12 +20,13 @@ class User(models.Model):
 
 class Session(models.Model):
     """Represent Sessions between a client and a health professional."""
+    name = models.TextField(max_length=100, help_text='Enter the name of this session: ')
     date = models.DateTimeField(help_text='Enter date and time that this session started: ')
     description = models.TextField(max_length=1000, help_text='Enter description of the session: ')
 
     def __str__(self) -> str:
         """String for representing the Model object."""
-        return f"Session #{self.id} on {self.date}"
+        return f"Session #{self.id} ({self.name}) on {self.date}"
 
 
 class InvolvedIn(models.Model):
@@ -36,8 +37,8 @@ class InvolvedIn(models.Model):
 
     def __str__(self) -> str:
         """String for representing the Model object."""
-        user_info = User.objects.get(id=self.user)
-        session_info = Session.objects.get(id=self.session)
+        user_info = User.objects.get(id=self.user.id)
+        session_info = Session.objects.get(id=self.session.id)
         return f"{user_info.first_name} {user_info.last_name} (user id #{user_info.id}) "\
                 f"was involved in session #{session_info.id} on {session_info.date}"
 

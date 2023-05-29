@@ -8,9 +8,14 @@ import plotly.graph_objs as go
 from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
-from datastore.datastore import data_store
+import tensorflow as tf
+from datastore.datastore import Sessionstore
+from .models import User, InvolvedIn
 import json
+from django.views.decorators.csrf import csrf_exempt
 
+# Decorator is just to mitigate some cookies problem that was preventing testing
+@csrf_exempt
 def frames_upload(request):
     # Testing phase, assume that the session is being written to for the first time (
     # we are not appending frames, just adding whatever frames received to the session
@@ -20,41 +25,43 @@ def frames_upload(request):
     data = json.loads(request.body)
     print(data)
 
-    user_id = data.get('user_id')       # Should be "1" for testing (note that this is a string)
-    session_id = data.get('session_id') # Should be "2" for testing (again, this is a string)
+    uid = data.get('uid')       # Should be 1 for testing
+    sid = data.get('sid')    # Should be 2 for testing
 
-    assert(user_id == "1")
-    assert(session_id == "2")
+    assert(uid == 1)
+    assert(sid == 2)
 
     session_data = data.get('frames')   # Assuming this is a dictionary of frames, where
                                         # keys are frame number and values are a list of
                                         # 3D coordinates. Could also be a list of frames
                                         # if prefered
-
-    data_store.set_session(session_data)
-    data_store.write_session(session_id)
-
+    session_store = Sessionstore()
+    session_store.set(session_data)
+    session_store.write(sid)
+    return render(request, 'frames_upload.html', {'sid': sid})
 
 def visualise_coordinates(request):
-    # Assume that we want session and user both with id "1"
+    # Assume that we want session and user both with id 1
     # These would actually be contained within the request
-    session_id = "1"
-    user_id = "1"
-    users = data_store.get_users()
-    user = users.get(user_id)
-    
-    if not user:
+    sid = 1
+    uid = 1
+
+    # Get the user with this user id
+    user = User.objects.filter(id=uid)
+    if not len(user):
         # user with this id does not exist ...
         pass
-    if not user['sessions'].get(session_id):
+
+    if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         # this session doesn't exist, or it does but this user wasn't part of it
         pass
-    if not data_store.populate_session(session_id):
+    session_store = Sessionstore()
+    if not session_store.populate(sid):
         # session file could not be located, ignore this case currently.
         # above check should prevent this ever being true
         pass
 
-    session_frames = data_store.get_session()
+    session_frames = session_store.get()
     frames = []
 
     for session_frame in session_frames.values():
