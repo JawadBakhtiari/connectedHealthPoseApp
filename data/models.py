@@ -1,7 +1,4 @@
 from django.db import models
-from datetime import datetime
-import os
-import json
 
 class User(models.Model):
     """Represent a User in the database."""
@@ -41,19 +38,4 @@ class InvolvedIn(models.Model):
         session_info = Session.objects.get(id=self.session.id)
         return f"{user_info.first_name} {user_info.last_name} (user id #{user_info.id}) "\
                 f"was involved in session #{session_info.id} on {session_info.date}"
-
-
-class Coordinate(models.Model):
-    """Represent a Coordinate in the database."""
-    name = models.TextField(max_length=50)
-    x = models.FloatField(help_text='Enter the width (x value) for the coordinate: ')
-    y = models.FloatField(help_text='Enter the height (y value) for the coordinate: ')
-    z = models.FloatField(help_text='Enter the depth (z value) for the coordinate: ')
-    score = models.FloatField(help_text='Enter the confidence score for this coordinate: ')
-    frame = models.IntegerField(help_text='Enter the frame that this coordinate belongs to: ')
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, help_text='Enter session this coordinate belongs to: ')
-
-    def __str__(self) -> str:
-        """String for representing the Model object."""
-        return f"Frame #{self.frame}, coord: {self.name} ({self.x}, {self.y}, {self.z})"
     
