@@ -8,11 +8,11 @@ import plotly.graph_objs as go
 from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
-import tensorflow as tf
 from datastore.datastore import Sessionstore
 from .models import User, InvolvedIn
 import json
 from django.views.decorators.csrf import csrf_exempt
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
@@ -27,23 +27,48 @@ def frames_upload(request):
 
     uid = data.get('uid')       # Should be 1 for testing
     sid = data.get('sid')    # Should be 2 for testing
-
+    
     assert(uid == 1)
-    assert(sid == 2)
+    assert(sid == 4)
 
     session_data = data.get('frames')   # Assuming this is a dictionary of frames, where
                                         # keys are frame number and values are a list of
                                         # 3D coordinates. Could also be a list of frames
                                         # if prefered
-    session_store = Sessionstore()
-    session_store.set(session_data)
-    session_store.write(sid)
+    # session_store = Sessionstore()
+    # session_store.set(session_data)
+    # session_store.write(sid)
+
+    # replaced above with azure storage
+    # Create a blob client 
+    blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=connectedhealthunsw;AccountKey=ByogeEDjYWdSoG+kCY1uR+KXHQwullTwi3F6kZ7QSZQoWshzq/wHXkgdBHlwmGYOg3MyI9NKh+iF+AStjaqaYw==;EndpointSuffix=core.windows.net")
+    blob_client = blob_service_client.get_blob_client("framedata", f"session{sid}")
+
+    # Upload the session data.
+    # if blob under that sessionId exists, append frames
+    if blob_client.exists():
+        # Download the existing session data 
+        downloaded_bytes = blob_client.download_blob().readall()
+        existing_data = json.loads(downloaded_bytes)
+
+        # Append the new frame to the existing session data
+        existing_data.update(session_data)
+        updated_session_data_bytes = json.dumps(existing_data).encode('utf-8')
+
+        # Upload the updated session data (overwrite with updated information)
+        blob_client.upload_blob(updated_session_data_bytes, overwrite=True)
+    else:
+        # If the sessionId does not exist, upload the session data as a new blob
+        session_data_bytes = json.dumps(session_data).encode('utf-8')
+        blob_client.upload_blob(session_data_bytes)
+
+
     return render(request, 'frames_upload.html', {'sid': sid})
 
 def visualise_coordinates(request):
     # Assume that we want session and user both with id 1
     # These would actually be contained within the request
-    sid = 1
+    sid = 4
     uid = 1
 
     # Get the user with this user id
@@ -55,13 +80,26 @@ def visualise_coordinates(request):
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         # this session doesn't exist, or it does but this user wasn't part of it
         pass
-    session_store = Sessionstore()
-    if not session_store.populate(sid):
-        # session file could not be located, ignore this case currently.
-        # above check should prevent this ever being true
-        pass
 
-    session_frames = session_store.get()
+    
+    # session_store = Sessionstore()
+    # if not session_store.populate(sid):
+    #     # session file could not be located, ignore this case currently.
+    #     # above check should prevent this ever being true
+    #     pass
+
+    # session_frames = session_store.get()
+
+    # replaced above with getting data from azure
+    # Create a blob client using the local file name as the name for the blob
+    blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=connectedhealthunsw;AccountKey=ByogeEDjYWdSoG+kCY1uR+KXHQwullTwi3F6kZ7QSZQoWshzq/wHXkgdBHlwmGYOg3MyI9NKh+iF+AStjaqaYw==;EndpointSuffix=core.windows.net")
+    blob_client = blob_service_client.get_blob_client("framedata", f"session{sid}")
+
+    # Download the blob from that session as a string as convert to json
+    session_data_string = blob_client.download_blob().content_as_text()
+    session_frames = json.loads(session_data_string)
+
+
     frames = []
 
     for session_frame in session_frames.values():
