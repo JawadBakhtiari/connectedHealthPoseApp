@@ -16,6 +16,8 @@ from django.views.decorators.csrf import csrf_exempt
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
 def frames_upload(request):
+    '''Receive frame data from the frontend and store this data persistently in the backend.'''
+
     # Output request to server terminal for testing
     data = json.loads(request.body)
     print(data)
@@ -41,6 +43,7 @@ def frames_upload(request):
     return render(request, 'frames_upload.html', {'sid': sid})
 
 def visualise_coordinates(request):
+    '''Present an animation of the frame data for a session.'''
     # Assume that we want session and user both with id 1
     # These would actually be contained within the request
     sid = 4
