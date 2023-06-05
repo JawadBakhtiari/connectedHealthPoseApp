@@ -12,56 +12,31 @@ from datastore.datastore import Sessionstore
 from .models import User, InvolvedIn
 import json
 from django.views.decorators.csrf import csrf_exempt
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
 def frames_upload(request):
-    # Testing phase, assume that the session is being written to for the first time (
-    # we are not appending frames, just adding whatever frames received to the session
-    # file and closing it).
-
     # Output request to server terminal for testing
     data = json.loads(request.body)
     print(data)
 
-    uid = data.get('uid')       # Should be 1 for testing
-    sid = data.get('sid')    # Should be 2 for testing
-    
-    assert(uid == 1)
-    assert(sid == 4)
+    uid = data.get('uid')
+    sid = data.get('sid')
+    session_data = data.get('frames')
 
-    session_data = data.get('frames')   # Assuming this is a dictionary of frames, where
-                                        # keys are frame number and values are a list of
-                                        # 3D coordinates. Could also be a list of frames
-                                        # if prefered
-    # session_store = Sessionstore()
-    # session_store.set(session_data)
-    # session_store.write(sid)
+    # Get the user with this user id
+    user = User.objects.filter(id=uid)
+    if not len(user):
+        # user with this id does not exist ...
+        print("user doesn't exist ... this case is not yet handled!")
 
-    # replaced above with azure storage
-    # Create a blob client 
-    blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=connectedhealthunsw;AccountKey=ByogeEDjYWdSoG+kCY1uR+KXHQwullTwi3F6kZ7QSZQoWshzq/wHXkgdBHlwmGYOg3MyI9NKh+iF+AStjaqaYw==;EndpointSuffix=core.windows.net")
-    blob_client = blob_service_client.get_blob_client("framedata", f"session{sid}")
+    if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
+        # this session doesn't exist, or it does but this user wasn't part of it
+        print("user was not involved in this session ... this case is not yet handled!")
 
-    # Upload the session data.
-    # if blob under that sessionId exists, append frames
-    if blob_client.exists():
-        # Download the existing session data 
-        downloaded_bytes = blob_client.download_blob().readall()
-        existing_data = json.loads(downloaded_bytes)
-
-        # Append the new frame to the existing session data
-        existing_data.update(session_data)
-        updated_session_data_bytes = json.dumps(existing_data).encode('utf-8')
-
-        # Upload the updated session data (overwrite with updated information)
-        blob_client.upload_blob(updated_session_data_bytes, overwrite=True)
-    else:
-        # If the sessionId does not exist, upload the session data as a new blob
-        session_data_bytes = json.dumps(session_data).encode('utf-8')
-        blob_client.upload_blob(session_data_bytes)
-
+    session_store = Sessionstore()
+    session_store.set(session_data)
+    session_store.write(sid)
 
     return render(request, 'frames_upload.html', {'sid': sid})
 
@@ -75,31 +50,18 @@ def visualise_coordinates(request):
     user = User.objects.filter(id=uid)
     if not len(user):
         # user with this id does not exist ...
-        pass
+        print("user doesn't exist ... this case is not yet handled!")
 
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         # this session doesn't exist, or it does but this user wasn't part of it
-        pass
+        print("user was not involved in this session ... this case is not yet handled!")
 
     
-    # session_store = Sessionstore()
-    # if not session_store.populate(sid):
-    #     # session file could not be located, ignore this case currently.
-    #     # above check should prevent this ever being true
-    #     pass
+    session_store = Sessionstore()
+    if not session_store.populate(sid):
+        print("No session data exists for this session ... this case is not yet handled!")
 
-    # session_frames = session_store.get()
-
-    # replaced above with getting data from azure
-    # Create a blob client using the local file name as the name for the blob
-    blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=connectedhealthunsw;AccountKey=ByogeEDjYWdSoG+kCY1uR+KXHQwullTwi3F6kZ7QSZQoWshzq/wHXkgdBHlwmGYOg3MyI9NKh+iF+AStjaqaYw==;EndpointSuffix=core.windows.net")
-    blob_client = blob_service_client.get_blob_client("framedata", f"session{sid}")
-
-    # Download the blob from that session as a string as convert to json
-    session_data_string = blob_client.download_blob().content_as_text()
-    session_frames = json.loads(session_data_string)
-
-
+    session_frames = session_store.get()
     frames = []
 
     for session_frame in session_frames.values():
