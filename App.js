@@ -1,19 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, Text, View, Dimensions, Platform, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, Platform, Image, Button } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as tf from '@tensorflow/tfjs';
 import * as posedetection from '@tensorflow-models/pose-detection';
 import { cameraWithTensors } from '@tensorflow/tfjs-react-native';
+import * as FileSystem from 'expo-file-system';
+import * as jpeg from 'jpeg-js';
+import * as MediaLibrary from 'expo-media-library'
+
 
 const TensorCamera = cameraWithTensors(Camera);
 
-const IS_ANDROID = Platform.OS === 'android';
 const IS_IOS = Platform.OS === 'ios';
 
-const CAM_PREVIEW_WIDTH = Dimensions.get('window').width;
-const CAM_PREVIEW_HEIGHT = CAM_PREVIEW_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
-
-const MIN_KEYPOINT_SCORE = 0.3;
 const OUTPUT_TENSOR_WIDTH = 180;
 const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
 
@@ -22,11 +21,12 @@ export default function App() {
   const cameraRef = useRef(null);
   const [tfReady, setTfReady] = useState(false);
   const [model, setModel] = useState();
+  const [uri, setUri] = useState();
   const [poses, setPoses] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
   const rafId = useRef(null);
-
+  
   useEffect(() => {
     async function prepare() {
       rafId.current = null;
@@ -60,16 +60,38 @@ export default function App() {
   }, []);
 
   const handleCameraStream = async (images) => {
+
     const loop = async () => {
-      const imageTensor = images.next().value;
-  
+      const tensor = images.next().value;
+      
+    
+      const [height, width] = tensor.shape
+      const data = new Buffer.from(
+        // concat with an extra alpha channel and slice up to 4 channels to handle 3 and 4 channels tensors
+        tf.concat([tensor, tf.ones([height, width, 1]).mul(255)], [-1])
+          .slice([0], [height, width, 4])
+          .dataSync(),
+      )
+      const rawImageData = {data, width, height};
+      const jpegImageData = jpeg.encode(rawImageData, 200);
+
+      const imgBase64 = tf.util.decodeString(jpegImageData.data, "base64")
+      const salt = `${Date.now()}-${Math.floor(Math.random() * 10000)}`
+      const uri = FileSystem.documentDirectory + `tensor-${salt}.jpg`;
+      await FileSystem.writeAsStringAsync(uri, imgBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      setUri(uri)
+      console.log(uri)
+      //await MediaLibrary.saveToLibraryAsync(uri); To test result off the tensor image
+
       const poses = await model.estimatePoses(
-        imageTensor,
+        tensor,
         undefined,
         Date.now()
       );
       setPoses(poses);
-      tf.dispose([imageTensor]);
+      tf.dispose([tensor]);
   
       if (rafId.current === 0) {
         return;
@@ -79,6 +101,7 @@ export default function App() {
     };
   
     loop();
+    
   };
 
   const renderPose = () => {
@@ -89,10 +112,8 @@ export default function App() {
     }
   };
 
-  const nothing = () => {
 
-  };
-  
+
   const renderCameraTypeSwitcher = () => {
     return (
       <View
@@ -156,7 +177,7 @@ export default function App() {
           resizeDepth={3}
           onReady={handleCameraStream}
         />
-        {renderPose()}
+        
         {renderCameraTypeSwitcher()}
         {renderRecordButton()}
       </View>
