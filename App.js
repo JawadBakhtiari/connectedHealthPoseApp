@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, Text, View, Dimensions, Platform } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Platform, TouchableOpacity} from 'react-native';
 import { Camera } from 'expo-camera';
 import * as tf from '@tensorflow/tfjs';
 import * as posedetection from '@tensorflow-models/pose-detection';
@@ -23,6 +23,7 @@ export default function App() {
   const [tfReady, setTfReady] = useState(false);
   const [model, setModel] = useState();
   const [poses, setPoses] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
   const rafId = useRef(null);
 
@@ -79,21 +80,18 @@ export default function App() {
   
     loop();
   };
+
   const renderPose = () => {
-    if (poses != null && poses.length > 0) {
-      const keypoints = poses[0].keypoints
-        .map((k) => {
-          const date = Date.now()
-          k["timestamp"] = date
-          console.log(k)
-          return (
-            <Text>
-            </Text>
-          );
-        });
+    if (poses != null && poses.length > 0 && isRecording) {
+      let data = poses.find(poses => poses.keypoints)
+      console.log(data)
+ 
     }
   };
-  
+
+  const nothing = () => {
+
+  };
   
   const renderCameraTypeSwitcher = () => {
     return (
@@ -117,6 +115,25 @@ export default function App() {
     }
   };
   
+  const renderRecordButton = () => {
+    return (
+      <View
+        style={styles.recordButton}
+        onTouchEnd={handleRecording}
+      >
+        <Text style={styles.recordText}>{isRecording ? 'Stop' : 'Record'}</Text>
+      </View>
+    );
+  };
+  
+  const handleRecording = () => {
+    if (!isRecording) {
+      setIsRecording(true);
+    } else {
+      setIsRecording(false)
+    }
+  };
+ 
   
   if (!tfReady) {
     return (
@@ -126,7 +143,7 @@ export default function App() {
     );
   } else {
     return (
-      <View
+      <View style={styles.container}
       >
         <TensorCamera
           ref={cameraRef}
@@ -141,22 +158,14 @@ export default function App() {
         />
         {renderPose()}
         {renderCameraTypeSwitcher()}
+        {renderRecordButton()}
       </View>
     );
   }}
 
   const styles = StyleSheet.create({
-    containerPortrait: {
-      position: 'relative',
-      width: CAM_PREVIEW_WIDTH,
-      height: CAM_PREVIEW_HEIGHT,
-      marginTop: Dimensions.get('window').height / 2 - CAM_PREVIEW_HEIGHT / 2,
-    },
-    containerLandscape: {
-      position: 'relative',
-      width: CAM_PREVIEW_HEIGHT,
-      height: CAM_PREVIEW_WIDTH,
-      marginLeft: Dimensions.get('window').height / 2 - CAM_PREVIEW_HEIGHT / 2,
+    container: {
+     flex: 1
     },
     loadingMsg: {
       position: 'absolute',
@@ -168,28 +177,11 @@ export default function App() {
     camera: {
       width: '100%',
       height: '100%',
-      zIndex: 1,
-    },
-    svg: {
-      width: '100%',
-      height: '100%',
-      position: 'absolute',
-      zIndex: 30,
-    },
-    fpsContainer: {
-      position: 'absolute',
-      top: 10,
-      left: 10,
-      width: 80,
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, .7)',
-      borderRadius: 2,
-      padding: 8,
-      zIndex: 20,
+      flex: 1,
     },
     cameraTypeSwitcher: {
       position: 'absolute',
-      top: 10,
+      top: 100,
       right: 10,
       width: 180,
       alignItems: 'center',
@@ -197,5 +189,21 @@ export default function App() {
       borderRadius: 2,
       padding: 8,
       zIndex: 20,
+    },
+    recordButton: {
+      position: 'absolute',
+      bottom: 16,
+      right: 16,
+      backgroundColor: 'red',
+      borderRadius: 30,
+      width: 60,
+      height: 60,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 20,
+    },
+    recordText: {
+      color: 'white',
+      fontSize: 18,
     },
   });
