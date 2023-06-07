@@ -8,7 +8,6 @@ import plotly.graph_objs as go
 from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
-import tensorflow as tf
 from datastore.datastore import Sessionstore
 from .models import User, InvolvedIn
 import json
@@ -17,49 +16,53 @@ from django.views.decorators.csrf import csrf_exempt
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
 def frames_upload(request):
-    # Testing phase, assume that the session is being written to for the first time (
-    # we are not appending frames, just adding whatever frames received to the session
-    # file and closing it).
+    '''Receive frame data from the frontend and store this data persistently in the backend.'''
 
     # Output request to server terminal for testing
     data = json.loads(request.body)
     print(data)
 
-    uid = data.get('uid')       # Should be 1 for testing
-    sid = data.get('sid')    # Should be 2 for testing
+    uid = data.get('uid')
+    sid = data.get('sid')
+    session_data = data.get('frames')
 
-    assert(uid == 1)
-    assert(sid == 2)
+    # Get the user with this user id
+    user = User.objects.filter(id=uid)
+    if not len(user):
+        # user with this id does not exist ...
+        print("user doesn't exist ... this case is not yet handled!")
 
-    session_data = data.get('frames')   # Assuming this is a dictionary of frames, where
-                                        # keys are frame number and values are a list of
-                                        # 3D coordinates. Could also be a list of frames
-                                        # if prefered
+    if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
+        # this session doesn't exist, or it does but this user wasn't part of it
+        print("user was not involved in this session ... this case is not yet handled!")
+
     session_store = Sessionstore()
     session_store.set(session_data)
     session_store.write(sid)
+
     return render(request, 'frames_upload.html', {'sid': sid})
 
 def visualise_coordinates(request):
+    '''Present an animation of the frame data for a session.'''
     # Assume that we want session and user both with id 1
     # These would actually be contained within the request
-    sid = 1
+    sid = 4
     uid = 1
 
     # Get the user with this user id
     user = User.objects.filter(id=uid)
     if not len(user):
         # user with this id does not exist ...
-        pass
+        print("user doesn't exist ... this case is not yet handled!")
 
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         # this session doesn't exist, or it does but this user wasn't part of it
-        pass
+        print("user was not involved in this session ... this case is not yet handled!")
+
+    
     session_store = Sessionstore()
     if not session_store.populate(sid):
-        # session file could not be located, ignore this case currently.
-        # above check should prevent this ever being true
-        pass
+        print("No session data exists for this session ... this case is not yet handled!")
 
     session_frames = session_store.get()
     frames = []
