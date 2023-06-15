@@ -7,6 +7,10 @@ from azure.storage.blob import BlobServiceClient
 class Sessionstore:
     def __init__(self):
         self.session = {}
+        self.local_buffer = {}  # Local buffer for frames
+    
+    def print_buffer(self):
+        print(self.local_buffer)
 
     def get(self):
         return self.session
@@ -38,6 +42,9 @@ class Sessionstore:
 
         Args:   sid (str)  - the uuid of the session being searched         
         '''
+
+        print(f'Before get_name, sid is: {sid}')
+
         # Create a blob client using the local file name as the name for the blob
         blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
         blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_name(sid))
@@ -57,33 +64,67 @@ class Sessionstore:
         with open(path + "/sessions/session_" + str(sid) + ".json", "w") as f:
             json.dump(self.session, f, indent=4)
 
-    def write(self, sid):
+    def buffer_frames(self, sid, clipNum, frame_data):
+        '''Buffer the frame data locally.
+
+        Args:
+            sid (str) - the uuid of the session
+            clipNum (int) - the clip number in the session
+            frame_data (dict) - the frame data
+        '''
+        # Use sid and clipNum as the key
+        key = f"{sid}_{clipNum}"
+
+        # If the key exists, merge the new frame data with the existing data,
+        # else create a new dictionary with the frame data
+        if key in self.local_buffer:
+            for frame_number, keypoints in frame_data.items():
+                if frame_number in self.local_buffer[key]:
+                    self.local_buffer[key][frame_number].extend(keypoints)
+                else:
+                    self.local_buffer[key][frame_number] = keypoints
+        else:
+            self.local_buffer[key] = frame_data
+
+
+    def write(self, sid, sessionFinished=False):
         '''If Azure blob exists for this session, append current session data to this blob.
         Otherwise, create a new blob for this session and store session data in new blob.
 
-        Args:   sid (str)  - the uuid of the session being written         
+        Args:   
+            sid (str)  - the uuid of the session being written  
+            sessionFinished (bool) - whether the session has been completed
         '''
-        # Create a blob client 
-        blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
-        blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_name(sid))
+        # Write to cloud storage only when the session has been completed
+        if sessionFinished:
+            # Concatenate all buffered frames in order
+            for clipNum in sorted(self.local_buffer.keys()):
+                self.session_frames = self.local_buffer[clipNum]
+                
+                # Create a blob client 
+                blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
+                blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_name(clipNum))
 
-        # Upload the session data.
-        # if blob under that sessionId exists, append frames
-        if blob_client.exists():
-            # Download the existing session data 
-            downloaded_bytes = blob_client.download_blob().readall()
-            existing_data = json.loads(downloaded_bytes)
+                # Upload the session data.
+                # if blob under that sessionId exists, append frames
+                if blob_client.exists():
+                    # Download the existing session data 
+                    downloaded_bytes = blob_client.download_blob().readall()
+                    existing_data = json.loads(downloaded_bytes)
 
-            # Append the new frame to the existing session data
-            existing_data.update(self.session)
-            updated_session_data_bytes = json.dumps(existing_data).encode('utf-8')
+                    # Append the new frame to the existing session data
+                    existing_data.extend(self.session_frames)
+                    updated_session_data_bytes = json.dumps(existing_data).encode('utf-8')
 
-            # Upload the updated session data (overwrite with updated information)
-            blob_client.upload_blob(updated_session_data_bytes, overwrite=True)
-        else:
-            # If the sessionId does not exist, upload the session data as a new blob
-            session_data_bytes = json.dumps(self.session).encode('utf-8')
-            blob_client.upload_blob(session_data_bytes)
+                    # Upload the updated session data (overwrite with updated information)
+                    blob_client.upload_blob(updated_session_data_bytes)
+                else:
+                    # If the sessionId does not exist, upload the session data as a new blob
+                    session_data_bytes = json.dumps(self.session_frames).encode('utf-8')
+                    blob_client.upload_blob(session_data_bytes)
+
+            # Clear the local buffer
+            self.local_buffer = {}
 
     def get_name(self, sid):
         '''For session with id sid, return the name that should be used to identify

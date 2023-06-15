@@ -13,6 +13,8 @@ from .models import User, InvolvedIn
 import json
 from django.views.decorators.csrf import csrf_exempt
 
+session_store = Sessionstore()
+
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
 def frames_upload(request):
@@ -20,10 +22,11 @@ def frames_upload(request):
 
     # Output request to server terminal for testing
     data = json.loads(request.body)
-    print(data)
 
     uid = data.get('uid')
     sid = data.get('sid')
+    clipNum = data.get('clipNum')  # Get clip number from request
+    sessionFinished = data.get('sessionFinished')  # Get sessionFinished flag from request
     session_data = data.get('frames')
 
     # Get the user with this user id
@@ -36,9 +39,16 @@ def frames_upload(request):
         # this session doesn't exist, or it does but this user wasn't part of it
         print("user was not involved in this session ... this case is not yet handled!")
 
-    session_store = Sessionstore()
-    session_store.set(session_data)
-    session_store.write(sid)
+    # Don't create a new Sessionstore object, instead use the global one
+    global session_store
+
+    # Buffer frames locally
+    session_store.buffer_frames(sid, clipNum, session_data)
+
+    session_store.print_buffer()
+    # Write to Azure blob only when the session has been completed
+    if sessionFinished:
+        session_store.write(sid, sessionFinished)
 
     return render(request, 'frames_upload.html', {'sid': sid})
 
@@ -46,7 +56,7 @@ def visualise_coordinates(request):
     '''Present an animation of the frame data for a session.'''
     # Assume that we want session and user both with id 1
     # These would actually be contained within the request
-    sid = 4
+    sid = "27_1"
     uid = 1
 
     # Get the user with this user id
