@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { StyleSheet, Text, View, Platform, Image, Button } from 'react-native';
 import { Camera } from 'expo-camera';
 import * as tf from '@tensorflow/tfjs';
@@ -26,6 +26,7 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
   const rafId = useRef(null);
+  const [fps, setFps] = useState(0);
   
   useEffect(() => {
     async function prepare() {
@@ -60,14 +61,17 @@ export default function App() {
   }, []);
 
   const handleCameraStream = async (images) => {
-
+   
     const loop = async () => {
       const tensor = images.next().value;
-      
+      //console.log(isRecording)
+      //encodeJpeg(tensor)
+      //loadModel(tensor)
+
+      const startTs = Date.now();
     
       const [height, width] = tensor.shape
       const data = new Buffer.from(
-        // concat with an extra alpha channel and slice up to 4 channels to handle 3 and 4 channels tensors
         tf.concat([tensor, tf.ones([height, width, 1]).mul(255)], [-1])
           .slice([0], [height, width, 4])
           .dataSync(),
@@ -82,15 +86,22 @@ export default function App() {
         encoding: FileSystem.EncodingType.Base64,
       });
       setUri(uri)
-      console.log(uri)
-      //await MediaLibrary.saveToLibraryAsync(uri); To test result off the tensor image
+      
 
       const poses = await model.estimatePoses(
         tensor,
         undefined,
         Date.now()
       );
+      
+      const latency = Date.now() - startTs;
+      setFps(Math.floor(1000 / latency));
+
       setPoses(poses);
+      let data2 = poses.find(poses => poses.keypoints)
+      //console.log(uri)
+      //console.log(data2)
+
       tf.dispose([tensor]);
   
       if (rafId.current === 0) {
@@ -104,6 +115,47 @@ export default function App() {
     
   };
 
+  const loadModel = async () => {
+    const poses = await model.estimatePoses(
+      tensor,
+      undefined,
+      Date.now()
+    );
+    setPoses(poses);
+  }
+
+  const renderFps = () => {
+    return (
+      <View style={styles.fpsContainer}>
+        <Text>FPS: {fps}</Text>
+      </View>
+    );
+  };
+
+  const encodeJpeg = async () => {
+ 
+    const [height, width] = tensor.shape
+    const data = new Buffer.from(
+      tf.concat([tensor, tf.ones([height, width, 1]).mul(255)], [-1])
+        .slice([0], [height, width, 4])
+        .dataSync(),
+    )
+    const rawImageData = {data, width, height};
+    const jpegImageData = jpeg.encode(rawImageData, 200);
+
+    const imgBase64 = tf.util.decodeString(jpegImageData.data, "base64")
+    const salt = `${Date.now()}-${Math.floor(Math.random() * 10000)}`
+    const uri = FileSystem.documentDirectory + `tensor-${salt}.jpg`;
+    await FileSystem.writeAsStringAsync(uri, imgBase64, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    setUri(uri)
+    console.log(uri)
+    
+    //await MediaLibrary.saveToLibraryAsync(uri); To test result off the tensor image
+  };
+  
+
   const renderPose = () => {
     if (poses != null && poses.length > 0 && isRecording) {
       let data = poses.find(poses => poses.keypoints)
@@ -111,9 +163,9 @@ export default function App() {
  
     }
   };
-
-
-
+  
+ 
+  
   const renderCameraTypeSwitcher = () => {
     return (
       <View
@@ -146,13 +198,14 @@ export default function App() {
       </View>
     );
   };
-  
+
   const handleRecording = () => {
     if (!isRecording) {
       setIsRecording(true);
     } else {
       setIsRecording(false)
     }
+
   };
  
   
@@ -177,7 +230,7 @@ export default function App() {
           resizeDepth={3}
           onReady={handleCameraStream}
         />
-        
+        {renderFps()}
         {renderCameraTypeSwitcher()}
         {renderRecordButton()}
       </View>
@@ -226,5 +279,16 @@ export default function App() {
     recordText: {
       color: 'white',
       fontSize: 18,
+    },
+    fpsContainer: {
+      position: 'absolute',
+      top: 100,
+      left: 10,
+      width: 80,
+      alignItems: 'center',
+      backgroundColor: 'rgba(255, 255, 255, .7)',
+      borderRadius: 2,
+      padding: 8,
+      zIndex: 20,
     },
   });
