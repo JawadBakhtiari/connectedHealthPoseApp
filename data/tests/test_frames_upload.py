@@ -33,7 +33,12 @@ class FramesUploadTestCase(TestCase):
             'sid': self.session.id,
             'frames': self.session_data,
         }
-        response = self.client.post(path='/data/frames/upload', data=request)
+        response = self.client.post(
+            path="/data/frames/upload/",
+            data=json.dumps(request),
+            content_type="application/json",
+            follow=True
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -43,8 +48,13 @@ class FramesUploadTestCase(TestCase):
             'sid': self.session.id,
             'frames': self.session_data,
         }
-        response = self.client.post(path='/data/frames/upload', data=request)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.post(
+            path="/data/frames/upload/",
+            data=json.dumps(request),
+            content_type="application/json",
+            follow=True
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     
     def test_frames_upload_session_does_not_exist(self):
@@ -53,8 +63,13 @@ class FramesUploadTestCase(TestCase):
             'sid': self.bad_sid,
             'frames': self.session_data,
         }
-        response = self.client.post(path='/data/frames/upload', data=request)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.post(
+            path="/data/frames/upload/",
+            data=json.dumps(request),
+            content_type="application/json",
+            follow=True
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
     def test_frames_upload_user_not_involved_in_session(self):
@@ -70,5 +85,10 @@ class FramesUploadTestCase(TestCase):
             'sid': new_session.id,
             'frames': self.session_data,
         }
-        response = self.client.post(path='/data/frames/upload', data=request)
+        response = self.client.post(
+            path="/data/frames/upload/",
+            data=json.dumps(request),
+            content_type="application/json",
+            follow=True
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

@@ -13,15 +13,13 @@ from .models import User, InvolvedIn, Session
 import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
-from rest_framework.response import Response
+from django.http import HttpResponse as response
 
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
 def frames_upload(request):
     '''Receive frame data from the frontend and store this data persistently in the backend.'''
-    # Output request to server terminal for testing
     data = json.loads(request.body)
-    print(data)
 
     uid = data.get('uid')
     sid = data.get('sid')
@@ -29,14 +27,14 @@ def frames_upload(request):
 
     user = User.objects.filter(id=uid)
     if not len(user):
-        return Response("user with this id does not exist", status=status.HTTP_404_NOT_FOUND)
+        return response("user with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
     
     session = Session.objects.filter(id=sid)
     if not len(session):
-        return Response("session with this id does not exist", status=status.HTTP_404_NOT_FOUND)
+        return response("session with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
 
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
-        return Response("user was not involved in this session", status=status.HTTP_401_UNAUTHORIZED)
+        return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
 
     session_store = Sessionstore()
     session_store.set(session_data)
