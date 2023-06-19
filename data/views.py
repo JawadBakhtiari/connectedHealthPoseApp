@@ -9,38 +9,38 @@ from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
 from datastore.datastore import Sessionstore
-from .models import User, InvolvedIn
+from .models import User, InvolvedIn, Session
 import json
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from django.http import HttpResponse as response
 
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
 def frames_upload(request):
     '''Receive frame data from the frontend and store this data persistently in the backend.'''
-
-    # Output request to server terminal for testing
     data = json.loads(request.body)
-    print(data)
 
     uid = data.get('uid')
     sid = data.get('sid')
     session_data = data.get('frames')
 
-    # Get the user with this user id
     user = User.objects.filter(id=uid)
     if not len(user):
-        # user with this id does not exist ...
-        print("user doesn't exist ... this case is not yet handled!")
+        return response("user with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
+    
+    session = Session.objects.filter(id=sid)
+    if not len(session):
+        return response("session with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
 
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
-        # this session doesn't exist, or it does but this user wasn't part of it
-        print("user was not involved in this session ... this case is not yet handled!")
+        return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
 
     session_store = Sessionstore()
     session_store.set(session_data)
     session_store.write(sid)
 
-    return render(request, 'frames_upload.html', {'sid': sid})
+    return render(request, 'frames_upload.html', {'sid': sid}, status=status.HTTP_200_OK)
 
 def visualise_coordinates(request):
     '''Present an animation of the frame data for a session.'''

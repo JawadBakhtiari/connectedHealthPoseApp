@@ -1,5 +1,5 @@
 """
-WSGI config for framestore_test project.
+WSGI config for connectedhealth project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

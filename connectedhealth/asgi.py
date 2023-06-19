@@ -1,5 +1,5 @@
 """
-ASGI config for framestore_test project.
+ASGI config for connectedhealth project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
