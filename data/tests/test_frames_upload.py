@@ -11,6 +11,9 @@ class FramesUploadTestCase(TestCase):
     def setUp(self):
         self.client = Client()
 
+        # Add the path to the endpoint
+        self.path = "/data/frames/upload/"
+
         # Create an example user, session, and store the user as having been involved in this session
         self.user = User(1, "Steve", "Smith")
         self.user.save()
@@ -34,7 +37,7 @@ class FramesUploadTestCase(TestCase):
             'frames': self.session_data,
         }
         response = self.client.post(
-            path="/data/frames/upload/",
+            path=self.path,
             data=json.dumps(request),
             content_type="application/json",
             follow=True
@@ -49,7 +52,7 @@ class FramesUploadTestCase(TestCase):
             'frames': self.session_data,
         }
         response = self.client.post(
-            path="/data/frames/upload/",
+            path=self.path,
             data=json.dumps(request),
             content_type="application/json",
             follow=True
@@ -64,7 +67,7 @@ class FramesUploadTestCase(TestCase):
             'frames': self.session_data,
         }
         response = self.client.post(
-            path="/data/frames/upload/",
+            path=self.path,
             data=json.dumps(request),
             content_type="application/json",
             follow=True
@@ -86,7 +89,7 @@ class FramesUploadTestCase(TestCase):
             'frames': self.session_data,
         }
         response = self.client.post(
-            path="/data/frames/upload/",
+            path=self.path,
             data=json.dumps(request),
             content_type="application/json",
             follow=True
