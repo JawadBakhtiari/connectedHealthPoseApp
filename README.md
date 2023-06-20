@@ -6,7 +6,7 @@ This is a web-based application that aids physicians in analysing their patients
 
 ## Components of the Application
 
-### Sessionstore Class
+### DataStore Class
 
 This class is a wrapper around Azure Blob Storage operations. It provides methods to get and set session data, populate session data from local storage or Azure Blob Storage, write session data to local storage or Azure Blob Storage, and get the name of the session blob in Azure Blob Storage.
 
