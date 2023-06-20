@@ -8,14 +8,12 @@ import plotly.graph_objs as go
 from django.shortcuts import render
 import plotly.graph_objs as go
 import numpy as np
-from datastore.datastore import Sessionstore
+from datastore.datastore import DataStore
 from .models import User, InvolvedIn, Session
 import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from django.http import HttpResponse as response
-
-
 
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
@@ -25,9 +23,9 @@ def frames_upload(request):
 
     uid = data.get('uid')
     sid = data.get('sid')
-    clipNum = data.get('clipNum')  # Get clip number from request
-    sessionFinished = data.get('sessionFinished')  # Get sessionFinished flag from request
-    session_data = data.get('frames')
+    clip_num = data.get('clipNum')  # Get clip number from request
+    session_finished = data.get('sessionFinished')  # Get session_finished flag from request
+    clip_data = data.get('frames')
 
     user = User.objects.filter(id=uid)
     if not len(user):
@@ -40,28 +38,22 @@ def frames_upload(request):
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
 
-    # Don't create a new Sessionstore object, instead use the global one
-    session_store = Sessionstore()
+    store = DataStore()
+    store.set(clip_data)
+    store.write_clip_locally(sid, clip_num)
 
-    # Buffer frames locally
-    #session_store.buffer_frames(sid, clipNum, session_data)
-
-    session_store.set(session_data)
-    session_store.write_local(sid, clipNum)
-
-    # session_store.print_buffer()
     # Write to Azure blob only when the session has been completed
-    if sessionFinished:
-        session_store.write(sid, sessionFinished)
+    if session_finished:
+        store.write_session_to_cloud(sid)
 
     return render(request, 'frames_upload.html', {'sid': sid}, status=status.HTTP_200_OK)
 
 def visualise_coordinates(request):
     '''Present an animation of the frame data for a session.'''
-    # Assume that we want session and user both with id 1
-    # These would actually be contained within the request
-    sid = "10_1"
+    # hardcode session id, user id and clip num for now (should actually be obtained from request)
     uid = 1
+    sid = 10
+    clip_num = 1
 
     # Get the user with this user id
     user = User.objects.filter(id=uid)
@@ -72,13 +64,12 @@ def visualise_coordinates(request):
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         # this session doesn't exist, or it does but this user wasn't part of it
         print("user was not involved in this session ... this case is not yet handled!")
-
     
-    session_store = Sessionstore()
-    if not session_store.populate(sid):
+    store = DataStore()
+    if not store.populate(sid, clip_num):
         print("No session data exists for this session ... this case is not yet handled!")
 
-    session_frames = session_store.get()
+    session_frames = store.get()
     frames = []
 
     for session_frame in session_frames.values():
