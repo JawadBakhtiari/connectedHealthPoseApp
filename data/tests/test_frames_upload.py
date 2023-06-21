@@ -59,6 +59,11 @@ class FramesUploadTestCase(TestCase):
         # Check if the response is successful
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
 
+
+        # Check if the file is uploaded locally in datastore/sessions/session_1_1
+        session_file_path = os.path.join("datastore", "sessions", f"session_{self.session.id}_{request1['clipNum']}")
+        self.assertTrue(os.path.exists(session_file_path))
+
         # Second request to append session2_data to the existing session
         request2 = {
             'uid': self.user.id,
@@ -76,6 +81,9 @@ class FramesUploadTestCase(TestCase):
 
         # Check if the response is successful
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
+
+        # Check if the file session_1_1 is deleted
+        self.assertFalse(os.path.exists(session_file_path))
 
         # all session files are uploaded on azure and are 
         # deleted from the sessions directory. 
@@ -95,6 +103,7 @@ class FramesUploadTestCase(TestCase):
         # Check if the blob is deleted
         blob_exists = blob_client.exists()
         self.assertFalse(blob_exists)
+    
 
     def test_frames_upload_user_does_not_exist(self):
         request = {
