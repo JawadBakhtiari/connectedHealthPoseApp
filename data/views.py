@@ -52,7 +52,7 @@ def visualise_coordinates(request):
     '''Present an animation of the frame data for a session.'''
     # hardcode session id, user id and clip num for now (should actually be obtained from request)
     uid = 1
-    sid = 10
+    sid = 1
     clip_num = 1
 
     # Get the user with this user id

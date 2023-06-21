@@ -70,7 +70,7 @@ class DataStore:
             existing_data = {}  # Create a new dictionary if the file doesn't exist
 
         # Update the existing data with the new frame data
-        existing_data.update(self.session)
+        existing_data.update(self.clip)
 
         with open(file_path, "w") as f:
             json.dump(existing_data, f, indent=4)
@@ -83,7 +83,6 @@ class DataStore:
             sid (str) - the UUID of the session being written
         '''
         session_data = {}
-
         # Iterate through the local files in the sessions directory
         path = os.path.dirname(__file__)
         directory = os.path.join(path, "sessions")
@@ -111,13 +110,12 @@ class DataStore:
                     # Shouldn't be reached, but handle this case just to be safe
                     downloaded_bytes = blob_client.download_blob().readall()
                     existing_data = json.loads(downloaded_bytes)
-
                     # Append the new frame to the existing clip data
-                    existing_data.extend(frames)
+                    existing_data.update(frames)
                     updated_clip_data_bytes = json.dumps(existing_data).encode('utf-8')
 
                     # Upload the updated clip data (overwrite with updated information)
-                    blob_client.upload_blob(updated_clip_data_bytes)
+                    blob_client.upload_blob(updated_clip_data_bytes, overwrite=True)
                 else:
                     # Upload the clip data as a new blob
                     clip_data_bytes = json.dumps(frames).encode('utf-8')
