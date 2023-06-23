@@ -2,6 +2,7 @@ from django.db import models
 
 class User(models.Model):
     """Represent a User in the database."""
+    id = models.TextField(max_length=200, primary_key=True)
     first_name = models.TextField(max_length=100, help_text='Enter user first name: ')
     last_name = models.TextField(max_length=100, help_text='Enter user last name: ')
     #   etc ...
@@ -17,6 +18,7 @@ class User(models.Model):
 
 class Session(models.Model):
     """Represent Sessions between a client and a health professional."""
+    id = models.TextField(max_length=200, primary_key=True)
     name = models.TextField(max_length=100, help_text='Enter the name of this session: ')
     date = models.DateTimeField(help_text='Enter date and time that this session started: ')
     description = models.TextField(max_length=1000, help_text='Enter description of the session: ')
@@ -29,6 +31,7 @@ class Session(models.Model):
 class InvolvedIn(models.Model):
     """Map Sessions to Users, since multiple Users may participate in a given Session and
         a given User may participate in multiple Sessions."""
+    id = models.TextField(max_length=200, primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text='Enter the id of the user who participated in this session: ')
     session = models.ForeignKey(Session, on_delete=models.CASCADE, help_text='Enter the id of the session that this user participated in: ')
 
