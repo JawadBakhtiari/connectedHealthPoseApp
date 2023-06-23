@@ -14,6 +14,39 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from django.http import HttpResponse as response
+import uuid
+
+def session_init(request):
+    '''Initialise session metadata for a newly started session.'''
+    data = json.loads(request.body)
+
+    uids = data.get('uids')
+    session = data.get('session')
+
+    # First, ensure every user that is involved in this session exists
+    users = User.objects.filter(id__in=uids)
+    if len(users) != len(uids):
+        return response("one or more invalid users provided", status=status.HTTP_401_UNAUTHORIZED)
+
+    # Create and save new session
+    new_sid = str(uuid.uuid4())
+    new_session = Session(
+        new_sid,
+        session.get('name'),
+        session.get('date'),
+        session.get('description')
+    )
+    new_session.save()
+
+    # Record each user as being involved in this session
+    for user in users:
+        InvolvedIn(id=str(uuid.uuid4()), user=user, session=new_session).save()
+
+    return response(
+        json.dumps({'sid': new_sid, 'debug': len(users)}),
+        content_type="application/json",
+        status=status.HTTP_200_OK
+    )
 
 # Decorator is just to mitigate some cookies problem that was preventing testing
 @csrf_exempt
