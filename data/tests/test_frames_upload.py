@@ -1,14 +1,12 @@
 from django.test import TestCase, Client
 from data.models import User, InvolvedIn, Session
-from django.db import models
 import json
 import os
 from rest_framework import status
 from datetime import datetime
-from django.urls import reverse
-from unittest import mock
 from azure.storage.blob import BlobServiceClient
 import datastore.const as const
+import uuid
 
 class FramesUploadTestCase(TestCase):
     def setUp(self):
@@ -18,15 +16,15 @@ class FramesUploadTestCase(TestCase):
         self.path = "/data/frames/upload/"
 
         # Create an example user, session, and store the user as having been involved in this session
-        self.user = User(1, "Steve", "Smith")
+        self.user = User(str(uuid.uuid4()), "Steve", "Smith")
         self.user.save()
-        self.session = Session(1, "Steve's Session", datetime.now().strftime("%Y-%m-%d"), "an example session")
+        self.session = Session(str(uuid.uuid4()), "Steve's Session", datetime.now().strftime("%Y-%m-%d"), "an example session")
         self.session.save()
-        InvolvedIn(id=1, user=self.user, session=self.session).save()
+        InvolvedIn(id=str(uuid.uuid4()), user=self.user, session=self.session).save()
 
         # ids for a user and a session that do not exist
-        self.bad_uid = 99
-        self.bad_sid = 99
+        self.bad_uid = "nogood"
+        self.bad_sid = "badid"
 
         # Load in some example session data
         with open(os.path.dirname(__file__) + "/example_session.json", "r") as f:
@@ -138,7 +136,7 @@ class FramesUploadTestCase(TestCase):
 
     def test_frames_upload_user_not_involved_in_session(self):
         new_session = Session(
-            2,
+            str(uuid.uuid4()),
             "a new session",
             datetime.now().strftime("%Y-%m-%d"),
             "no one is involved in this session!"
