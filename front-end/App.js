@@ -187,6 +187,7 @@ export default function App() {
      * - Write the base64-encoded image data to the file using `FileSystem.writeAsStringAsync()`
      * The resulting URI can be used to access the saved image file
      **/
+    // console.log()
     const imgBase64 = tf.util.decodeString(jpegImageData.data, "base64");
     const salt = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     const uri = FileSystem.documentDirectory + `tensor-${salt}.jpg`;

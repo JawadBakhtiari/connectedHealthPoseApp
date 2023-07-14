@@ -13,6 +13,7 @@ import signal
 import sys
 from json import dumps
 from flask import Flask, request, send_from_directory
+from flask_cors import CORS, cross_origin
 
 from PIL import Image
 import numpy as np
@@ -36,6 +37,7 @@ def default_handler(err):
 
 application = Flask(__name__, static_folder="static", static_url_path='')
 
+CORS(application)
 
 application.config['TRAP_HTTP_EXCEPTIONS'] = True
 application.register_error_handler(Exception, default_handler)
