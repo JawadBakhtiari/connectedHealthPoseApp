@@ -118,35 +118,19 @@ export default function App() {
       const latency = Date.now() - startTs;
       setFps(Math.floor(1000 / latency));
 
-      // Axios Method
-      // try {
-      //   // Post Request
-      //   const response = await Axios.post(
-      //     "http://192.168.0.137:9090/send/get_tensor",
-      //     {
-      //       tensorAsArray,
-      //       poses,
-      //     }
-      //   );
-      //   //console.log(response);
-      // } catch (err) {
-      //   console.log(err);
-      // }
-
-      // Fetch Method
-      fetch("http://192.168.0.137:9090/send/get_tensor", {
-        method: "POST",
-        body: JSON.stringify({
-          tensorAsArray,
-          poses,
-        }),
-      })
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          console.log(data);
-        });
+      try {
+        // Post Request
+        const response = await Axios.post(
+          "http://192.168.0.137:9090/send/get_tensor",
+          {
+            tensorAsArray,
+            poses,
+          }
+        );
+        //console.log(response);
+      } catch (err) {
+        console.log(err);
+      }
 
       // Disposes image tensoor to free memery resources after used
       tf.dispose([tensor]);
