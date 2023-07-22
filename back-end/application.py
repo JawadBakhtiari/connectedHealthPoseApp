@@ -52,9 +52,9 @@ def serve():
 
 def generate_tensor(tensorAsArray, poses):
     # convert tensor array to images and pop up image.
-    data = np.array(tensorAsArray, dtype=np.uint8)
-    img = Image.fromarray(data, 'RGB')
-    img.show()
+    # data = np.array(tensorAsArray, dtype=np.uint8)
+    # img = Image.fromarray(data, 'RGB')
+    # img.show()
 
     file = open("poses.txt","a") 
     file.write(str(poses))

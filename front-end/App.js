@@ -99,24 +99,22 @@ export default function App() {
    **/
   const handleCameraStream = async (images) => {
     const loop = async () => {
+      // This marks the starting time of the image processing for measuring latency.
+      const startTs = Date.now();
+
       /**
        * This line retrieves the next image from the images object using the next() method.
        * The value property contains the actual image tensor data.
        **/
       const tensor = images.next().value;
-      // This marks the starting time of the image processing for measuring latency.
-      const startTs = Date.now();
 
       // encodeJpeg(tensor)
 
       const tensorAsArray = tensor.arraySync();
       const [height, width] = tensor.shape;
 
-      loadModel(tensor);
-
-      // Calculates the latency in order to get the FPS
-      const latency = Date.now() - startTs;
-      setFps(Math.floor(1000 / latency));
+      const poses = await model.estimatePoses(tensor, undefined, Date.now());
+      setPoses(poses);
 
       try {
         // Post Request
@@ -135,6 +133,10 @@ export default function App() {
       // Disposes image tensoor to free memery resources after used
       tf.dispose([tensor]);
 
+      // Calculates the latency in order to get the FPS
+      const latency = Date.now() - startTs;
+      setFps(Math.floor(1000 / latency));
+
       // If current animation frame is no longer processing then exit
       if (rafId.current === 0) {
         return;
@@ -144,10 +146,11 @@ export default function App() {
     loop();
   };
 
-  const loadModel = async (tensor) => {
-    const poses = await model.estimatePoses(tensor, undefined, Date.now());
-    setPoses(poses);
-  };
+  // Function not working
+  // const loadModel = async (tensor) => {
+  //   const poses = await model.estimatePoses(tensor, undefined, Date.now());
+  //   setPoses(poses);
+  // };
 
   const renderFps = () => {
     return (
@@ -257,7 +260,7 @@ export default function App() {
           resizeDepth={3}
           onReady={handleCameraStream}
         />
-        {renderPose()}
+        {/* {renderPose()} */}
         {renderFps()}
         {renderCameraTypeSwitcher()}
         {renderRecordButton()}
