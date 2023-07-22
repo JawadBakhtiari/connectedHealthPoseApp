@@ -8,6 +8,7 @@ import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
 import * as FileSystem from "expo-file-system";
 import * as jpeg from "jpeg-js";
 import * as MediaLibrary from "expo-media-library";
+import { encode, decode } from "base64-arraybuffer";
 import Axios from "axios";
 
 const TensorCamera = cameraWithTensors(Camera);
@@ -108,16 +109,27 @@ export default function App() {
        **/
       const tensor = images.next().value;
 
-      // encodeJpeg(tensor)
-
-      const tensorAsArray = tensor.arraySync();
+      // JPEG conversion
       const [height, width] = tensor.shape;
+      const data = new Buffer.from(
+        tf
+          .concat([tensor, tf.ones([height, width, 1]).mul(255)], [-1])
+          .slice([0], [height, width, 4])
+          .dataSync()
+      );
+
+      const rawImageData = { data, width, height };
+      const jpegImageData = jpeg.encode(rawImageData, 100);
+
+      const tensorAsArray = tf.util.decodeString(jpegImageData.data, "base64");
+
+      // tf.tensor().arraySync
 
       const poses = await model.estimatePoses(tensor, undefined, Date.now());
       setPoses(poses);
 
+      // Post Request
       try {
-        // Post Request
         const response = await Axios.post(
           "http://192.168.0.137:9090/send/get_tensor",
           {

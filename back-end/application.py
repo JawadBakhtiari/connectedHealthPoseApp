@@ -14,7 +14,7 @@ import sys
 from json import dumps
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS, cross_origin
-
+import io, base64
 from PIL import Image
 import numpy as np
 
@@ -51,17 +51,18 @@ def serve():
 
 
 def generate_tensor(tensorAsArray, poses):
-    # convert tensor array to images and pop up image.
-    # data = np.array(tensorAsArray, dtype=np.uint8)
-    # img = Image.fromarray(data, 'RGB')
-    # img.show()
+    img = Image.open(io.BytesIO(base64.decodebytes(bytes(tensorAsArray, "utf-8"))))
+    # img.save('my-image.jpeg')
+    img.show()
 
+    # Save keypoints
     file = open("poses.txt","a") 
     file.write(str(poses))
     file.write("\n")
 
+    # Save base64 jpeg encoded image
     file2 = open("imageData.txt","a") 
-    file2.write(str(tensorAsArray))
+    file2.write(tensorAsArray)
     file2.write("\n")
 
     file.close()
