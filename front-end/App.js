@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { StyleSheet, Text, View, Platform, Image, Button } from "react-native";
+import { StyleSheet, Text, View, Platform, Dimensions } from "react-native";
 import { Camera } from "expo-camera";
 import { GLView } from "expo-gl";
 import * as tf from "@tensorflow/tfjs";
@@ -15,7 +15,13 @@ const TensorCamera = cameraWithTensors(Camera);
 
 const IS_IOS = Platform.OS === "ios";
 
-const OUTPUT_TENSOR_WIDTH = 96;
+// Camera preview size.
+
+const CAM_PREVIEW_WIDTH = Dimensions.get("window").width;
+const CAM_PREVIEW_HEIGHT = CAM_PREVIEW_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
+
+// The size of the resized output from TensorCamera.
+const OUTPUT_TENSOR_WIDTH = 180;
 const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
 
 export default function App() {
