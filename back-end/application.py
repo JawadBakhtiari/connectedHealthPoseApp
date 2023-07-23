@@ -53,7 +53,7 @@ def serve():
 def generate_tensor(tensorAsArray, poses):
     # for i in range(len(tensorAsArray)):
     #     img = Image.open(io.BytesIO(base64.decodebytes(bytes(tensorAsArray[i], "utf-8"))))
-        # img.save('my-image.jpeg')
+    #     img.save('my-image.jpeg')
         # img.show()
     print(len(tensorAsArray))
 

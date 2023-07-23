@@ -135,11 +135,11 @@ export default function App() {
       // tensorAsArray.push(data);
 
       // Check if 2 seconds have elapsed
-      if (Date.now() - lastSendTime >= 2000) {
+      if (Date.now() - lastSendTime >= 1000) {
         // const sendData = dataBuffer.splice(0, dataBuffer.length); // Copy the data buffer
         lastSendTime = Date.now(); // Update the last send time
         try {
-          const response = await Axios.post(
+          const response = Axios.post(
             "http://192.168.0.137:9090/send/get_tensor",
             {
               poses,
