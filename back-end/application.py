@@ -51,9 +51,11 @@ def serve():
 
 
 def generate_tensor(tensorAsArray, poses):
-    img = Image.open(io.BytesIO(base64.decodebytes(bytes(tensorAsArray, "utf-8"))))
-    # img.save('my-image.jpeg')
-    img.show()
+    # for i in range(len(tensorAsArray)):
+    #     img = Image.open(io.BytesIO(base64.decodebytes(bytes(tensorAsArray[i], "utf-8"))))
+        # img.save('my-image.jpeg')
+        # img.show()
+    print(len(tensorAsArray))
 
     # Save keypoints
     file = open("poses.txt","a") 
@@ -62,7 +64,7 @@ def generate_tensor(tensorAsArray, poses):
 
     # Save base64 jpeg encoded image
     file2 = open("imageData.txt","a") 
-    file2.write(tensorAsArray)
+    file2.write(str(tensorAsArray))
     file2.write("\n")
 
     file.close()

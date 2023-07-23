@@ -29,11 +29,14 @@ export default function App() {
   const [tfReady, setTfReady] = useState(false);
   const [model, setModel] = useState();
   const [uri, setUri] = useState();
-  const [poses, setPoses] = useState([]);
+  // const [poses, setPoses] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
   const rafId = useRef(null);
   const [fps, setFps] = useState(0);
+  let lastSendTime = Date.now();
+  const poses = [];
+  const tensorAsArray = [];
 
   /**
    * This is a React useEffect hook that runs once when the component is mounted.
@@ -115,6 +118,10 @@ export default function App() {
        **/
       const tensor = images.next().value;
 
+      // KeyPoint Calculation
+      const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
+      poses.push(newPoses);
+
       // JPEG conversion
       const [height, width] = tensor.shape;
       const data = new Buffer.from(
@@ -123,29 +130,29 @@ export default function App() {
           .slice([0], [height, width, 4])
           .dataSync()
       );
-
       const rawImageData = { data, width, height };
       const jpegImageData = jpeg.encode(rawImageData, 100);
+      const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
+      tensorAsArray.push(base64jpeg);
 
-      const tensorAsArray = tf.util.decodeString(jpegImageData.data, "base64");
-
-      // tf.tensor().arraySync
-
-      const poses = await model.estimatePoses(tensor, undefined, Date.now());
-      setPoses(poses);
-
-      // Post Request
-      try {
-        const response = await Axios.post(
-          "http://192.168.0.137:9090/send/get_tensor",
-          {
-            tensorAsArray,
-            poses,
-          }
-        );
-        //console.log(response);
-      } catch (err) {
-        console.log(err);
+      // Check if 2 seconds have elapsed
+      if (Date.now() - lastSendTime >= 2000) {
+        // const sendData = dataBuffer.splice(0, dataBuffer.length); // Copy the data buffer
+        lastSendTime = Date.now(); // Update the last send time
+        try {
+          const response = await Axios.post(
+            "http://192.168.0.137:9090/send/get_tensor",
+            {
+              poses,
+              tensorAsArray,
+            }
+          );
+          // Empty Data
+          poses.splice(0, poses.length);
+          tensorAsArray.splice(0, tensorAsArray.length);
+        } catch (err) {
+          console.log(err);
+        }
       }
 
       // Disposes image tensoor to free memery resources after used
