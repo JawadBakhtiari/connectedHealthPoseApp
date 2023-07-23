@@ -135,7 +135,7 @@ export default function App() {
       // tensorAsArray.push(data);
 
       // Check if 2 seconds have elapsed
-      if (Date.now() - lastSendTime >= 1000) {
+      if (Date.now() - lastSendTime >= 2000) {
         // const sendData = dataBuffer.splice(0, dataBuffer.length); // Copy the data buffer
         lastSendTime = Date.now(); // Update the last send time
         try {
