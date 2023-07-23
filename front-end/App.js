@@ -15,13 +15,8 @@ const TensorCamera = cameraWithTensors(Camera);
 
 const IS_IOS = Platform.OS === "ios";
 
-// Camera preview size.
-
-const CAM_PREVIEW_WIDTH = Dimensions.get("window").width;
-const CAM_PREVIEW_HEIGHT = CAM_PREVIEW_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
-
 // The size of the resized output from TensorCamera.
-const OUTPUT_TENSOR_WIDTH = 180;
+const OUTPUT_TENSOR_WIDTH = 120;
 const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
 
 export default function App() {
@@ -135,8 +130,12 @@ export default function App() {
       const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
       tensorAsArray.push(base64jpeg);
 
+      // RGB array
+      // const data = tensor.arraySync();
+      // tensorAsArray.push(data);
+
       // Check if 2 seconds have elapsed
-      if (Date.now() - lastSendTime >= 2000) {
+      if (Date.now() - lastSendTime >= 1000) {
         // const sendData = dataBuffer.splice(0, dataBuffer.length); // Copy the data buffer
         lastSendTime = Date.now(); // Update the last send time
         try {
