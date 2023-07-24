@@ -94,6 +94,7 @@ def frames_upload(request):
     clip_num = data.get('clipNum')  # Get clip number from request
     session_finished = data.get('sessionFinished')  # Get session_finished flag from request
     clip_data = data.get('frames')
+    image_data = data.get('images')  # Get image data from request
 
     user = User.objects.filter(id=uid)
     if not len(user):
@@ -107,14 +108,17 @@ def frames_upload(request):
         return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
 
     store = DataStore()
-    store.set(clip_data)
+    store.set_clip(clip_data)
+    store.set_images(image_data)
     store.write_clip_locally(sid, clip_num)
+    store.write_images_locally(sid, clip_num)
 
     # Write to Azure blob only when the session has been completed
     if session_finished:
         store.write_session_to_cloud(sid)
 
     return render(request, 'frames_upload.html', {'sid': sid}, status=status.HTTP_200_OK)
+
 
 
 #2D VISUALISATION
@@ -299,3 +303,8 @@ def visualise_coordinates(request):
     plot_div = opy.plot(fig, auto_open=False, output_type='div')
 
     return render(request, 'visualise_coordinates.html', context={'plot_div': plot_div})
+
+
+# Function for visualising a 2D video with keypoints layed on top; not necessary to incorporate into the backend at this
+# point but I included it just incase you guys were interested
+

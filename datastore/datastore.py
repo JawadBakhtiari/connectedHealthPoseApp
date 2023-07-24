@@ -3,18 +3,26 @@ import orjson
 import json
 import datastore.const as const
 from azure.storage.blob import BlobServiceClient
+from PIL import Image
+import numpy as np
 
 class DataStore:
     def __init__(self):
         self.clip = {}
+        self.images = None
 
     def get(self):
         return self.clip
 
-    def set(self, store):
+    def set_clip(self, store):
         if not isinstance(store, dict):
             raise TypeError('store must be of type dictionary')
         self.clip = store
+
+    def set_images(self, images):
+        if not isinstance(images, list):
+            raise TypeError('images must be of type list')
+        self.images = images
     
     def populate_local(self, sid, clip_num):
         ''' KEEP VERSION FOR LOCAL STORAGE UNTIL BLOB STORAGE FINALISED
@@ -74,6 +82,39 @@ class DataStore:
 
         with open(file_path, "w") as f:
             json.dump(existing_data, f, indent=4)
+
+    def write_images_locally(self, sid, clip_num):
+        '''Write the image data to local storage on the file system.
+
+        Args:
+            sid (str) - the UUID of the session being written
+            clip_num (int) - the clip number of the session being written
+        '''
+        path = os.path.dirname(__file__)
+        directory = os.path.join(path, "sessions", f"video_{sid}_{clip_num}")
+        os.makedirs(directory, exist_ok=True)
+
+        start = self._get_next_image_number(directory)
+
+        for i, image_array in enumerate(self.images, start=start):
+            image = Image.fromarray(np.array(image_array, dtype='uint8'))
+            image.save(os.path.join(directory, f"img{i}.jpg"))
+
+    def _get_next_image_number(self, directory):
+        '''Get the next image number to be used in the given directory.
+
+        Args:
+            directory (str) - The directory to check for existing images.
+
+        Returns:
+            int - The next image number to be used.
+        '''
+        existing_files = os.listdir(directory)
+        if existing_files:
+            highest_num = max(int(f.split("img")[-1].split(".jpg")[0]) for f in existing_files if f.startswith("img") and f.endswith(".jpg"))
+            return highest_num + 1
+        else:
+            return 0
 
     def write_session_to_cloud(self, sid):
         '''Write all clips that are stored locally for a session to Azure Blob storage. Remove
