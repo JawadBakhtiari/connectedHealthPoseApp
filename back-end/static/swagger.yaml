@@ -1,0 +1,141 @@
+openapi: 3.0.0
+info:
+  title: Server API
+  description: Contains the server information for the API routes and Swagger API methods
+  version: "1.0"
+
+servers:
+  - url: http://H13A-SOX-SENDING-API.ap-southeast-2.elasticbeanstalk.com
+    description: Local development server
+    variables:
+      port:
+        default: "5000"
+
+paths:
+  /send/send_invoice:
+    post:
+      summary: Send invoice
+      description: Sends an invoice to the specified email address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receiver_email:
+                  type: string
+                  description: the recipient's email address
+                  example: sixrip7er@gmail.com, aj.bakhti@gmail.com
+                file_name:
+                  type: string
+                  description: the name of the file
+                  example: example1.xml
+                xml_data:
+                  type: string
+                  description: the entire xml content
+                  example: "<?xml versi  .... </Invoice>"
+              required:
+                - receiver_email
+                - file_name
+                - xml_data
+      responses:
+        "200":
+          description: Invoice sent
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /send/create_email:
+    post:
+      summary: Create and send an email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                receiver_email:
+                  type: string
+                  description: The recipient's email address
+                  example: sixrip7er@gmail.com, aj.bakhti@gmail.com
+                subject:
+                  type: string
+                  description: The subject of the email
+                  example: E-Invoice
+                content:
+                  type: string
+                  description: Body of the email, not attachment
+                  example: Please find your attached e-invoice
+              required:
+                - receiver_email
+                - subject
+                - content
+      responses:
+        '200':
+          description: Email created and sent successfully
+
+  /send/attach_invoice:
+    put:
+      summary: Attach an invoice to an email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_id:
+                  type: string
+                  example: 0
+                file_name:
+                  type: string
+                  example: "invoice.xml"
+                xml_data:
+                  type: string
+                  example: "<xml>...</xml>"
+              required:
+                - email_id
+                - file_name
+                - xml_data
+      responses:
+        '200':
+          description: Invoice attached successfully
+        '400':
+          description: Invalid input data
+        '500':
+          description: Internal server error
+
+  /send/send_email:
+    post:
+      summary: Send an email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_id:
+                  type: integer
+                  description: the email id you got using create email
+                  example: 0
+              required:
+                - email_id
+      responses:
+        '200':
+          description: Email sent successfully
+
+  /send/clear:
+    delete:
+      summary: Clear
+      description: Clears data
+      responses:
+        "200":
+          description: Data cleared
+          content:
+            application/json:
+              schema:
+                type: object
