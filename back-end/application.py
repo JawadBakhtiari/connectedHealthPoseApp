@@ -55,7 +55,20 @@ def generate_tensor(tensorAsArray, poses):
     #     img = Image.open(io.BytesIO(base64.decodebytes(bytes(tensorAsArray[i], "utf-8"))))
     #     img.save('my-image.jpeg')
         # img.show()
+
+    # # Display JPG image
+    # img = Image.open(io.BytesIO(base64.decodebytes(bytes(tensorAsArray[0], "utf-8"))))
+    # img.save('my-image.jpeg')
+    # # img.show()
+
+    # # Display RGB image
+    data = np.array(tensorAsArray[0], dtype=np.uint8)
+    img = Image.fromarray(data, 'RGB')
+    # img.show()
+    img.save('my-image.jpeg')
+
     print(len(tensorAsArray))
+    print(len(poses))
 
     # Save keypoints
     file = open("poses.txt","a") 
