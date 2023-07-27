@@ -117,41 +117,15 @@ export default function App() {
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       poses.push(newPoses);
 
-      // JPEG conversion
-      const [height, width] = tensor.shape;
-      const data = new Buffer.from(
-        tf
-          .concat([tensor, tf.ones([height, width, 1]).mul(255)], [-1])
-          .slice([0], [height, width, 4])
-          .dataSync()
-      );
-      const rawImageData = { data, width, height };
-      const jpegImageData = jpeg.encode(rawImageData, 100);
-      const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
-      tensorAsArray.push(base64jpeg);
+      // Encode Image Data
+      // encodeJPG(tensor);
+      encodeRGB(tensor);
 
-      // RGB array
-      // const data = tensor.arraySync();
-      // tensorAsArray.push(data);
-
-      // Check if 2 seconds have elapsed
-      if (Date.now() - lastSendTime >= 1000) {
+      // Check if 500 milliseconds have elapsed
+      if (Date.now() - lastSendTime >= 500) {
         // const sendData = dataBuffer.splice(0, dataBuffer.length); // Copy the data buffer
         lastSendTime = Date.now(); // Update the last send time
-        try {
-          const response = Axios.post(
-            "http://192.168.0.137:9090/send/get_tensor",
-            {
-              poses,
-              tensorAsArray,
-            }
-          );
-          // Empty Data
-          poses.splice(0, poses.length);
-          tensorAsArray.splice(0, tensorAsArray.length);
-        } catch (err) {
-          console.log(err);
-        }
+        sendData();
       }
 
       // Disposes image tensoor to free memery resources after used
@@ -182,6 +156,40 @@ export default function App() {
         <Text>FPS: {fps}</Text>
       </View>
     );
+  };
+
+  const sendData = async () => {
+    try {
+      const response = Axios.post("http://192.168.0.137:9090/send/get_tensor", {
+        poses,
+        tensorAsArray,
+      });
+      // Empty Data
+      poses.splice(0, poses.length);
+      tensorAsArray.splice(0, tensorAsArray.length);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const encodeJPG = async (tensor) => {
+    // JPEG conversion
+    const [height, width] = tensor.shape;
+    const data = new Buffer.from(
+      tf
+        .concat([tensor, tf.ones([height, width, 1]).mul(255)], [-1])
+        .slice([0], [height, width, 4])
+        .dataSync()
+    );
+    const rawImageData = { data, width, height };
+    const jpegImageData = jpeg.encode(rawImageData, 100);
+    const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
+    tensorAsArray.push(base64jpeg);
+  };
+
+  const encodeRGB = async (tensor) => {
+    const data = tensor.arraySync();
+    tensorAsArray.push(data);
   };
 
   const encodeJpeg = async (tensor) => {
