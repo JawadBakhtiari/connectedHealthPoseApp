@@ -1,0 +1,7 @@
+Django==4.1.7
+djangorestframework==3.14.0
+numpy==1.22.4
+opencv_python==4.7.0.72
+orjson==3.9.1
+plotly==5.14.0
+azure-storage-blob==12.16.0
