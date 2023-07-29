@@ -121,13 +121,6 @@ export default function App() {
       // encodeJPG(tensor);
       encodeRGB(tensor);
 
-      // Check if 500 milliseconds have elapsed
-      if (Date.now() - lastSendTime >= 500) {
-        // const sendData = dataBuffer.splice(0, dataBuffer.length); // Copy the data buffer
-        lastSendTime = Date.now(); // Update the last send time
-        sendData();
-      }
-
       // Disposes image tensoor to free memery resources after used
       tf.dispose([tensor]);
 
@@ -190,6 +183,10 @@ export default function App() {
   const encodeRGB = async (tensor) => {
     const data = tensor.arraySync();
     tensorAsArray.push(data);
+    // Send 15 frames per request
+    if (tensorAsArray.length == 15) {
+      sendData();
+    }
   };
 
   const encodeJpeg = async (tensor) => {
