@@ -23,8 +23,18 @@ from django.http import FileResponse
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
+from django.contrib.auth.decorators import login_required
 import base64
 import io
+
+def dashboard(request):
+    user = request.user
+    involvements = InvolvedIn.objects.filter(user=user)
+    sessions = [inv.session for inv in involvements]
+    context = {'sessions': sessions}
+    return render(request, 'dashboard.html', context)
+
+
 
 @csrf_exempt
 def user_init(request):
@@ -95,6 +105,11 @@ def frames_upload(request):
     session_finished = data.get('sessionFinished')  # Get session_finished flag from request
     clip_data = data.get('frames')
     image_data = data.get('images')  # Get image data from request
+
+    print(image_data)
+    print(clip_data)
+    print(uid)
+    print(sid)
 
     user = User.objects.filter(id=uid)
     if not len(user):

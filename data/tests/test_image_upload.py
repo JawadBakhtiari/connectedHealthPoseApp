@@ -16,7 +16,7 @@ class FramesUploadTestCase(TestCase):
         self.path = "/data/frames/upload/"
 
         # Create an example user, session, and store the user as having been involved in this session
-        self.user = User(str(uuid.uuid4()), "Steve", "Smith")
+        self.user = User(str(uuid.uuid4()), "Stevey", "Smithy")
         self.user.save()
         self.session = Session(str(uuid.uuid4()), "Steve's Session", datetime.now().strftime("%Y-%m-%d"), "an example session")
         self.session.save()
@@ -27,18 +27,17 @@ class FramesUploadTestCase(TestCase):
         self.bad_sid = "badid"
 
         # Load in some example session data
-        with open(os.path.dirname(__file__) + "/example_session.json", "r") as f:
+        with open(os.path.dirname(__file__) + "/data.json", "r") as f:
             self.session_data = json.loads(f.read())
 
 
     def test_frames_upload_append_to_session(self):
         # Load the example session data
-        with open(os.path.dirname(__file__) + "/example_session.json", "r") as f:
+        with open(os.path.dirname(__file__) + "/data.json", "r") as f:
             session1_data = json.loads(f.read())
 
-        # Load the second example session data
-        with open(os.path.dirname(__file__) + "/example_session2.json", "r") as f:
-            session2_data = json.loads(f.read())
+        with open(os.path.dirname(__file__) + "/data.json", "r") as f:
+            image_data = json.loads(f.read())
 
         # First request to create a session and upload session1_data
         request1 = {
@@ -46,8 +45,10 @@ class FramesUploadTestCase(TestCase):
             'sid': self.session.id,
             'clipNum': 1,
             'sessionFinished': False,
-            'frames': session1_data,
+            'frames': session1_data["poses"],
+            'images': image_data["tensorAsArray"]
         }
+
         response1 = self.client.post(
             path=self.path,
             data=json.dumps(request1),
