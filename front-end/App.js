@@ -115,11 +115,10 @@ export default function App() {
 
       // KeyPoint Calculation
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
-      poses.push(newPoses);
-
-      // Encode Image Data
-      // encodeJPG(tensor);
-      encodeRGB(tensor);
+      if (newPoses) {
+        poses.push(newPoses);
+        encodeRGB(tensor);
+      }
 
       // Disposes image tensoor to free memery resources after used
       tf.dispose([tensor]);
