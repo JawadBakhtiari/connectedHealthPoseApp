@@ -115,7 +115,7 @@ export default function App() {
 
       // KeyPoint Calculation
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
-      if (newPoses) {
+      if (newPoses.length != 0) {
         poses.push(newPoses);
         encodeRGB(tensor);
       }
