@@ -98,18 +98,19 @@ def session_init(request):
 def frames_upload(request):
     '''Receive frame data from the frontend and store this data persistently in the backend.'''
     data = json.loads(request.body)
+    #print("OOOOIIIIIIIOOOOOOIIIIIIIIIIIOOOOOOOOOOOOO")
 
     uid = data.get('uid')
     sid = data.get('sid')
     clip_num = data.get('clipNum')  # Get clip number from request
     session_finished = data.get('sessionFinished')  # Get session_finished flag from request
     clip_data = data.get('frames')
-    image_data = data.get('images')  # Get image data from request
+    #image_data = data.get('images')  # Get image data from request
 
-    print(image_data)
-    print(clip_data)
-    print(uid)
-    print(sid)
+    #print(image_data)
+    #print(clip_data)
+    #print(uid)
+    #print(sid)
 
     user = User.objects.filter(id=uid)
     if not len(user):
@@ -121,7 +122,7 @@ def frames_upload(request):
 
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
-
+    
     store = DataStore()
     store.set_clip(clip_data)
     store.set_images(image_data)

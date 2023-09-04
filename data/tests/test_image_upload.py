@@ -32,21 +32,14 @@ class FramesUploadTestCase(TestCase):
 
 
     def test_frames_upload_append_to_session(self):
-        # Load the example session data
-        with open(os.path.dirname(__file__) + "/data.json", "r") as f:
-            session1_data = json.loads(f.read())
-
-        with open(os.path.dirname(__file__) + "/data.json", "r") as f:
-            image_data = json.loads(f.read())
-
         # First request to create a session and upload session1_data
         request1 = {
             'uid': self.user.id,
             'sid': self.session.id,
             'clipNum': 1,
             'sessionFinished': False,
-            'frames': session1_data["poses"],
-            'images': image_data["tensorAsArray"]
+            'frames': self.session_data["poses"],
+            'images': self.session_data["tensorAsArray"]
         }
 
         response1 = self.client.post(

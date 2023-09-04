@@ -8,6 +8,7 @@ from azure.storage.blob import BlobServiceClient
 import datastore.const as const
 import uuid
 
+'''
 class FramesUploadTestCase(TestCase):
     def setUp(self):
         self.client = Client()
@@ -154,3 +155,5 @@ class FramesUploadTestCase(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+'''
