@@ -242,9 +242,9 @@ def visualise_coordinates(request):
 
     # create a list of numpy arrays for each keypoint
     frames = []
-    for frame_num, session_frame in enumerate(session_frames.values()):
+    for frame_num, session_frame in enumerate(session_frames):
         keypoints3D_arrays = []
-        for kp in session_frame:
+        for kp in session_frame.get("keypoints3D"):
             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
 
         xdata = np.array([kp[0] for kp in keypoints3D_arrays])

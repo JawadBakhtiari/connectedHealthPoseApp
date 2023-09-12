@@ -4,8 +4,6 @@ import json
 import os
 from rest_framework import status
 from datetime import datetime
-from azure.storage.blob import BlobServiceClient
-import datastore.const as const
 from datastore.datastore import DataStore
 import uuid
 
