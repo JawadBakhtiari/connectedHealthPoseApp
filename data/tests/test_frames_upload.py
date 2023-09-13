@@ -4,9 +4,9 @@ import json
 import os
 from rest_framework import status
 from datetime import datetime
-from azure.storage.blob import BlobServiceClient
-import datastore.const as const
+from datastore.datastore import DataStore
 import uuid
+
 
 class FramesUploadTestCase(TestCase):
     def setUp(self):
@@ -26,26 +26,19 @@ class FramesUploadTestCase(TestCase):
         self.bad_uid = "nogood"
         self.bad_sid = "badid"
 
-        # Load in some example session data
-        with open(os.path.dirname(__file__) + "/example_session.json", "r") as f:
-            self.session_data = json.loads(f.read())
+        # Load in some example frames data
+        with open(os.path.dirname(__file__) + "/example_frames.json", "r") as f:
+            self.frames = json.loads(f.read())
 
-    def test_frames_upload_append_to_session(self):
-        # Load the example session data
-        with open(os.path.dirname(__file__) + "/example_session.json", "r") as f:
-            session1_data = json.loads(f.read())
-
-        # Load the second example session data
-        with open(os.path.dirname(__file__) + "/example_session2.json", "r") as f:
-            session2_data = json.loads(f.read())
-
-        # First request to create a session and upload session1_data
+    def test_frames_upload_append_to_clip(self):
+        # Send frame data
         request1 = {
             'uid': self.user.id,
             'sid': self.session.id,
             'clipNum': 1,
             'sessionFinished': False,
-            'frames': session1_data,
+            'poses': self.frames["poses"],
+            'images': self.frames["tensorAsArray"]
         }
         response1 = self.client.post(
             path=self.path,
@@ -57,18 +50,21 @@ class FramesUploadTestCase(TestCase):
         # Check if the response is successful
         self.assertEqual(response1.status_code, status.HTTP_200_OK)
 
+        # Check that both directory for images and poses file have been created
+        poses_file_path = os.path.join("datastore", "sessions", "poses", DataStore.get_poses_name(self.session.id, request1.get('clipNum'))) + ".json"
+        images_dir_path = os.path.join("datastore", "sessions", "images", DataStore.get_images_name(self.session.id, request1.get('clipNum')))
 
-        # Check if the file is uploaded locally in datastore/sessions/session_1_1
-        session_file_path = os.path.join("datastore", "sessions", f"session_{self.session.id}_{request1['clipNum']}")
-        self.assertTrue(os.path.exists(session_file_path))
+        self.assertTrue(os.path.exists(poses_file_path))
+        self.assertTrue(os.path.exists(images_dir_path))
 
-        # Second request to append session2_data to the existing session
+        # Send same frame data again, but this time session is finished
         request2 = {
             'uid': self.user.id,
             'sid': self.session.id,
             'clipNum': 1,
             'sessionFinished': True,
-            'frames': session2_data,
+            'poses': self.frames["poses"],
+            'images': self.frames["tensorAsArray"]
         }
         response2 = self.client.post(
             path=self.path,
@@ -80,27 +76,24 @@ class FramesUploadTestCase(TestCase):
         # Check if the response is successful
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
 
-        # Check if the file session_1_1 is deleted
-        self.assertFalse(os.path.exists(session_file_path))
+        # Check that local copy of poses file has been removed
+        self.assertFalse(os.path.exists(poses_file_path))
 
         # all session files are uploaded on azure and are 
         # deleted from the sessions directory. 
 
-        blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
-        blob_name = f"session_{self.session.id}_{request2['clipNum']}"
-        blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, blob=blob_name)
+        # TODO ->   once cloud storage implemented for images, check image
+        #           blob as well as poses blob (poses blob already checked)
 
-        blob_exists = blob_client.exists()
+        # Check that right number of poses have been recorded
+        expected_pose_data_length = len(self.frames.get("poses")) * 2
+        store = DataStore()
+        store.populate_poses(self.session.id, request2.get('clipNum'))
 
-        # Check if the blob exists
-        self.assertTrue(blob_exists)
+        self.assertEquals(len(store.get_poses()), expected_pose_data_length)
 
         # Delete the blob
-        blob_client.delete_blob()
-
-        # Check if the blob is deleted
-        blob_exists = blob_client.exists()
-        self.assertFalse(blob_exists)
+        store.delete_clip(self.session.id, request2.get('clipNum'))
     
 
     def test_frames_upload_user_does_not_exist(self):
@@ -108,7 +101,8 @@ class FramesUploadTestCase(TestCase):
             'uid': self.bad_uid,
             'sid': self.session.id,
             'clipNum': 1,
-            'frames': self.session_data,
+            'poses': self.frames["poses"],
+            'images': self.frames["tensorAsArray"]
         }
         response = self.client.post(
             path=self.path,
@@ -123,7 +117,8 @@ class FramesUploadTestCase(TestCase):
         request = {
             'uid': self.user.id,
             'sid': self.bad_sid,
-            'frames': self.session_data,
+            'poses': self.frames["poses"],
+            'images': self.frames["tensorAsArray"]
         }
         response = self.client.post(
             path=self.path,
@@ -145,7 +140,8 @@ class FramesUploadTestCase(TestCase):
         request = {
             'uid': self.user.id,
             'sid': new_session.id,
-            'frames': self.session_data,
+            'poses': self.frames["poses"],
+            'images': self.frames["tensorAsArray"]
         }
         response = self.client.post(
             path=self.path,

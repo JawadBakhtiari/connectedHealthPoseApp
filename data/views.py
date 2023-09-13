@@ -23,8 +23,18 @@ from django.http import FileResponse
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
+from django.contrib.auth.decorators import login_required
 import base64
 import io
+
+def dashboard(request):
+    user = request.user
+    involvements = InvolvedIn.objects.filter(user=user)
+    sessions = [inv.session for inv in involvements]
+    context = {'sessions': sessions}
+    return render(request, 'dashboard.html', context)
+
+
 
 @csrf_exempt
 def user_init(request):
@@ -91,10 +101,10 @@ def frames_upload(request):
 
     uid = data.get('uid')
     sid = data.get('sid')
-    clip_num = data.get('clipNum')  # Get clip number from request
-    session_finished = data.get('sessionFinished')  # Get session_finished flag from request
-    clip_data = data.get('frames')
-    image_data = data.get('images')  # Get image data from request
+    clip_num = data.get('clipNum')
+    session_finished = data.get('sessionFinished')
+    pose_data = data.get('poses')
+    image_data = data.get('images')
 
     user = User.objects.filter(id=uid)
     if not len(user):
@@ -106,11 +116,11 @@ def frames_upload(request):
 
     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
         return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
-
+    
     store = DataStore()
-    store.set_clip(clip_data)
+    store.set_poses(pose_data)
     store.set_images(image_data)
-    store.write_clip_locally(sid, clip_num)
+    store.write_poses_locally(sid, clip_num)
     store.write_images_locally(sid, clip_num)
 
     # Write to Azure blob only when the session has been completed
@@ -225,16 +235,16 @@ def visualise_coordinates(request):
         print("user was not involved in this session ... this case is not yet handled!")
 
     store = DataStore()
-    if not store.populate(sid, clip_num):
+    if not store.populate_poses(sid, clip_num):
         print("No session data exists for this session ... this case is not yet handled!")
 
-    session_frames = store.get()
+    session_frames = store.get_poses()
 
     # create a list of numpy arrays for each keypoint
     frames = []
-    for frame_num, session_frame in enumerate(session_frames.values()):
+    for frame_num, session_frame in enumerate(session_frames):
         keypoints3D_arrays = []
-        for kp in session_frame:
+        for kp in session_frame.get("keypoints3D"):
             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
 
         xdata = np.array([kp[0] for kp in keypoints3D_arrays])
