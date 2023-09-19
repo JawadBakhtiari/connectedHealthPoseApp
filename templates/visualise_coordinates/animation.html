@@ -1,12 +1,24 @@
 {% extends "base_generic.html" %}
+{% load static %}
 
 {% block title %}Animation{% endblock %}
 
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/visualisation.css' %}">
+{% endblock %}
+
 {% block content %}
     <div class="plot-container">
-        <img id="animation" alt="Animation" />
+        <div id="animation-title">
+            visualisation
+        </div>
+        <div id="animation-holder">
+            <img id="animation" alt="Animation" />
+        </div>
     </div>
 {% endblock %}
+
 
 {% block scripts %}
     {{ block.super }}

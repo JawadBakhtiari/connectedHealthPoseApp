@@ -26,6 +26,8 @@ import matplotlib.animation as animation
 from django.contrib.auth.decorators import login_required
 import base64
 import io
+import data.const as const
+import os
 
 def dashboard(request):
     user = request.user
@@ -127,101 +129,94 @@ def frames_upload(request):
     if session_finished:
         store.write_session_to_cloud(sid)
 
-    return render(request, 'frames_upload.html', {'sid': sid}, status=status.HTTP_200_OK)
+    return response(status=status.HTTP_200_OK)
 
+def visualise_2D_temporary_helper(sid: str, clip_num: str, fps=15):
+    '''Convert a directory of images stored on the file system into a video.
 
+    NOTE:   ->  This function will become obselete and should be removed once cloud 
+                storage is implemented for clip images (video)'''
+    images_path = os.path.join(os.path.dirname(__file__), "tests/sample_poses_and_images", DataStore.get_images_name(sid, clip_num))
+    images = sorted(os.listdir(images_path), key=lambda x: int(x[3:len(x)-4]))
 
-#2D VISUALISATION
-# def visualise_coordinates(request):
-#     '''Present an animation of the frame data for a session.'''
-#     # hardcode session id, user id and clip num for now (should actually be obtained from request)
-#     uid = "a4db80a8-bac7-4831-8954-d3e402f469bc"
-#     sid = "e2b7957a-a1e3-490f-a5a3-b4d00905dd6e"
-#     clip_num = 1
+    # Get the first image to get dimensions
+    image_path = os.path.join(images_path, images[0])
+    frame = cv2.imread(image_path)
+    height, width, _ = frame.shape
 
-#     # Get the user with this user id
-#     user = User.objects.filter(id=uid)
-#     if not len(user):
-#         # user with this id does not exist ...
-#         print("user doesn't exist ... this case is not yet handled!")
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video = cv2.VideoWriter("vid.mp4", fourcc, fps, (width, height))
 
-#     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
-#         # this session doesn't exist, or it does but this user wasn't part of it
-#         print("user was not involved in this session ... this case is not yet handled!")
-    
-#     store = DataStore()
-#     if not store.populate(sid, clip_num):
-#         print("No session data exists for this session ... this case is not yet handled!")
+    for image in images:
+        image_path = os.path.join(images_path, image)
+        frame = cv2.imread(image_path)
+        video.write(frame)
 
-#     session_frames = store.get()
-#     frames = []
+    video.release()
 
-#     for session_frame in session_frames.values():
-#         keypoints3D_arrays = []
-#         for kp in session_frame:
-#             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
+def visualise_2D(request):
+    '''Present a 2D visualisation of pose data overlayed over the video from 
+    which this data was extracted.'''
+    #data = json.loads(request.body)
+    #sid = data.get('sid')
+    #clip_num = data.get('clip_num')
+    #store = DataStore()
+    #store.populate_poses(sid, clip_num)
+    #poses = store.get_poses()
 
-#         keypoints2D_arrays = [(int(kp[0] * 100 + 300), int(kp[1] * 100 + 300)) for kp in keypoints3D_arrays]
+    # NOTE
+    # skip all error checking: assume user was involved in this session, session exists, etc.
+    # use sample pose and image data currently - for testing
+    sid = "6d6895ee-6e5b-4097-923c-b98aa7968d0d"
+    clip_num = "1"
 
-#         img = np.zeros((600, 600, 3), dtype=np.uint8)
+    with open(os.path.join(os.path.dirname(__file__), "tests/sample_poses_and_images/poses_6d6895ee-6e5b-4097-923c-b98aa7968d0d_1.json")) as f:
+        poses = json.load(f)
 
-#         for kp in keypoints2D_arrays:
-#             cv2.circle(img, kp, 2, (0, 0, 255), -1)
+    visualise_2D_temporary_helper(sid, clip_num)
+    cap = cv2.VideoCapture("vid.mp4")
 
-#         # define connections based on BlazePose Keypoints: Used in MediaPipe BlazePose
-#         connections = [
-#             (0, 4),
-#             (0, 1),
-#             (4, 5),
-#             (5, 6),
-#             (6, 8),
-#             (1, 2),
-#             (2, 3),
-#             (3, 7),
-#             (10, 9),
-#             (12, 11),
-#             (12, 14),
-#             (14, 16),
-#             (16, 22),
-#             (16, 20),
-#             (16, 18),
-#             (18, 20),
-#             (11, 13),
-#             (13, 15),
-#             (15, 21),
-#             (15, 19),
-#             (15, 17),
-#             (17, 19),
-#             (12, 24),
-#             (11, 23),
-#             (24, 23),
-#             (24, 26),
-#             (23, 25),
-#             (26, 28),
-#             (25, 27),
-#             (28, 32),
-#             (28, 30),
-#             (30, 32),
-#             (27, 29),
-#             (27, 31),
-#             (29, 31)
-#         ]
+    if not cap.isOpened():
+        print("Error: Could not open the video file.")
+        return response(status=status.HTTP_404_NOT_FOUND)
 
-#         for joint1, joint2 in connections:
-#             pt1 = keypoints2D_arrays[joint1]
-#             pt2 = keypoints2D_arrays[joint2]
-#             cv2.line(img, pt1, pt2, (255, 0, 0), 1)
+    frames = []
+    for p in poses:
+        ret, frame_image = cap.read()
+        if not ret:
+            # video has reached the end
+            break
 
-#         _, buffer = cv2.imencode('.png', img)
-#         img_base64 = base64.b64encode(buffer).decode('utf-8')
-#         frames.append(img_base64)
+        frame_height, frame_width, _ = frame_image.shape
 
-#     frames = json.dumps(frames)
-#     return render(request, 'animation.html', {'frames': frames})
+        # Create a copy of the frame for overlaying keypoints
+        overlay_image = frame_image.copy()
+
+        # Overlay each keypoint onto the image for this frame
+        keypoints = []
+        for kp in p.get("keypoints3D"):
+            x, y = int(kp['x'] * frame_width + frame_width/2), int(kp['y'] * frame_height + frame_height/2)
+            keypoints.append((x, y))
+            cv2.circle(overlay_image, (x, y), radius=2, color=(0, 255, 0), thickness=-1)
+
+        # Connect the dots - draw lines between joints to form a human stick-figure shape
+        for joint1, joint2 in const.KP_CONNS:
+            pt1 = keypoints[joint1]
+            pt2 = keypoints[joint2]
+            cv2.line(overlay_image, pt1, pt2, (0, 255, 0), 1)
+
+        _, buffer = cv2.imencode('.png', overlay_image)
+        img_base64 = base64.b64encode(buffer).decode('utf-8')
+        frames.append(img_base64)
+
+    cv2.destroyAllWindows()
+    os.remove("vid.mp4")
+    frames = json.dumps(frames)
+    return render(request, 'animation.html', {'frames': frames})
 
 
 # WORK IN PROGRESS 3D VISUALISATION
-def visualise_coordinates(request):
+def visualise_3D(request):
     '''Present an animation of the frame data for a session.'''
     uid = "a4db80a8-bac7-4831-8954-d3e402f469bc"
     sid = "e2b7957a-a1e3-490f-a5a3-b4d00905dd6e"
@@ -251,15 +246,6 @@ def visualise_coordinates(request):
         ydata = np.array([kp[1] for kp in keypoints3D_arrays])
         zdata = np.array([kp[2] for kp in keypoints3D_arrays])
 
-        # Assume connections are correct
-        connections = [
-            (0, 4), (0, 1), (4, 5), (5, 6), (6, 8), (1, 2), (2, 3), (3, 7),
-            (10, 9), (12, 11), (12, 14), (14, 16), (16, 22), (16, 20), (16, 18), (18, 20),
-            (11, 13), (13, 15), (15, 21), (15, 19), (15, 17), (17, 19), (12, 24),
-            (11, 23), (24, 23), (24, 26), (23, 25), (26, 28), (25, 27), (28, 32), 
-            (28, 30), (30, 32), (27, 29), (27, 31), (29, 31)
-        ]
-
         trace = go.Scatter3d(
             x=xdata,
             y=ydata,
@@ -276,7 +262,7 @@ def visualise_coordinates(request):
                 mode='lines',
                 line=dict(width=2, color='blue')
             )
-            for joint1, joint2 in connections
+            for joint1, joint2 in const.KP_CONNS
         ]
 
         frames.append(go.Frame(data=[trace] + lines, name=str(frame_num)))
@@ -314,7 +300,51 @@ def visualise_coordinates(request):
 
     return render(request, 'visualise_coordinates.html', context={'plot_div': plot_div})
 
+#2D VISUALISATION - OLD, NO VIDEO BACKGROUND
+# def visualise_coordinates(request):
+#     '''Present an animation of the frame data for a session.'''
+#     # hardcode session id, user id and clip num for now (should actually be obtained from request)
+#     uid = "a4db80a8-bac7-4831-8954-d3e402f469bc"
+#     sid = "e2b7957a-a1e3-490f-a5a3-b4d00905dd6e"
+#     clip_num = 1
 
-# Function for visualising a 2D video with keypoints layed on top; not necessary to incorporate into the backend at this
-# point but I included it just incase you guys were interested
+#     # Get the user with this user id
+#     user = User.objects.filter(id=uid)
+#     if not len(user):
+#         # user with this id does not exist ...
+#         print("user doesn't exist ... this case is not yet handled!")
 
+#     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
+#         # this session doesn't exist, or it does but this user wasn't part of it
+#         print("user was not involved in this session ... this case is not yet handled!")
+    
+#     store = DataStore()
+#     if not store.populate(sid, clip_num):
+#         print("No session data exists for this session ... this case is not yet handled!")
+
+#     session_frames = store.get()
+#     frames = []
+
+#     for session_frame in session_frames.values():
+#         keypoints3D_arrays = []
+#         for kp in session_frame:
+#             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
+
+#         keypoints2D_arrays = [(int(kp[0] * 100 + 300), int(kp[1] * 100 + 300)) for kp in keypoints3D_arrays]
+
+#         img = np.zeros((600, 600, 3), dtype=np.uint8)
+
+#         for kp in keypoints2D_arrays:
+#             cv2.circle(img, kp, 2, (0, 0, 255), -1)
+
+#         for joint1, joint2 in const.KP_CONNS:
+#             pt1 = keypoints2D_arrays[joint1]
+#             pt2 = keypoints2D_arrays[joint2]
+#             cv2.line(img, pt1, pt2, (255, 0, 0), 1)
+
+#         _, buffer = cv2.imencode('.png', img)
+#         img_base64 = base64.b64encode(buffer).decode('utf-8')
+#         frames.append(img_base64)
+
+#     frames = json.dumps(frames)
+#     return render(request, 'animation.html', {'frames': frames})
