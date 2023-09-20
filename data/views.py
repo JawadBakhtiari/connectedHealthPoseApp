@@ -135,30 +135,6 @@ def frames_upload(request):
     return response(status=status.HTTP_200_OK)
 
 
-def visualise_2D_temporary_helper(sid: str, clip_num: str, fps=15):
-    '''Convert a directory of images stored on the file system into a video.
-
-    NOTE:   ->  This function will become obselete and should be removed once cloud 
-                storage is implemented for clip images (video)'''
-    # images_path = os.path.join(os.path.dirname(__file__), "datastore/sessions/images", DataStore.get_images_name(sid, clip_num))
-    images_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "datastore/sessions/images", DataStore.get_images_name(sid, clip_num))
-
-    images = sorted(os.listdir(images_path), key=lambda x: int(x[3:len(x)-4]))
-
-    # Get the first image to get dimensions
-    image_path = os.path.join(images_path, images[0])
-    frame = cv2.imread(image_path)
-    height, width, _ = frame.shape
-
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video = cv2.VideoWriter("vid.mp4", fourcc, fps, (width, height))
-
-    for image in images:
-        image_path = os.path.join(images_path, image)
-        frame = cv2.imread(image_path)
-        video.write(frame)
-
-    video.release()
 
 def visualise_2D(request):
     '''Present a 2D visualisation of pose data overlayed over the video from 
