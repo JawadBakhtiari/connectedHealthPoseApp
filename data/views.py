@@ -1,5 +1,6 @@
 import base64
 from datetime import datetime
+import tempfile
 import cv2
 from django.shortcuts import render
 import numpy as np
@@ -29,7 +30,6 @@ import io
 import data.const as const
 import os
 from azure.storage.blob import BlobServiceClient, BlobClient
-import datastore.const as const
 
 def dashboard(request):
     user = request.user
@@ -129,16 +129,20 @@ def frames_upload(request):
 
     # Write to Azure blob only when the session has been completed
     if session_finished:
-        store.write_session_to_cloud(sid)
+        store.write_poses_to_cloud(sid)
+        store.write_images_to_cloud(sid)
 
     return response(status=status.HTTP_200_OK)
+
 
 def visualise_2D_temporary_helper(sid: str, clip_num: str, fps=15):
     '''Convert a directory of images stored on the file system into a video.
 
     NOTE:   ->  This function will become obselete and should be removed once cloud 
                 storage is implemented for clip images (video)'''
-    images_path = os.path.join(os.path.dirname(__file__), "tests/sample_poses_and_images", DataStore.get_images_name(sid, clip_num))
+    # images_path = os.path.join(os.path.dirname(__file__), "datastore/sessions/images", DataStore.get_images_name(sid, clip_num))
+    images_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "datastore/sessions/images", DataStore.get_images_name(sid, clip_num))
+
     images = sorted(os.listdir(images_path), key=lambda x: int(x[3:len(x)-4]))
 
     # Get the first image to get dimensions
@@ -169,12 +173,8 @@ def visualise_2D(request):
     # NOTE
     # skip all error checking: assume user was involved in this session, session exists, etc.
     # use sample pose and image data currently - for testing
-    sid = "952bca80-2c88-499e-bd8e-449df075dd70"
+    sid = "e73b5edc-7f2f-43ae-acd6-f2b68b3d0497"
     clip_num = "1"
-
-    # with open(os.path.join(os.path.dirname(__file__), "tests/sample_poses_and_images/poses_6d6895ee-6e5b-4097-923c-b98aa7968d0d_1.json")) as f:
-    #     poses = json.load(f)
-
     
     # Create a blob service client
     blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
@@ -189,13 +189,25 @@ def visualise_2D(request):
         print("Error: Pose data not found in Azure Blob Storage.")
         return response(status=status.HTTP_404_NOT_FOUND)
 
-    visualise_2D_temporary_helper(sid, clip_num)
-    cap = cv2.VideoCapture("vid.mp4")
+    # Retrieve video from Azure Blob Storage
+    video_blob_name = f"vid_{sid}_{clip_num}.mp4"
+    video_blob_client = blob_service_client.get_blob_client("clips", video_blob_name)
+    if video_blob_client.exists():
+        video_path = os.path.join(tempfile.gettempdir(), video_blob_name)
+        with open(video_path, "wb") as f:
+            video_data = video_blob_client.download_blob()
+            video_data.readinto(f)
+    else:
+        print("Error: Video not found in Azure Blob Storage.")
+        return response(status=status.HTTP_404_NOT_FOUND)
+
+    cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return response(status=status.HTTP_404_NOT_FOUND)
 
+    # overlaying pose data on image data
     frames = []
     for p in poses:
         ret, frame_image = cap.read()
@@ -226,7 +238,7 @@ def visualise_2D(request):
         frames.append(img_base64)
 
     cv2.destroyAllWindows()
-    os.remove("vid.mp4")
+
     frames = json.dumps(frames)
     return render(request, 'animation.html', {'frames': frames})
 
