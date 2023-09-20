@@ -28,6 +28,8 @@ import base64
 import io
 import data.const as const
 import os
+from azure.storage.blob import BlobServiceClient, BlobClient
+import datastore.const as const
 
 def dashboard(request):
     user = request.user
@@ -167,11 +169,25 @@ def visualise_2D(request):
     # NOTE
     # skip all error checking: assume user was involved in this session, session exists, etc.
     # use sample pose and image data currently - for testing
-    sid = "6d6895ee-6e5b-4097-923c-b98aa7968d0d"
+    sid = "952bca80-2c88-499e-bd8e-449df075dd70"
     clip_num = "1"
 
-    with open(os.path.join(os.path.dirname(__file__), "tests/sample_poses_and_images/poses_6d6895ee-6e5b-4097-923c-b98aa7968d0d_1.json")) as f:
-        poses = json.load(f)
+    # with open(os.path.join(os.path.dirname(__file__), "tests/sample_poses_and_images/poses_6d6895ee-6e5b-4097-923c-b98aa7968d0d_1.json")) as f:
+    #     poses = json.load(f)
+
+    
+    # Create a blob service client
+    blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
+
+    # Get the pose data from Azure Blob Storage
+    pose_blob_name = DataStore.get_poses_name(sid, clip_num)
+    pose_blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, pose_blob_name)
+    if pose_blob_client.exists():
+        pose_data_string = pose_blob_client.download_blob().content_as_text()
+        poses = json.loads(pose_data_string)
+    else:
+        print("Error: Pose data not found in Azure Blob Storage.")
+        return response(status=status.HTTP_404_NOT_FOUND)
 
     visualise_2D_temporary_helper(sid, clip_num)
     cap = cv2.VideoCapture("vid.mp4")
