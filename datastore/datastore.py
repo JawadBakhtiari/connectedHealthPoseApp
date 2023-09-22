@@ -1,10 +1,14 @@
 import os
+import cv2
 import orjson
 import json
 import datastore.const as const
 from azure.storage.blob import BlobServiceClient
 from PIL import Image
 import numpy as np
+from azure.storage.blob import BlobServiceClient
+import shutil
+
 
 class DataStore:
     def __init__(self):
@@ -117,7 +121,7 @@ class DataStore:
         else:
             return 0
 
-    def write_session_to_cloud(self, sid):
+    def write_poses_to_cloud(self, sid):
         '''Write pose data for all clips from a session to cloud storage.
 
         Args:
@@ -161,6 +165,49 @@ class DataStore:
                     # Upload the clip data as a new blob
                     clip_data_bytes = json.dumps(frames).encode('utf-8')
                     blob_client.upload_blob(clip_data_bytes)
+
+
+    def write_images_to_cloud(self, sid, fps=15):
+        '''Convert directories of images stored on the file system into videos and upload to Azure.
+
+        NOTE:   ->  This function will become obsolete and should be removed once cloud 
+                    storage is implemented for clip images (video)'''
+        base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "datastore/sessions/images")
+        
+        # Iterate through all directories that start with images_sid
+        for dir_name in os.listdir(base_path):
+            if dir_name.startswith(f"images_{sid}_"):
+                clip_num = dir_name.split('_')[-1]
+                images_path = os.path.join(base_path, dir_name)
+                images = sorted([img for img in os.listdir(images_path) if img.endswith('.jpg')], key=lambda x: int(x[3:len(x)-4]))
+
+                # Get the first image to get dimensions
+                image_path = os.path.join(images_path, images[0])
+                frame = cv2.imread(image_path)
+                height, width, _ = frame.shape
+
+                video_name = f"vid_{sid}_{clip_num}.mp4"
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                video = cv2.VideoWriter(video_name, fourcc, fps, (width, height))
+
+                for image in images:
+                    image_path = os.path.join(images_path, image)
+                    frame = cv2.imread(image_path)
+                    video.write(frame)
+
+                video.release()
+
+                # Upload the video to Azure Blob Storage
+                blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
+                blob_client = blob_service_client.get_blob_client(container="clips", blob=video_name)
+                with open(video_name, "rb") as f:
+                    blob_client.upload_blob(f, overwrite=True)
+
+                # Optionally, delete the local video file after uploading
+                os.remove(video_name)
+                # Delete the directory from the images directory after converting to a video and uploading
+                shutil.rmtree(images_path)
+        
 
     def delete_clip(self, sid, clip_num):
         '''Delete the poses and images blobs for a clip.

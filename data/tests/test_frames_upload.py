@@ -93,7 +93,7 @@ class FramesUploadTestCase(TestCase):
         self.assertEquals(len(store.get_poses()), expected_pose_data_length)
 
         # Delete the blob
-        store.delete_clip(self.session.id, request2.get('clipNum'))
+        #store.delete_clip(self.session.id, request2.get('clipNum'))
     
 
     def test_frames_upload_user_does_not_exist(self):
