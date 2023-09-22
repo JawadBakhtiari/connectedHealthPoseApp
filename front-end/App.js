@@ -22,20 +22,20 @@ const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
 export default function App() {
   const cameraRef = useRef(null);
   const [tfReady, setTfReady] = useState(false);
-  const [model, setModel] = useState();
-  const [uri, setUri] = useState();
-  // const [poses, setPoses] = useState([]);
+  const [model, setModel] = useState(null);
+  const [poses, setPoses] = useState([]);
   const [isRecording, setIsRecording] = useState(false);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
   const rafId = useRef(null);
   const [fps, setFps] = useState(0);
   let lastSendTime = Date.now();
-  const poses = [];
+  //const poses = [];
   const tensorAsArray = [];
+  const [activateEffect, setActivateEffect] = useState(false);
 
   /**
-   * This is a React useEffect hook that runs once when the component is mounted.
-   * The empty dependency array ([]) ensures that the effect only runs once.
+   * This is a React useEffect hook that runs when the component is mounted.
+   * The dependency array ([activateEffect]) ensures that the effect is run every time we press the button.
    * Inside this effect, an asynchronous function prepare() is defined.
    **/
   useEffect(() => {
@@ -68,13 +68,19 @@ export default function App() {
       );
       setModel(model);
       setTfReady(true);
+      
     }
-    prepare();
-  }, []);
+    if (activateEffect) {
+      prepare();
+    } else {
+      // If activateEffect is false, setModel to empty and setTfReady to false
+      setModel(null);
+      setTfReady(false);
+    }
+  }, [activateEffect]);
 
   /**
-   * This is another useEffect hook that runs once when the component is mounted.
-   * The empty dependency array ([]) ensures that the effect only runs once.
+   * This is another useEffect hook that runs when the component is mounted.
    * Inside this effect, a cleanup function is defined.
    **/
   useEffect(() => {
@@ -89,7 +95,7 @@ export default function App() {
         rafId.current = 0;
       }
     };
-  }, []);
+  }, [activateEffect]);
 
   /**
    * This toggles the isRecording state variable using the setIsRecording() function.
@@ -97,6 +103,13 @@ export default function App() {
   const handleRecording = () => {
     setIsRecording((prevRecording) => !prevRecording);
   };
+
+   /**
+   * This toggles the activateeffect state variable 
+   **/
+  const handleTf = () => {
+    setActivateEffect((prevEffect) => !prevEffect);
+  }
 
   /**
    * Takes an images parameter.
@@ -116,8 +129,9 @@ export default function App() {
       // KeyPoint Calculation
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       if (newPoses.length != 0) {
-        poses.push(newPoses);
-        encodeRGB(tensor);
+        //poses.push(newPoses);
+        //encodeRGB(tensor);
+        setPoses(newPoses)
       }
 
       // Disposes image tensoor to free memery resources after used
@@ -136,11 +150,6 @@ export default function App() {
     loop();
   };
 
-  // Function not working
-  // const loadModel = async (tensor) => {
-  //   const poses = await model.estimatePoses(tensor, undefined, Date.now());
-  //   setPoses(poses);
-  // };
 
   const renderFps = () => {
     return (
@@ -149,7 +158,7 @@ export default function App() {
       </View>
     );
   };
-
+/*
   const sendData = async () => {
     try {
       const response = Axios.post("http://192.168.0.137:9090/send/get_tensor", {
@@ -163,7 +172,7 @@ export default function App() {
       console.log(err);
     }
   };
-
+*/
   const encodeJPG = async (tensor) => {
     // JPEG conversion
     const [height, width] = tensor.shape;
@@ -178,7 +187,7 @@ export default function App() {
     const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
     tensorAsArray.push(base64jpeg);
   };
-
+/*
   const encodeRGB = async (tensor) => {
     const data = tensor.arraySync();
     tensorAsArray.push(data);
@@ -187,53 +196,11 @@ export default function App() {
       sendData();
     }
   };
-
-  const encodeJpeg = async (tensor) => {
-    /**
-     * Prepare RGB Image Data
-     * Concatenate the input tensor with an alpha channel tensor (if necessary) and extract RGB pixel values
-     * Returns a flat array of RGB pixel values representing the image data
-     **/
-    const [height, width] = tensor.shape;
-    const data = new Buffer.from(
-      tf
-        .concat([tensor, tf.ones([height, width, 1]).mul(255)], [-1])
-        .slice([0], [height, width, 4])
-        .dataSync()
-    );
-    /**
-     * The jpeg.encode() function is called with two arguments: rawImageData and 100.
-     * rawImageData: This object contains the raw image data, width, and height of the image.
-     * 100: This parameter represents the quality setting for JPEG encoding.
-     * Higher values (up to 100) indicate better quality but larger file sizes.
-     **/
-    const rawImageData = { data, width, height };
-    const jpegImageData = jpeg.encode(rawImageData, 100);
-
-    /**
-     * Convert Encoded Image to Base64 and Save to File
-     *  - Decode the base64-encoded image data from `jpegImageData.data`
-     * - Generate a unique file name with a timestamp and random number (`salt`)
-     * - Create the URI for the file in the document directory
-     * - Write the base64-encoded image data to the file using `FileSystem.writeAsStringAsync()`
-     * The resulting URI can be used to access the saved image file
-     **/
-    // console.log()
-    const imgBase64 = tf.util.decodeString(jpegImageData.data, "base64");
-    const salt = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-    const uri = FileSystem.documentDirectory + `tensor-${salt}.jpg`;
-    await FileSystem.writeAsStringAsync(uri, imgBase64, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    setUri(uri);
-
-    //await MediaLibrary.saveToLibraryAsync(uri); // To test result of the tensor image
-  };
+*/
 
   const renderPose = () => {
     if (poses != null && poses.length > 0) {
       let data = poses.find((poses) => poses.keypoints3D);
-      data["frame_image"] = uri;
       console.log(data);
     }
   };
@@ -267,12 +234,21 @@ export default function App() {
       </View>
     );
   };
+  const renderTFButton = () => {
+    return (
+      <View style={styles.TFButton} onTouchEnd={handleTf}>
+        <Text style={styles.TFText}>{tfReady ? "Ready" : "Not Ready"}</Text>
+      </View>
+    );
+  };
 
   if (!tfReady) {
     return (
       <View style={styles.loadingMsg}>
         <Text>Loading...</Text>
+        {renderTFButton()}
       </View>
+     
     );
   } else {
     return (
@@ -288,7 +264,8 @@ export default function App() {
           resizeDepth={3}
           onReady={handleCameraStream}
         />
-        {/* {renderPose()} */}
+        {renderPose()}
+        {renderTFButton()}
         {renderFps()}
         {renderCameraTypeSwitcher()}
         {renderRecordButton()}
@@ -350,5 +327,21 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     padding: 8,
     zIndex: 20,
+  },
+  TFButton: {
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    backgroundColor: "black",
+    borderRadius: 30,
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 20,
+  },
+  TFText: {
+    color: "white",
+    fontSize: 15,
   },
 });
