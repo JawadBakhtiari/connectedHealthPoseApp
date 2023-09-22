@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { StyleSheet, Text, View, Platform, Dimensions } from "react-native";
+import { StyleSheet, Text, View, Platform, Image, Dimensions } from "react-native";
 import { Camera } from "expo-camera";
 import { GLView } from "expo-gl";
 import * as tf from "@tensorflow/tfjs";
@@ -10,6 +10,7 @@ import * as jpeg from "jpeg-js";
 import * as MediaLibrary from "expo-media-library";
 import { encode, decode } from "base64-arraybuffer";
 import Axios from "axios";
+import { Fontisto } from '@expo/vector-icons';
 
 const TensorCamera = cameraWithTensors(Camera);
 
@@ -230,14 +231,26 @@ export default function App() {
   const renderRecordButton = () => {
     return (
       <View style={styles.recordButton} onTouchEnd={handleRecording}>
-        <Text style={styles.recordText}>{isRecording ? "Stop" : "Record"}</Text>
+        {isRecording ? (
+          <Image
+            source={require('./assets/button2.png')}
+            style={styles.recordImage}
+          />
+        ) : (
+          <Image
+            source={require('./assets/button1.png')}
+            style={styles.recordImage}
+          />
+        )}
       </View>
+      
     );
   };
   const renderTFButton = () => {
     return (
       <View style={styles.TFButton} onTouchEnd={handleTf}>
-        <Text style={styles.TFText}>{tfReady ? "Ready" : "Not Ready"}</Text>
+        <Fontisto name="arrow-swap" size={24} color="white" />
+
       </View>
     );
   };
@@ -264,7 +277,7 @@ export default function App() {
           resizeDepth={3}
           onReady={handleCameraStream}
         />
-        {renderPose()}
+        {/*renderPose()*/}
         {renderTFButton()}
         {renderFps()}
         {renderCameraTypeSwitcher()}
@@ -305,13 +318,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 16,
     right: 16,
-    backgroundColor: "red",
     borderRadius: 30,
-    width: 60,
-    height: 60,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 20,
+  },
+  recordImage: {
+    width: 60,
+    height: 60,
   },
   recordText: {
     color: "white",
@@ -332,7 +346,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 16,
     left: 16,
-    backgroundColor: "black",
+    backgroundColor: "#796A6A",
     borderRadius: 30,
     width: 60,
     height: 60,
