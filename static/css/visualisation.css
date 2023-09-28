@@ -20,21 +20,22 @@ body {
 }
 
 #animation-holder #animation {
-    width: 300px;
-    height: 450px;
+    width: 450px;
+    height: 620px;
     border-radius: 8px;
 }
 
 #animation-title {
     background-color: white;
     color: rgb(0, 129, 94);
+    font-weight: 500;
     width: 300px;
     height: 60px;
     text-align: center;
     font-size: 35pt;
     border-radius: 30px;
-    margin-bottom: 10px;
-    margin-top: 50px;
+    margin-bottom: 30px;
+    margin-top: -10px;
     border: 2px solid black;
     box-shadow: 5px 5px 2px rgba(60, 180, 130, 0.7);
 }
@@ -45,26 +46,53 @@ body {
     flex-direction: column;
     align-items: center;
     left: 85%;
-    margin-top: 20%;
-    transform: translate(-85%, 0);
+    margin-top: 15%;
+    transform: translate(-65%, 0);
 }
 
 #session-id-input {
+    margin-bottom: 8%;
+}
+
+#clip-num-input {
     margin-bottom: 20%;
 }
 
 #session-id-input, #clip-num-input {
-    width: 220px;
+    width: 240px;
     height: 60px;
     border-radius: 30px;
     text-align: center;
     color: rgb(0, 129, 94);
     font-size: 24pt;
+    font-weight: 600;
     border: 2px solid black;
-    font-family: 'Times New Roman', Times, serif;
     box-shadow: 4px 4px 2px rgba(0, 0, 0, 0.2);
 }
 
 #session-id-input::placeholder, #clip-num-input::placeholder {
     color: rgba(0, 129, 94, 0.7);
 }
+
+#start-visualisation-button {
+    width: 120px;
+    height: 60px;
+    background-color: rgb(60, 180, 130, 0.7);
+    color: rgb(0, 129, 94);
+    font-size: 20pt;
+    font-weight: 600;
+    border: 5px solid rgb(0, 129, 94);
+    border-radius: 30px;
+    transition-duration: 0.3s;
+}
+
+#start-visualisation-button:hover {
+    opacity: 0.7;
+    cursor: grab;
+}
+
+#start-visualisation-button:active {
+    /* Styles for when the button is being clicked */
+    background-color: rgb(0, 129, 94);
+    box-shadow: 2px 2px 0 #1a609e;
+  }
