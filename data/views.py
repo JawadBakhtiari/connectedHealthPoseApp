@@ -1,6 +1,5 @@
 import base64
 from datetime import datetime
-import tempfile
 import cv2
 from django.shortcuts import render
 import numpy as np
@@ -18,18 +17,9 @@ from rest_framework import status
 from django.http import HttpResponse as response, JsonResponse
 import uuid
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from django.http import FileResponse
 import matplotlib.pyplot as plt
-import mpl_toolkits.mplot3d.axes3d as p3
-import matplotlib.animation as animation
-from django.contrib.auth.decorators import login_required
 import base64
-import io
 import data.const as const
-import os
-from azure.storage.blob import BlobServiceClient, BlobClient
 
 def dashboard(request):
     user = request.user
