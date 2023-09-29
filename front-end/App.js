@@ -16,7 +16,11 @@ export default function App() {
           component={HomeScreen}
           options={{ title: "SessionStart", headerShown: false }}
         />
-        <Stack.Screen name="Second" component={SecondScreen} />
+        <Stack.Screen
+          name="Second"
+          component={SecondScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

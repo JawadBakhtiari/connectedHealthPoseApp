@@ -60,9 +60,10 @@ export default function HomeScreen({ navigation }) {
 
             {/* Input: Session Code */}
             <View style={styles.inputWrapper}>
+              <Text>Session Name:</Text>
               <TextInput
                 style={styles.inputStyle}
-                placeholder="Session Code"
+                placeholder="Session Name"
                 value={values.sessionCode}
                 onChangeText={handleChange("sessionCode")}
                 onBlur={() => setFieldTouched("sessionCode")}
@@ -73,6 +74,7 @@ export default function HomeScreen({ navigation }) {
             </View>
             {/* Input: Full Name */}
             <View style={styles.inputWrapper}>
+              <Text>Full Name:</Text>
               <TextInput
                 style={styles.inputStyle}
                 placeholder="Participant Full Name"
@@ -86,6 +88,7 @@ export default function HomeScreen({ navigation }) {
             </View>
             {/* Input: Email */}
             <View style={styles.inputWrapper}>
+              <Text>Email:</Text>
               <TextInput
                 style={styles.inputStyle}
                 placeholder="Email Address"
@@ -100,6 +103,7 @@ export default function HomeScreen({ navigation }) {
             </View>
             {/* Input: Mobile Number */}
             <View style={styles.inputWrapper}>
+              <Text>Mobile Number:</Text>
               <TextInput
                 style={styles.inputStyle}
                 placeholder="Mobile Number"
@@ -124,7 +128,7 @@ export default function HomeScreen({ navigation }) {
               ]}
               disabled={!isValid}
             >
-              <Text style={[styles.submitBtnTxt]}>Start Session</Text>
+              <Text style={[styles.submitBtnTxt]}>Run Model</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
