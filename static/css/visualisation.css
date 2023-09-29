@@ -83,7 +83,7 @@ body {
     font-weight: 600;
     border: 5px solid rgb(0, 129, 94);
     border-radius: 30px;
-    transition-duration: 0.3s;
+    transition-duration: 0.4s;
 }
 
 #start-visualisation-button:hover {
@@ -92,7 +92,6 @@ body {
 }
 
 #start-visualisation-button:active {
-    /* Styles for when the button is being clicked */
     background-color: rgb(0, 129, 94);
-    box-shadow: 2px 2px 0 #1a609e;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
   }

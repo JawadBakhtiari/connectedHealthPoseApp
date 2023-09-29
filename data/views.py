@@ -110,16 +110,15 @@ def frames_upload(request):
     pose_data = data.get('poses')
     image_data = data.get('images')
 
-    user = User.objects.filter(id=uid)
-    if not len(user):
-        return response("user with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
-    
-    session = Session.objects.filter(id=sid)
-    if not len(session):
-        return response("session with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
-
-    if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
-        return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
+    # NOTE -> skip error checking for demonstration
+    #user = User.objects.filter(id=uid)
+    #if not len(user):
+    #    return response("user with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
+    #session = Session.objects.filter(id=sid)
+    #if not len(session):
+    #    return response("session with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
+    #if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
+    #    return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
     
     store = DataStore()
     store.set_poses(pose_data)
@@ -135,57 +134,38 @@ def frames_upload(request):
     return response(status=status.HTTP_200_OK)
 
 
-
+@csrf_exempt
 def visualise_2D(request):
     '''Present a 2D visualisation of pose data overlayed over the video from 
     which this data was extracted.'''
-    #data = json.loads(request.body)
-    #sid = data.get('sid')
-    #clip_num = data.get('clip_num')
-    #store = DataStore()
-    #store.populate_poses(sid, clip_num)
-    #poses = store.get_poses()
+    # NOTE ->   skip error checking involving users
+    #           don't expect user id in request currently
 
-    # NOTE
-    # skip all error checking: assume user was involved in this session, session exists, etc.
-    # use sample pose and image data currently - for testing
+    # use sample data if request is empty (happens when page is first loaded by url)
     sid = "e73b5edc-7f2f-43ae-acd6-f2b68b3d0497"
     clip_num = "1"
-    
-    # Create a blob service client
-    blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
+    if request.body:
+        # if request non-empty, use this data
+        data = json.loads(request.body)
+        sid = data.get('sid')
+        clip_num = data.get('clip_num')
 
-    # Get the pose data from Azure Blob Storage
-    pose_blob_name = DataStore.get_poses_name(sid, clip_num)
-    pose_blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, pose_blob_name)
-    if pose_blob_client.exists():
-        pose_data_string = pose_blob_client.download_blob().content_as_text()
-        poses = json.loads(pose_data_string)
-    else:
+    store = DataStore()
+    if not store.populate_poses(sid, clip_num):
         print("Error: Pose data not found in Azure Blob Storage.")
         return response(status=status.HTTP_404_NOT_FOUND)
-
-    # Retrieve video from Azure Blob Storage
-    video_blob_name = f"vid_{sid}_{clip_num}.mp4"
-    video_blob_client = blob_service_client.get_blob_client("clips", video_blob_name)
-    if video_blob_client.exists():
-        video_path = os.path.join(tempfile.gettempdir(), video_blob_name)
-        with open(video_path, "wb") as f:
-            video_data = video_blob_client.download_blob()
-            video_data.readinto(f)
-    else:
+    if not store.populate_video(sid, clip_num):
         print("Error: Video not found in Azure Blob Storage.")
         return response(status=status.HTTP_404_NOT_FOUND)
 
-    cap = cv2.VideoCapture(video_path)
-
+    cap = cv2.VideoCapture(store.get_video_path())
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return response(status=status.HTTP_404_NOT_FOUND)
 
     # overlaying pose data on image data
     frames = []
-    for p in poses:
+    for p in store.get_poses():
         ret, frame_image = cap.read()
         if not ret:
             # video has reached the end
@@ -214,7 +194,6 @@ def visualise_2D(request):
         frames.append(img_base64)
 
     cv2.destroyAllWindows()
-
     frames = json.dumps(frames)
     return render(request, 'animation.html', {'frames': frames})
 

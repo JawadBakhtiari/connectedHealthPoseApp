@@ -8,12 +8,16 @@ from PIL import Image
 import numpy as np
 from azure.storage.blob import BlobServiceClient
 import shutil
-
+import tempfile
 
 class DataStore:
     def __init__(self):
         self.poses = []
         self.images = None
+        self.video_path = None
+
+    def get_video_path(self):
+        return self.video
 
     def get_poses(self):
         return self.poses
@@ -64,6 +68,25 @@ class DataStore:
             return True
         else:
             # No blob exists, for the moment return false to signify this
+            return False
+        
+    def populate_video(self, sid, clip_num):
+        '''Load video from cloud storage into a video file, store path to this file
+        in self.video_path. Return True on success, False if video does not exist
+        in cloud storage.
+
+        Args:   sid         (str)  - the uuid of the session being searched 
+                clip_num    (int)  - the clip number of this clip       
+        '''
+        blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
+        blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_video_name(sid, clip_num))
+        if blob_client.exists():
+            self.video_path = os.path.join(tempfile.gettempdir(), self.get_video_name(sid, clip_num))
+            with open(self.video_path, "wb") as f:
+                video_data = blob_client.download_blob()
+                video_data.readinto(f)
+            return True
+        else:
             return False
 
     def write_poses_locally(self, sid, clip_num):
@@ -168,10 +191,7 @@ class DataStore:
 
 
     def write_images_to_cloud(self, sid, fps=15):
-        '''Convert directories of images stored on the file system into videos and upload to Azure.
-
-        NOTE:   ->  This function will become obsolete and should be removed once cloud 
-                    storage is implemented for clip images (video)'''
+        '''Convert directories of images stored on the file system into videos and upload to Azure.'''
         base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "datastore/sessions/images")
         
         # Iterate through all directories that start with images_sid
@@ -242,4 +262,14 @@ class DataStore:
                 clip_num    (int)  - the clip number of this clip   
         '''
         return f"images_{sid}_{clip_num}"
+    
+    @classmethod
+    def get_video_name(cls, sid, clip_num):
+        '''Return the name that should be used to identify the video for a clip.
+
+        Args:   sid         (str)  - the uuid of the session being searched 
+                clip_num    (int)  - the clip number of this clip   
+        '''
+        return f"vid_{sid}_{clip_num}.mp4"
+
     
