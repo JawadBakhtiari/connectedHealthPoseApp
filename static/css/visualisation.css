@@ -94,4 +94,9 @@ body {
 #start-visualisation-button:active {
     background-color: rgb(0, 129, 94);
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
-  }
+}
+
+img {
+    color: rgb(0, 129, 94);
+    font-weight: 600;
+}

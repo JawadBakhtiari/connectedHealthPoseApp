@@ -143,15 +143,15 @@ def visualise_2D(request):
     store = DataStore()
     if not store.populate_poses(sid, clip_num):
         print("Error: Pose data not found in Azure Blob Storage.")
-        return response(status=status.HTTP_404_NOT_FOUND)
+        return render(request, 'animation.html', {'frames': None})
     if not store.populate_video(sid, clip_num):
         print("Error: Video not found in Azure Blob Storage.")
-        return response(status=status.HTTP_404_NOT_FOUND)
+        return render(request, 'animation.html', {'frames': None})
 
     cap = cv2.VideoCapture(store.get_video_path())
     if not cap.isOpened():
         print("Error: Could not open the video file.")
-        return response(status=status.HTTP_404_NOT_FOUND)
+        return render(request, 'animation.html', {'frames': None})
 
     # overlaying pose data on image data
     frames = []
