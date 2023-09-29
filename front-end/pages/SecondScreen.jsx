@@ -32,7 +32,6 @@ export default function SecondScreen({ navigation }) {
   const [tfReady, setTfReady] = useState(false);
   const [model, setModel] = useState(null);
   const [poses, setPoses] = useState([]);
-  const [isRecording, setIsRecording] = useState(false);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
   const rafId = useRef(null);
   const [fps, setFps] = useState(0);
@@ -104,12 +103,6 @@ export default function SecondScreen({ navigation }) {
     };
   }, [activateEffect]);
 
-  /**
-   * This toggles the isRecording state variable using the setIsRecording() function.
-   **/
-  const handleRecording = () => {
-    setIsRecording((prevRecording) => !prevRecording);
-  };
 
   /**
    * This toggles the activateeffect state variable
@@ -155,6 +148,9 @@ export default function SecondScreen({ navigation }) {
       rafId.current = requestAnimationFrame(loop);
     };
     loop();
+  };
+  const handleOffCameraStream = async (images) => {
+    
   };
 
   const renderFps = () => {
@@ -211,20 +207,6 @@ export default function SecondScreen({ navigation }) {
     }
   };
 
-  const renderCameraTypeSwitcher = () => {
-    return (
-      <View
-        style={styles.cameraTypeSwitcher}
-        onTouchEnd={handleSwitchCameraType}
-      >
-        <Text>
-          Switch to{" "}
-          {cameraType === Camera.Constants.Type.front ? "back" : "front"} camera
-        </Text>
-      </View>
-    );
-  };
-
   const handleSwitchCameraType = () => {
     if (cameraType === Camera.Constants.Type.front) {
       setCameraType(Camera.Constants.Type.back);
@@ -235,8 +217,8 @@ export default function SecondScreen({ navigation }) {
 
   const renderRecordButton = () => {
     return (
-      <View style={styles.recordButton} onTouchEnd={handleRecording}>
-        {isRecording ? (
+      <View style={styles.recordButton} onTouchEnd={handleTf}>
+        {tfReady ? (
           <Image
             source={require("./assets/button2.png")}
             style={styles.recordImage}
@@ -250,9 +232,9 @@ export default function SecondScreen({ navigation }) {
       </View>
     );
   };
-  const renderTFButton = () => {
+  const renderSwitchCamButton = () => {
     return (
-      <View style={styles.TFButton} onTouchEnd={handleTf}>
+      <View style={styles.SwitchButton} onTouchEnd={handleSwitchCameraType}>
         <Fontisto name="arrow-swap" size={24} color="white" />
       </View>
     );
@@ -260,14 +242,36 @@ export default function SecondScreen({ navigation }) {
 
   if (!tfReady) {
     return (
-      <View style={styles.loadingMsg}>
-        <Text>Loading...</Text>
-        {renderTFButton()}
+      <View style={styles.container}>
+        <View style={styles.top}></View>
+        <TensorCamera
+          ref={cameraRef}
+          style={styles.camera}
+          autorender={true}
+          type={cameraType}
+          // tensor related props
+          resizeWidth={OUTPUT_TENSOR_WIDTH}
+          resizeHeight={OUTPUT_TENSOR_HEIGHT}
+          resizeDepth={3}
+          onReady={handleOffCameraStream}
+        />
+        {/*renderPose()*/}
+        {/*renderFps()*/}
+        <View style={styles.bottom}>
+          <View style={{flex: 1}}></View>
+          <View style={styles.recordcontain}>
+            {renderRecordButton()}
+          </View>
+          <View style={styles.switchcontain}>
+            {renderSwitchCamButton()}
+          </View>
+        </View>
       </View>
     );
   } else {
     return (
       <View style={styles.container}>
+        <View style={styles.top}></View>
         <TensorCamera
           ref={cameraRef}
           style={styles.camera}
@@ -280,11 +284,18 @@ export default function SecondScreen({ navigation }) {
           onReady={handleCameraStream}
         />
         {/*renderPose()*/}
-        {renderTFButton()}
-        {renderFps()}
-        {renderCameraTypeSwitcher()}
-        {renderRecordButton()}
+        {/*renderFps()*/}
+        <View style={styles.bottom}>
+          <View style={{flex: 1}}></View>
+          <View style={styles.recordcontain}>
+            {renderRecordButton()}
+          </View>
+          <View style={styles.switchcontain}>
+            {renderSwitchCamButton()}
+          </View>
+        </View>
       </View>
+      
     );
   }
 }
@@ -292,46 +303,39 @@ export default function SecondScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
   },
-  loadingMsg: {
-    position: "absolute",
+  top:{
+    flex: 1,
     width: "100%",
     height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#423B3B",
+  },
+  bottom:{
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: "space-evenly",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#423B3B",
   },
   camera: {
     width: "100%",
     height: "100%",
-    flex: 1,
+    flex: 6,
   },
-  cameraTypeSwitcher: {
-    position: "absolute",
-    top: 100,
-    right: 10,
-    width: 180,
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, .7)",
-    borderRadius: 2,
-    padding: 8,
-    zIndex: 20,
+  recordcontain: {
+    flex: 1,
+    justifyContent: "center",
   },
   recordButton: {
-    position: "absolute",
-    bottom: 16,
-    right: 16,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 20,
+    alignSelf: "center",
+    bottom: 5,
+
   },
   recordImage: {
     width: 60,
     height: 60,
-  },
-  recordText: {
-    color: "white",
-    fontSize: 18,
   },
   fpsContainer: {
     position: "absolute",
@@ -344,20 +348,18 @@ const styles = StyleSheet.create({
     padding: 8,
     zIndex: 20,
   },
-  TFButton: {
-    position: "absolute",
-    bottom: 16,
-    left: 16,
+  switchcontain: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  SwitchButton: {
+    alignSelf: "flex-end",
+    right: 25,
     backgroundColor: "#796A6A",
     borderRadius: 30,
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 20,
-  },
-  TFText: {
-    color: "white",
-    fontSize: 15,
   },
 });
