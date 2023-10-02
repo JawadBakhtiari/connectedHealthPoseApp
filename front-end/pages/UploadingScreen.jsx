@@ -3,7 +3,7 @@ import TouchableOpacity from 'react-native';
 
 
 export default function UploadingScreen({ uploading }) {
-  const [isDisabled, setIsDisabled] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(true)
 
   const checkUploadStatus = () => {
     setIsDisabled(false)
