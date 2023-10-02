@@ -1,6 +1,7 @@
 import { Header } from "react-native/Libraries/NewAppScreen";
 import HomeScreen from "./pages/HomeScreen";
 import SecondScreen from "./pages/SecondScreen";
+import UploadingScreen from "./pages/UploadingScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ScreenStackHeaderCenterView } from "react-native-screens";
@@ -21,6 +22,10 @@ export default function App() {
           component={SecondScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="Uploading"
+          component={UploadingScreen}
+          options={{ headerShown: false }}
       </Stack.Navigator>
     </NavigationContainer>
   );
