@@ -16,10 +16,12 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from django.http import HttpResponse as response, JsonResponse
 import uuid
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import base64
 import data.const as const
+from io import BytesIO
 
 def dashboard(request):
     user = request.user
@@ -189,89 +191,89 @@ def visualise_2D(request):
 
 
 # WORK IN PROGRESS 3D VISUALISATION
-def visualise_3D(request):
-    '''Present an animation of the frame data for a session.'''
-    uid = "a4db80a8-bac7-4831-8954-d3e402f469bc"
-    sid = "e2b7957a-a1e3-490f-a5a3-b4d00905dd6e"
-    clip_num = 2
+# def visualise_3D(request):
+#     '''Present an animation of the frame data for a session.'''
+#     uid = "a4db80a8-bac7-4831-8954-d3e402f469bc"
+#     sid = "e2b7957a-a1e3-490f-a5a3-b4d00905dd6e"
+#     clip_num = 2
 
-    user = User.objects.filter(id=uid)
-    if not len(user):
-        print("user doesn't exist ... this case is not yet handled!")
+#     user = User.objects.filter(id=uid)
+#     if not len(user):
+#         print("user doesn't exist ... this case is not yet handled!")
 
-    if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
-        print("user was not involved in this session ... this case is not yet handled!")
+#     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
+#         print("user was not involved in this session ... this case is not yet handled!")
 
-    store = DataStore()
-    if not store.populate_poses(sid, clip_num):
-        print("No session data exists for this session ... this case is not yet handled!")
+#     store = DataStore()
+#     if not store.populate_poses(sid, clip_num):
+#         print("No session data exists for this session ... this case is not yet handled!")
 
-    session_frames = store.get_poses()
+#     session_frames = store.get_poses()
 
-    # create a list of numpy arrays for each keypoint
-    frames = []
-    for frame_num, session_frame in enumerate(session_frames):
-        keypoints3D_arrays = []
-        for kp in session_frame.get("keypoints3D"):
-            keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
+#     # create a list of numpy arrays for each keypoint
+#     frames = []
+#     for frame_num, session_frame in enumerate(session_frames):
+#         keypoints3D_arrays = []
+#         for kp in session_frame.get("keypoints3D"):
+#             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
 
-        xdata = np.array([kp[0] for kp in keypoints3D_arrays])
-        ydata = np.array([kp[1] for kp in keypoints3D_arrays])
-        zdata = np.array([kp[2] for kp in keypoints3D_arrays])
+#         xdata = np.array([kp[0] for kp in keypoints3D_arrays])
+#         ydata = np.array([kp[1] for kp in keypoints3D_arrays])
+#         zdata = np.array([kp[2] for kp in keypoints3D_arrays])
 
-        trace = go.Scatter3d(
-            x=xdata,
-            y=ydata,
-            z=zdata,
-            mode='markers',
-            marker=dict(size=2, color='red')
-        )
+#         trace = go.Scatter3d(
+#             x=xdata,
+#             y=ydata,
+#             z=zdata,
+#             mode='markers',
+#             marker=dict(size=2, color='red')
+#         )
 
-        lines = [
-            go.Scatter3d(
-                x=[xdata[joint1], xdata[joint2]],
-                y=[ydata[joint1], ydata[joint2]],
-                z=[zdata[joint1], zdata[joint2]],
-                mode='lines',
-                line=dict(width=2, color='blue')
-            )
-            for joint1, joint2 in const.KP_CONNS
-        ]
+#         lines = [
+#             go.Scatter3d(
+#                 x=[xdata[joint1], xdata[joint2]],
+#                 y=[ydata[joint1], ydata[joint2]],
+#                 z=[zdata[joint1], zdata[joint2]],
+#                 mode='lines',
+#                 line=dict(width=2, color='blue')
+#             )
+#             for joint1, joint2 in const.KP_CONNS
+#         ]
 
-        frames.append(go.Frame(data=[trace] + lines, name=str(frame_num)))
+#         frames.append(go.Frame(data=[trace] + lines, name=str(frame_num)))
 
-    layout = go.Layout(
-        scene=dict(
-            aspectmode="data",
-            aspectratio=dict(x=2, y=2, z=1),
-            xaxis=dict(range=[-2, 2], visible=False),
-            yaxis=dict(range=[-2, 2], visible=False),
-            zaxis=dict(range=[-2, 2]),
-        ),
-        showlegend=False,
-        height=800,
-        margin=dict(l=0, r=0, b=0, t=0),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        updatemenus=[
-            dict(
-                type="buttons",
-                showactive=False,
-                buttons=[dict(label="Play",
-                            method="animate",
-                            args=[None, {"frame": {"duration": 100, "redraw": True}}])])  # Adjust duration for speed
-        ]
-    )
+#     layout = go.Layout(
+#         scene=dict(
+#             aspectmode="data",
+#             aspectratio=dict(x=2, y=2, z=1),
+#             xaxis=dict(range=[-2, 2], visible=False),
+#             yaxis=dict(range=[-2, 2], visible=False),
+#             zaxis=dict(range=[-2, 2]),
+#         ),
+#         showlegend=False,
+#         height=800,
+#         margin=dict(l=0, r=0, b=0, t=0),
+#         plot_bgcolor='rgba(0,0,0,0)',
+#         paper_bgcolor='rgba(0,0,0,0)',
+#         updatemenus=[
+#             dict(
+#                 type="buttons",
+#                 showactive=False,
+#                 buttons=[dict(label="Play",
+#                             method="animate",
+#                             args=[None, {"frame": {"duration": 100, "redraw": True}}])])  # Adjust duration for speed
+#         ]
+#     )
 
-    fig = go.Figure(
-        data=[trace] + lines,
-        layout=layout,
-        frames=frames
-    )
+#     fig = go.Figure(
+#         data=[trace] + lines,
+#         layout=layout,
+#         frames=frames
+#     )
 
-    plot_div = opy.plot(fig, auto_open=False, output_type='div')
+#     plot_div = opy.plot(fig, auto_open=False, output_type='div')
 
-    return render(request, 'visualise_coordinates.html', context={'plot_div': plot_div})
+#     return render(request, 'visualise_coordinates.html', context={'plot_div': plot_div})
 
 #2D VISUALISATION - OLD, NO VIDEO BACKGROUND
 # def visualise_coordinates(request):
@@ -321,3 +323,54 @@ def visualise_3D(request):
 
 #     frames = json.dumps(frames)
 #     return render(request, 'animation.html', {'frames': frames})
+
+
+@csrf_exempt
+def visualise_3D(request):
+    '''Present a 3D visualisation of pose data.'''
+    sid = "e73b5edc-7f2f-43ae-acd6-f2b68b3d0497"
+    clip_num = "1"
+    
+    if request.body:
+        data = json.loads(request.body)
+        sid = data.get('sid')
+        clip_num = data.get('clip_num')
+
+    store = DataStore()
+    if not store.populate_poses(sid, clip_num):
+        print("Error: Pose data not found in Azure Blob Storage.")
+        return render(request, '3D_animation.html', {'image': None})
+    
+    frames = []
+    for p in store.get_poses():
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        keypoints = []
+        for kp in p.get("keypoints3D"):
+            x, y, z = kp['x'], kp['y'], kp['z']
+             
+            # Swap Y and Z axes, and adjust X, Y, Z as needed
+            x_new = x  # X remains the same
+            y_new = z  # Y in Matplotlib is -Z in BlazePose
+            z_new = -y  # Z in Matplotlib is Y in BlazePose
+
+            ax.scatter(x_new, y_new, z_new, c='g', marker='o')
+            keypoints.append((x_new, y_new, z_new))
+
+        for joint1, joint2 in const.KP_CONNS:
+            x1, y1, z1 = keypoints[joint1]
+            x2, y2, z2 = keypoints[joint2]
+            ax.plot([x1, x2], [y1, y2], [z1, z2], c='b')
+        # Set the view angle of the plot here
+        ax.view_init(elev=10, azim=-50) 
+
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close(fig)
+        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+        frames.append(img_base64)
+
+    frames_json = json.dumps(frames)
+    return render(request, '3D_animation.html', {'frames': frames_json})
+
