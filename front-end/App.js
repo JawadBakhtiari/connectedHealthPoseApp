@@ -26,6 +26,7 @@ export default function App() {
           name="Uploading"
           component={UploadingScreen}
           options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

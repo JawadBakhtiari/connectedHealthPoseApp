@@ -30,6 +30,7 @@ const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
 export default function SecondScreen({ navigation }) {
   const cameraRef = useRef(null);
   const [tfReady, setTfReady] = useState(false);
+  const [recorded, setRecorded] = useState(false);
   const [model, setModel] = useState(null);
   const [poses, setPoses] = useState([]);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
@@ -82,6 +83,9 @@ export default function SecondScreen({ navigation }) {
       // If activateEffect is false, setModel to empty and setTfReady to false
       setModel(null);
       setTfReady(false);
+      if (recorded)
+        console.log("YES")
+        // PROMPT UP HERE
     }
   }, [activateEffect]);
 
@@ -109,6 +113,7 @@ export default function SecondScreen({ navigation }) {
    **/
   const handleTf = () => {
     setActivateEffect((prevEffect) => !prevEffect);
+    setRecorded(true)
   };
 
   /**
