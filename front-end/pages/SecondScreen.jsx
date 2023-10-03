@@ -6,6 +6,8 @@ import {
   Platform,
   Image,
   Dimensions,
+  Modal,
+  Button,
 } from "react-native";
 import { Camera } from "expo-camera";
 import { GLView } from "expo-gl";
@@ -82,12 +84,10 @@ export default function SecondScreen({ navigation }) {
     } else {
       // If activateEffect is false, setModel to empty and setTfReady to false
       setModel(null);
-      setTfReady(false);
-      if (recorded)
-        console.log("YES")
-        // PROMPT UP HERE
+      setTfReady(false);        
     }
   }, [activateEffect]);
+  
 
   /**
    * This is another useEffect hook that runs when the component is mounted.
@@ -113,6 +113,11 @@ export default function SecondScreen({ navigation }) {
    **/
   const handleTf = () => {
     setActivateEffect((prevEffect) => !prevEffect);
+    
+    if (recorded == true) {
+      navigation.navigate("Uploading", { language: "french "})
+    }
+    
     setRecorded(true)
   };
 
@@ -165,6 +170,7 @@ export default function SecondScreen({ navigation }) {
       </View>
     );
   };
+
   /*
   const sendData = async () => {
     try {
