@@ -1,19 +1,34 @@
 
-import { TouchableOpacity, StyleSheet, Text, View, SafeAreaView, TextInput } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text, View, SafeAreaView, TextInput, Button } from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import ProgressBar from 'react-native-progress/Bar'
 
 
 
 export default function UploadingScreen({ navigation }) {
-  const [isDisabled, setIsDisabled] = useState(true)
-
-  const checkUploadStatus = () => {
-    setIsDisabled(false)
-  }
+  const [uploadCheck, setUploadCheck] = useState(false)
+  const [submitCheck, setSubmitCheck] = useState(true)
+  const [progress, setProgress] = useState(0);
+  const handlePress = () => {
+    setUploadCheck(true)
+    for (let i = 0; i <= 100; i++) {
+      setProgress(i)
+      i = i + 0.25
+    }
+    setSubmitCheck(false)
+  };
+  
+  
 
   return (
     <View style={styles.container}>
+    <View style={styles.progress}>
+        <ProgressBar progress={progress} width={300} height={25}/>
+      </View>
+    <View>
+      <Button onPress={handlePress} title="Upload Video" disabled={uploadCheck}/>
+    </View>
       <View style={styles.textContainer}>
         <Text>Additional Notes (optional):</Text>
       </View>
@@ -24,15 +39,11 @@ export default function UploadingScreen({ navigation }) {
         />
         
       </SafeAreaView>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home", { language: "french" })}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home", { language: "french" })} disabled={submitCheck}>
         <Text>Submit Session</Text>
       </TouchableOpacity>
     </View>
-  );
-  // Finish Button -> Greyed out
-  // Check for any frames that still need to be uploaded to backend
-  // Once done - allow user to press finish back which navigates back to home screen.
-  
+  );  
 
 }
 
@@ -66,4 +77,10 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     textAlign: "left",
   },
+  progress: {
+    margin: 'auto',
+    right: -30,
+    padding: 30,
+    
+  }
 });

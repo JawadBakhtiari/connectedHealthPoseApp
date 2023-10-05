@@ -115,6 +115,8 @@ export default function SecondScreen({ navigation }) {
     setActivateEffect((prevEffect) => !prevEffect);
     
     if (recorded == true) {
+      // Send rest of data once user has ended recording and switch to next screen
+      sendData()
       navigation.navigate("Uploading", { language: "french "})
     }
     
@@ -171,7 +173,7 @@ export default function SecondScreen({ navigation }) {
     );
   };
 
-  /*
+  
   const sendData = async () => {
     try {
       const response = Axios.post("http://192.168.0.137:9090/send/get_tensor", {
@@ -185,7 +187,7 @@ export default function SecondScreen({ navigation }) {
       console.log(err);
     }
   };
-*/
+
   const encodeJPG = async (tensor) => {
     // JPEG conversion
     const [height, width] = tensor.shape;
@@ -200,7 +202,7 @@ export default function SecondScreen({ navigation }) {
     const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
     tensorAsArray.push(base64jpeg);
   };
-  /*
+  
   const encodeRGB = async (tensor) => {
     const data = tensor.arraySync();
     tensorAsArray.push(data);
@@ -209,7 +211,7 @@ export default function SecondScreen({ navigation }) {
       sendData();
     }
   };
-*/
+
 
   const renderPose = () => {
     if (poses != null && poses.length > 0) {
