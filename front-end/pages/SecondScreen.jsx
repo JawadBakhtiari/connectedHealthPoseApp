@@ -168,6 +168,7 @@ export default function SecondScreen({ navigation }) {
       if (newPoses.length != 0) {
         poses.push(newPoses);
         encodeJPG(tensor);
+        // encodeRGB(tensor);
         //setPoses(newPoses);
       }
 
@@ -195,27 +196,6 @@ export default function SecondScreen({ navigation }) {
     );
   };
 
-  const sendData = async () => {
-    try {
-      const response = Axios.post(
-        "http://192.168.0.137:8000/data/frames/upload/",
-        {
-          uid: "ahmad",
-          sid: "12983129",
-          clipNum: "1",
-          sessionFinished: false,
-          poses,
-          tensorAsArray,
-        }
-      );
-      // Empty Data
-      poses.splice(0, poses.length);
-      tensorAsArray.splice(0, tensorAsArray.length);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const sendLastData = async () => {
     try {
       const response = Axios.post(
@@ -232,6 +212,29 @@ export default function SecondScreen({ navigation }) {
       // Empty Data
       poses.splice(0, poses.length);
       tensorAsArray.splice(0, tensorAsArray.length);
+      console.log("sending last data:");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const sendData = async () => {
+    try {
+      const response = Axios.post(
+        "http://192.168.0.137:8000/data/frames/upload/",
+        {
+          uid: "ahmad",
+          sid: "12983129",
+          clipNum: "1",
+          sessionFinished: false,
+          poses,
+          tensorAsArray,
+        }
+      );
+      // Empty Data
+      poses.splice(0, poses.length);
+      tensorAsArray.splice(0, tensorAsArray.length);
+      console.log("sending data:");
     } catch (err) {
       console.log(err);
     }
@@ -252,7 +255,7 @@ export default function SecondScreen({ navigation }) {
     tensorAsArray.push(base64jpeg);
     if (tensorAsArray.length == 15) {
       sendData();
-      console.log("sending data");
+      // console.log("sending data");
     }
   };
 
@@ -262,7 +265,7 @@ export default function SecondScreen({ navigation }) {
     // Send 15 frames per request
     if (tensorAsArray.length == 15) {
       sendData();
-      console.log("sending data");
+      // console.log("sending data");
     }
   };
 

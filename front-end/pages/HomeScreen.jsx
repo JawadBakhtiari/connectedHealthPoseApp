@@ -15,28 +15,40 @@ import * as Yup from "yup";
 
 // Validation Schema //
 const SignupSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(6, "Too Short!")
-    .max(50, "Too Long!")
-    .required("Please enter your full name."),
-  email: Yup.string()
-    .email("Invalid email")
-    .required("Please enter your email"),
-  mobile: Yup.string()
-    .min(8, "Too Short!")
-    .max(20, "Too Long!")
+  uid: Yup.string()
+    .min(5, "Too Short!")
+    .max(15, "Too Long!")
+    .required("Please enter uid."),
+  sid: Yup.string()
+    .min(1, "Too Short!")
+    .max(15, "Too Long!")
+    .required("Please enter sid."),
+  clipNum: Yup.string()
+    .min(1, "Too Short!")
+    .max(100, "Too Long!")
+    .required("Please enter clip Num.")
     .matches(/^[0-9]+$/, "Must be only digits"),
-  sessionCode: Yup.string().min(5, "Too Short!").max(20, "Too Long!"),
+  name: Yup.string().min(5, "Too Short!").max(15, "Too Long!"),
+  // .required("Please enter full name."),
+
+  // email: Yup.string()
+  //   .email("Invalid email")
+  //   .required("Please enter your email"),
+
+  // mobile: Yup.string()
+  //   .min(8, "Too Short!")
+  //   .max(20, "Too Long!")
+  //   .matches(/^[0-9]+$/, "Must be only digits"),
 });
 
 export default function HomeScreen({ navigation }) {
   return (
     <Formik
       initialValues={{
+        uid: "",
+        sid: "",
+        clipNum: "",
         name: "",
-        email: "",
-        mobile: "",
-        sessionCode: "",
       }}
       validationSchema={SignupSchema}
       onSubmit={(values) => Alert.alert(JSON.stringify(values))}
@@ -58,18 +70,49 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.formContainer}>
             <Text style={styles.title}>Session Details</Text>
 
-            {/* Input: Session Code */}
+            {/* Input: UID */}
             <View style={styles.inputWrapper}>
-              <Text>Session Name:</Text>
+              <Text>uID:</Text>
               <TextInput
                 style={styles.inputStyle}
-                placeholder="Session Name"
-                value={values.sessionCode}
-                onChangeText={handleChange("sessionCode")}
-                onBlur={() => setFieldTouched("sessionCode")}
+                // placeholder="Participant Full Name"
+                value={values.uid}
+                onChangeText={handleChange("uid")}
+                onBlur={() => setFieldTouched("uid")}
               />
-              {touched.sessionCode && errors.sessionCode && (
-                <Text style={styles.errorTxt}>{errors.sessionCode}</Text>
+              {touched.uid && errors.uid && (
+                <Text style={styles.errorTxt}>{errors.uid}</Text>
+              )}
+            </View>
+
+            {/* Input: sID */}
+            <View style={styles.inputWrapper}>
+              <Text>sID:</Text>
+              <TextInput
+                style={styles.inputStyle}
+                // placeholder="Email Address"
+                autoCapitalize={false}
+                value={values.sid}
+                onChangeText={handleChange("sid")}
+                onBlur={() => setFieldTouched("sid")}
+              />
+              {touched.sid && errors.sid && (
+                <Text style={styles.errorTxt}>{errors.sid}</Text>
+              )}
+            </View>
+            {/* Input: clipNum */}
+            <View style={styles.inputWrapper}>
+              <Text>Clip Number:</Text>
+              <TextInput
+                style={styles.inputStyle}
+                // placeholder="Mobile Number"
+                keyboardType="phone-pad"
+                value={values.clipNum}
+                onChangeText={handleChange("clipNum")}
+                onBlur={() => setFieldTouched("clipNum")}
+              />
+              {touched.clipNum && errors.clipNum && (
+                <Text style={styles.errorTxt}>{errors.clipNum}</Text>
               )}
             </View>
             {/* Input: Full Name */}
@@ -77,43 +120,13 @@ export default function HomeScreen({ navigation }) {
               <Text>Full Name:</Text>
               <TextInput
                 style={styles.inputStyle}
-                placeholder="Participant Full Name"
+                // placeholder="Participant Full Name"
                 value={values.name}
                 onChangeText={handleChange("name")}
                 onBlur={() => setFieldTouched("name")}
               />
               {touched.name && errors.name && (
                 <Text style={styles.errorTxt}>{errors.name}</Text>
-              )}
-            </View>
-            {/* Input: Email */}
-            <View style={styles.inputWrapper}>
-              <Text>Email:</Text>
-              <TextInput
-                style={styles.inputStyle}
-                placeholder="Email Address"
-                autoCapitalize={false}
-                value={values.email}
-                onChangeText={handleChange("email")}
-                onBlur={() => setFieldTouched("email")}
-              />
-              {touched.email && errors.email && (
-                <Text style={styles.errorTxt}>{errors.email}</Text>
-              )}
-            </View>
-            {/* Input: Mobile Number */}
-            <View style={styles.inputWrapper}>
-              <Text>Mobile Number:</Text>
-              <TextInput
-                style={styles.inputStyle}
-                placeholder="Mobile Number"
-                keyboardType="phone-pad"
-                value={values.mobile}
-                onChangeText={handleChange("mobile")}
-                onBlur={() => setFieldTouched("mobile")}
-              />
-              {touched.mobile && errors.mobile && (
-                <Text style={styles.errorTxt}>{errors.mobile}</Text>
               )}
             </View>
 
