@@ -141,7 +141,7 @@ export default function SecondScreen({ navigation }) {
 
     if (recorded == true) {
       // Send rest of data once user has ended recording and switch to next screen
-      sendData();
+      sendLastData();
       navigation.navigate("Uploading", { language: "french " });
     }
 
@@ -167,7 +167,7 @@ export default function SecondScreen({ navigation }) {
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       if (newPoses.length != 0) {
         poses.push(newPoses);
-        encodeRGB(tensor);
+        encodeJPG(tensor);
         //setPoses(newPoses);
       }
 
@@ -197,10 +197,38 @@ export default function SecondScreen({ navigation }) {
 
   const sendData = async () => {
     try {
-      const response = Axios.post("http://192.168.0.137:9090/send/get_tensor", {
-        poses,
-        tensorAsArray,
-      });
+      const response = Axios.post(
+        "http://192.168.0.137:8000/data/frames/upload/",
+        {
+          uid: "ahmad",
+          sid: "12983129",
+          clipNum: "1",
+          sessionFinished: false,
+          poses,
+          tensorAsArray,
+        }
+      );
+      // Empty Data
+      poses.splice(0, poses.length);
+      tensorAsArray.splice(0, tensorAsArray.length);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const sendLastData = async () => {
+    try {
+      const response = Axios.post(
+        "http://192.168.0.137:8000/data/frames/upload/",
+        {
+          uid: "ahmad",
+          sid: "12983129",
+          clipNum: "1",
+          sessionFinished: true,
+          poses,
+          tensorAsArray,
+        }
+      );
       // Empty Data
       poses.splice(0, poses.length);
       tensorAsArray.splice(0, tensorAsArray.length);
