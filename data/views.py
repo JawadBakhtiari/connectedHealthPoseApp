@@ -150,7 +150,7 @@ def visualise_2D(request):
         print("Error: Video not found in Azure Blob Storage.")
         return render(request, 'animation.html', {'frames': None})
 
-    cap = cv2.VideoCapture(store.get_video_path())
+    cap = cv2.VideoCapture(store.get_video_path(sid, clip_num))
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return render(request, 'animation.html', {'frames': None})

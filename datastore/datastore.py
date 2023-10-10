@@ -16,8 +16,8 @@ class DataStore:
         self.images = None
         self.video_path = None
 
-    def get_video_path(self):
-        return self.video
+    def get_video_path(self, sid, clip_num):
+        return os.path.join(tempfile.gettempdir(), self.get_video_name(sid, clip_num))
 
     def get_poses(self):
         return self.poses
@@ -59,7 +59,7 @@ class DataStore:
         '''
         # Create a blob client using the local file name as the name for the blob
         blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
-        blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_poses_name(sid, clip_num))
+        blob_client = blob_service_client.get_blob_client(const.AZ_POSES_CONTAINER_NAME, self.get_poses_name(sid, clip_num))
 
         if blob_client.exists():
             # Download the blob from that clip as a string and convert to json
@@ -79,7 +79,7 @@ class DataStore:
                 clip_num    (int)  - the clip number of this clip       
         '''
         blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
-        blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_video_name(sid, clip_num))
+        blob_client = blob_service_client.get_blob_client(const.AZ_CLIPS_CONTAINER_NAME, self.get_video_name(sid, clip_num))
         if blob_client.exists():
             self.video_path = os.path.join(tempfile.gettempdir(), self.get_video_name(sid, clip_num))
             with open(self.video_path, "wb") as f:
@@ -172,7 +172,7 @@ class DataStore:
             # Iterate through the session data and upload/update blobs
             for clip_num, frames in session_data.items():
                 filename = self.get_poses_name(sid, clip_num)
-                blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, filename)
+                blob_client = blob_service_client.get_blob_client(const.AZ_POSES_CONTAINER_NAME, filename)
 
                 if blob_client.exists():
                     # Shouldn't be reached, but handle this case just to be safe
@@ -219,7 +219,7 @@ class DataStore:
 
                 # Upload the video to Azure Blob Storage
                 blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
-                blob_client = blob_service_client.get_blob_client(container="clips", blob=video_name)
+                blob_client = blob_service_client.get_blob_client(const.AZ_CLIPS_CONTAINER_NAME, blob=video_name)
                 with open(video_name, "rb") as f:
                     blob_client.upload_blob(f, overwrite=True)
 
@@ -237,8 +237,8 @@ class DataStore:
             clip_num (int) - the clip number of the clip being deleted
         '''
         blob_service_client = BlobServiceClient.from_connection_string(const.AZ_CON_STR)
-        poses_blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_poses_name(sid, clip_num))
-        video_blob_client = blob_service_client.get_blob_client(const.AZ_CONTAINER_NAME, self.get_images_name(sid, clip_num))
+        poses_blob_client = blob_service_client.get_blob_client(const.AZ_POSES_CONTAINER_NAME, self.get_poses_name(sid, clip_num))
+        video_blob_client = blob_service_client.get_blob_client(const.AZ_CLIPS_CONTAINER_NAME, self.get_images_name(sid, clip_num))
 
         if poses_blob_client.exists():
             poses_blob_client.delete_blob()
