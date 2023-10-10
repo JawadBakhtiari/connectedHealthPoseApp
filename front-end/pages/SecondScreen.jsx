@@ -8,6 +8,7 @@ import {
   Dimensions,
   Modal,
   Button,
+  TouchableOpacity,
 } from "react-native";
 import { Camera } from "expo-camera";
 import { GLView } from "expo-gl";
@@ -42,6 +43,7 @@ export default function SecondScreen({ navigation }) {
   const poses = [];
   const tensorAsArray = [];
   const [activateEffect, setActivateEffect] = useState(false);
+  const [timer, setTimer] = useState(0);
 
   /**
    * This is a React useEffect hook that runs when the component is mounted.
@@ -106,6 +108,29 @@ export default function SecondScreen({ navigation }) {
       }
     };
   }, [activateEffect]);
+
+  useEffect(() => {
+    let interval;
+
+    if (tfReady) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+      setTimer(0);
+    }
+
+    return () => clearInterval(interval);
+  }, [tfReady]);
+
+  const formatTime = (timeInSeconds) => {
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = timeInSeconds % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
 
   /**
@@ -229,21 +254,14 @@ export default function SecondScreen({ navigation }) {
 
   const renderRecordButton = () => {
     return (
-      <View style={styles.recordButton} onTouchEnd={handleTf}>
-        {tfReady ? (
-          <Image
-            source={require("./assets/button2.png")}
-            style={styles.recordImage}
-          />
-        ) : (
-          <Image
-            source={require("./assets/button1.png")}
-            style={styles.recordImage}
-          />
-        )}
+      <View style={styles.recordButton}>
+      <TouchableOpacity style={styles.recordB} onPress={handleTf}>
+        <View style={[styles.inner, tfReady && styles.activeInner ]}></View>
+      </TouchableOpacity>
       </View>
     );
   };
+
   const renderSwitchCamButton = () => {
     return (
       <View style={styles.SwitchButton} onTouchEnd={handleSwitchCameraType}>
@@ -252,10 +270,32 @@ export default function SecondScreen({ navigation }) {
     );
   };
 
+  const rendertimer = () => {
+    return (
+      <View style={styles.timercontain}>
+        {tfReady ? (
+        <View style={styles.activeTimer}>
+          <Text style={styles.timerText}>{formatTime(timer)}</Text>
+        </View>
+      ) : (
+        <View style={styles.notactiveTimer}>
+          <Text style={styles.timerText}>{formatTime(timer)}</Text>
+        </View>
+      )}
+      </View>
+    );
+  };
+
   if (!tfReady) {
     return (
       <View style={styles.container}>
-        <View style={styles.top}></View>
+        <View style={styles.top}>
+          <View style={{flex: 1}}></View>
+          <View style={styles.timercontain}>
+            {rendertimer()}
+          </View>
+          <View style={{flex: 1}}></View>
+        </View>
         <Camera
           ref={cameraRef}
           style={styles.camera}
@@ -275,7 +315,13 @@ export default function SecondScreen({ navigation }) {
   } else {
     return (
       <View style={styles.container}>
-        <View style={styles.top}></View>
+        <View style={styles.top}>
+          <View style={{flex: 1}}></View>
+          <View style={styles.timercontain}>
+            {rendertimer()}
+          </View>
+          <View style={{flex: 1}}></View>
+        </View>
         <TensorCamera
           ref={cameraRef}
           style={styles.camera}
@@ -314,6 +360,8 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "#423B3B",
+    flexDirection: 'row',
+    justifyContent: "space-evenly",
   },
   bottom:{
     flex: 1,
@@ -328,6 +376,34 @@ const styles = StyleSheet.create({
     height: "100%",
     flex: 6,
   },
+  timercontain: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  timerText: {
+    top: 10,
+    fontSize: 24,
+    marginBottom: 16,
+    color: "white"
+  },
+  activeTimer: {
+    top: 20,
+    backgroundColor: 'red',
+    alignItems: 'center',
+    borderRadius: 5,
+    width: 120,
+    height: 50,
+
+  },
+  notactiveTimer: {
+    top: 20,
+    alignItems: 'center',
+    borderRadius: 5,
+    width: 120,
+    height: 50,
+
+  },
   recordcontain: {
     flex: 1,
     justifyContent: "center",
@@ -335,11 +411,30 @@ const styles = StyleSheet.create({
   recordButton: {
     alignSelf: "center",
     bottom: 5,
-
   },
-  recordImage: {
+  recordB: {
     width: 60,
     height: 60,
+    borderColor: 'white',
+    borderWidth: 5,
+    borderRadius: 50,
+  },
+  inner: {
+    backgroundColor: '#9e1919',
+    width: '100%',
+    height: '100%',
+    borderRadius: '50%',
+    transitionProperty: 'all',
+    transitionDuration: 200,
+    transitionTimingFunction: 'ease',
+    transform: [{ scale: 0.94 }],
+  },
+  activeInner: {
+    backgroundColor: '#9e1919',
+    width: '100%',
+    height: '100%',
+    transform: [{ scale: 0.5 }],
+    borderRadius: '12%',
   },
   fpsContainer: {
     position: "absolute",
