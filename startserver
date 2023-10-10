@@ -12,7 +12,8 @@ if [ "$#" -eq 1 ]; then
 fi
 
 # find machine ip address within LAN
-ip=$(hostname -I | xargs)
+# ip=$(hostname -I | xargs)
+ip=$(ipconfig getifaddr en0)
 
 # add new known host (if necessary) and start the server
 ./addknownhost.py "$ip"

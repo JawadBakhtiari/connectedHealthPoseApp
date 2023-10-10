@@ -100,7 +100,7 @@ def frames_upload(request):
     clip_num = data.get('clipNum')
     session_finished = data.get('sessionFinished')
     pose_data = data.get('poses')
-    image_data = data.get('images')
+    image_data = data.get('tensorAsArray')
 
     # NOTE -> skip error checking for demonstration
     #user = User.objects.filter(id=uid)
