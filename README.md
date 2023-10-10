@@ -57,7 +57,7 @@ The application has two main view functions: `frames_upload` and `visualise_coor
     ```
     ./startserver
     ```
-6. Visit link in server output to view application in browser.
+6. Visit link in server terminal output to view application in browser.
 
 ## Future Work
 
