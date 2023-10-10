@@ -7,6 +7,7 @@
     <title>Sider Menu Bar CSS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link rel="stylesheet" href="{% static 'css/sidebar.css' %}"/>
+    <script type="module" src="{% static 'js/sidebar.js' %}"></script>
   </head>
   <body>
     <input type="checkbox" id="check">
@@ -17,13 +18,10 @@
     <div class="sidebar">
     <header>Connected Health</header>
     <ul>
-     <li><a href="#"><i class="fas fa-qrcode"></i>Dashboard</a></li>
-     <li><a href="#"><i class="fas fa-link"></i>Shortcuts</a></li>
-     <li><a href="#"><i class="fas fa-stream"></i>Overview</a></li>
-     <li><a href="#"><i class="fas fa-calendar-week"></i>Events</a></li>
-     <li><a href="#"><i class="far fa-question-circle"></i>About</a></li>
-     <li><a href="#"><i class="fas fa-sliders-h"></i>Services</a></li>
-     <li><a href="#"><i class="far fa-envelope"></i>Contact</a></li>
+     <li><a href="#"><i class="fas fa-stream"></i>My Sessions</a></li>
+     <li id="2D-animation-demo-tab"><a href="#"><i class="fas fa-running"></i>2D Animation Demo</a></li>
+     <li><a href="#"><i class="fas fa-chart-line"></i>Graph Demo</a></li>
+     <li id="source-code-tab"><a href="#"><i class="fab fa-github"></i>Source Code</a></li>
     </ul>
    </div>
    <section></section>
