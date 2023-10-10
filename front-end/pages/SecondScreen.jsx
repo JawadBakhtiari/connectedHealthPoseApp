@@ -34,12 +34,12 @@ export default function SecondScreen({ navigation }) {
   const [tfReady, setTfReady] = useState(false);
   const [recorded, setRecorded] = useState(false);
   const [model, setModel] = useState(null);
-  const [poses, setPoses] = useState([]);
+  //const [poses, setPoses] = useState([]);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
   const rafId = useRef(null);
   const [fps, setFps] = useState(0);
   let lastSendTime = Date.now();
-  //const poses = [];
+  const poses = [];
   const tensorAsArray = [];
   const [activateEffect, setActivateEffect] = useState(false);
 
@@ -129,6 +129,7 @@ export default function SecondScreen({ navigation }) {
    **/
   const handleCameraStream = async (images) => {
     const loop = async () => {
+     
       // This marks the starting time of the image processing for measuring latency.
       const startTs = Date.now();
 
@@ -141,12 +142,12 @@ export default function SecondScreen({ navigation }) {
       // KeyPoint Calculation
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       if (newPoses.length != 0) {
-        //poses.push(newPoses);
-        //encodeRGB(tensor);
-        setPoses(newPoses);
+        poses.push(newPoses);
+        encodeRGB(tensor);
+        //setPoses(newPoses);
       }
 
-      // Disposes image tensoor to free memery resources after used
+      // Disposes image tensor to free memery resources after used
       tf.dispose([tensor]);
 
       // Calculates the latency in order to get the FPS
@@ -160,9 +161,6 @@ export default function SecondScreen({ navigation }) {
       rafId.current = requestAnimationFrame(loop);
     };
     loop();
-  };
-  const handleOffCameraStream = async (images) => {
-    
   };
 
   const renderFps = () => {
@@ -209,6 +207,7 @@ export default function SecondScreen({ navigation }) {
     // Send 15 frames per request
     if (tensorAsArray.length == 15) {
       sendData();
+      console.log("sending data")
     }
   };
 
@@ -257,19 +256,11 @@ export default function SecondScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <View style={styles.top}></View>
-        <TensorCamera
+        <Camera
           ref={cameraRef}
           style={styles.camera}
-          autorender={true}
           type={cameraType}
-          // tensor related props
-          resizeWidth={OUTPUT_TENSOR_WIDTH}
-          resizeHeight={OUTPUT_TENSOR_HEIGHT}
-          resizeDepth={3}
-          onReady={handleOffCameraStream}
         />
-        {/*renderPose()*/}
-        {/*renderFps()*/}
         <View style={styles.bottom}>
           <View style={{flex: 1}}></View>
           <View style={styles.recordcontain}>
@@ -297,7 +288,7 @@ export default function SecondScreen({ navigation }) {
           onReady={handleCameraStream}
         />
         {/*renderPose()*/}
-        {/*renderFps()*/}
+        {renderFps()}
         <View style={styles.bottom}>
           <View style={{flex: 1}}></View>
           <View style={styles.recordcontain}>
