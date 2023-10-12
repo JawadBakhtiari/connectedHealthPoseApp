@@ -11,15 +11,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Add jump to 2D visualisation demo
-    document.getElementById('2D-animation-demo-tab').addEventListener('click', function() {
-    const url = getFullUrl('/data/visualise2D/');
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-
-    // Send empty request to get to demo page
-    const data = JSON.stringify({ sid: null, clip_num: null});
-    xhr.send(data);
+    document.getElementById('2D-visualisation-tab').addEventListener('click', function() {
+        const url = getFullUrl('/data/visualise2D/');
+        window.location.href = url;
     });
+
+    // Add jump to graph demo
+    document.getElementById('graph-tab').addEventListener('click', function() {
+        const url = getFullUrl('/chart/');
+        window.location.href = url;
+    });
+
 });

@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}3D Coordinates{% endblock %}</title>
     {% block styles %}
+        <link rel="stylesheet" href="{% static 'css/general.css' %}">
     {% endblock %}
     {% block scripts %}
     {% endblock %}

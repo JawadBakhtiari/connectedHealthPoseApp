@@ -37,7 +37,6 @@ def dashboard(request):
     return render(request, 'dashboard.html', context)
 
 
-
 @csrf_exempt
 def user_init(request):
     '''Initialise a new user.'''
@@ -151,15 +150,15 @@ def visualise_2D(request):
     store = DataStore()
     if not store.populate_poses(sid, clip_num):
         print("Error: Pose data not found in Azure Blob Storage.")
-        return render(request, 'animation.html', {'frames': None})
+        return render(request, 'visualise2D.html', {'frames': None})
     if not store.populate_video(sid, clip_num):
         print("Error: Video not found in Azure Blob Storage.")
-        return render(request, 'animation.html', {'frames': None})
+        return render(request, 'visualise2D.html', {'frames': None})
 
     cap = cv2.VideoCapture(store.get_video_path(sid, clip_num))
     if not cap.isOpened():
         print("Error: Could not open the video file.")
-        return render(request, 'animation.html', {'frames': None})
+        return render(request, 'visualise2D.html', {'frames': None})
 
     # overlaying pose data on image data
     frames = []
@@ -203,7 +202,7 @@ def visualise_2D(request):
 
     cv2.destroyAllWindows()
     frames = json.dumps(frames)
-    return render(request, 'animation.html', {'frames': frames})
+    return render(request, 'visualise2D.html', {'frames': frames})
 
 
 
@@ -339,7 +338,7 @@ def visualise_2D(request):
 #         frames.append(img_base64)
 
 #     frames = json.dumps(frames)
-#     return render(request, 'animation.html', {'frames': frames})
+#     return render(request, 'visualise2D.html', {'frames': frames})
 
 
 @csrf_exempt
@@ -356,7 +355,7 @@ def visualise_3D(request):
     store = DataStore()
     if not store.populate_poses(sid, clip_num):
         print("Error: Pose data not found in Azure Blob Storage.")
-        return render(request, '3D_animation.html', {'image': None})
+        return render(request, '3D_visualise2D.html', {'image': None})
     
     frames = []
     for p in store.get_poses():
@@ -389,5 +388,5 @@ def visualise_3D(request):
         frames.append(img_base64)
 
     frames_json = json.dumps(frames)
-    return render(request, '3D_animation.html', {'frames': frames_json})
+    return render(request, '3D_visualise2D.html', {'frames': frames_json})
 
