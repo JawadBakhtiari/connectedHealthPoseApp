@@ -1,0 +1,39 @@
+#animation-holder {
+    display: flex;
+    justify-content: center;
+}
+
+#animation-holder #animation {
+    width: 450px;
+    height: 620px;
+    border-radius: 10px;
+    border: 3px solid rgb(0, 129, 94);
+}
+
+#animation-title {
+    margin-bottom: 30px;
+    margin-top: -10px;
+}
+
+.inputs-holder {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    align-items: center;
+    left: 85%;
+    margin-top: 15%;
+    transform: translate(-65%, 0);
+}
+
+#session-id-input {
+    margin-bottom: 8%;
+}
+
+#clip-num-input {
+    margin-bottom: 20%;
+}
+
+img {
+    color: rgb(0, 129, 94);
+    font-weight: 600;
+}

@@ -1,16 +1,16 @@
 {% extends "base_generic.html" %}
 {% load static %}
 
-{% block title %}Animation{% endblock %}
+{% block title %}Visualisation | Connected Health{% endblock %}
 
 {% block styles %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'css/visualisation.css' %}">
+    <link rel="stylesheet" href="{% static 'css/visualise2D.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div class="plot-container">
-        <div id="animation-title">
+    <div class="centered-vertical-container">
+        <div id="animation-title" class="title-box">
             visualisation
         </div>
         <div id="animation-holder">
@@ -18,16 +18,16 @@
         </div>
     </div>
     <div class="inputs-holder">
-        <input type="text" id="session-id-input" placeholder="session id ..." onfocus="this.placeholder=''" onblur="this.placeholder='session id...'">
-        <input type="text" id="clip-num-input" placeholder="clip number ..." onfocus="this.placeholder=''" onblur="this.placeholder='clip number ...'">
-        <button id="start-visualisation-button">START</button>
+        <input type="text" id="session-id-input" class="input-box" placeholder="session id ..." onfocus="this.placeholder=''" onblur="this.placeholder='session id ...'">
+        <input type="text" id="clip-num-input" class="input-box" placeholder="clip number ..." onfocus="this.placeholder=''" onblur="this.placeholder='clip number ...'">
+        <button class="start-button" id="start-visualisation-button">START</button>
     </div>
 {% endblock %}
 
 
 {% block scripts %}
     {{ block.super }}
-    <script type="module" src="{% static 'js/visualisation.js' %}"></script>
+    <script type="module" src="{% static 'js/visualise2D.js' %}"></script>
     <script>
         const frameData = JSON.parse('{{ frames|safe }}');
         let currentFrame = 0;

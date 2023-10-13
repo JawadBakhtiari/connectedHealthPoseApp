@@ -25,6 +25,7 @@ from data.views import dashboard
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('data/', include('data.urls')),
+    path('chart/', include('chart.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', RedirectView.as_view(url='accounts/login')),
     path('dashboard/', dashboard, name='dashboard'),
