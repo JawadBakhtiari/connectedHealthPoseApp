@@ -127,15 +127,15 @@ class DataStore:
         start = self._get_next_image_number(directory)
 
         # # JPG
-        for i in range(len(self.images)):
-            image = Image.open(io.BytesIO(base64.decodebytes(bytes(self.images[i], "utf-8"))))
-            image.save(os.path.join(directory, f"img{start+i}.jpg"))
+        # for i in range(len(self.images)):
+        #     image = Image.open(io.BytesIO(base64.decodebytes(bytes(self.images[i], "utf-8"))))
+        #     image.save(os.path.join(directory, f"img{start+i}.jpg"))
 
 
         # # RGB 
-        # for i, image_array in enumerate(self.images, start=start):
-        #     image = Image.fromarray(np.array(image_array, dtype='uint8'))
-        #     image.save(os.path.join(directory, f"img{i}.jpg"))
+        for i, image_array in enumerate(self.images, start=start):
+            image = Image.fromarray(np.array(image_array, dtype='uint8'))
+            image.save(os.path.join(directory, f"img{i}.jpg"))
 
     def _get_next_image_number(self, directory):
         '''Get the next image number to be used in the given directory.
