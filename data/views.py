@@ -105,7 +105,7 @@ def frames_upload(request):
     clip_num = data.get('clipNum')
     session_finished = data.get('sessionFinished')
     pose_data = data.get('poses')
-    image_data = data.get('images')
+    image_data = data.get('tensorAsArray')
 
     # NOTE -> skip error checking for demonstration
     #user = User.objects.filter(id=uid)
@@ -139,7 +139,7 @@ def visualise_2D(request):
     #           don't expect user id in request currently
 
     # use sample data if request is empty (happens when page is first loaded by url)
-    sid = "12983129"
+    sid = "1818182445799"
     clip_num = "1"
     if request.GET:
         # if request non-empty, use this data
@@ -164,7 +164,7 @@ def visualise_2D(request):
     # Create a Pose model for static images
     with mp_pose.Pose(
         static_image_mode=True,
-        model_complexity=2,
+        model_complexity=0,
         enable_segmentation=True,
         min_detection_confidence=0.5) as pose:
 
