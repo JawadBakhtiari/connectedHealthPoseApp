@@ -2,8 +2,8 @@
 
 import os
 import json
-import datastore.const as const
-from datastore.cloud import get_blob_client
+import data.datastore.const as const
+from data.datastore.cloud import get_blob_client
 
 class PoseStore:
     def __init__(self, sid: str, clip_num: str):

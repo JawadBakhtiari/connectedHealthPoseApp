@@ -1,6 +1,6 @@
 '''Helper functions relating to cloud storage.'''
 
-import datastore.const as const
+import data.datastore.const as const
 from azure.storage.blob import BlobServiceClient
 
 def get_blob_client(container_name: str, blob_name: str):

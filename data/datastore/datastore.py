@@ -1,7 +1,7 @@
 '''Class that provides an abstraction for pose data and video storage.'''
 
-from datastore.videostore import VideoStore
-from datastore.posestore import PoseStore
+from data.datastore.videostore import VideoStore
+from data.datastore.posestore import PoseStore
 
 class DataStore:
     def __init__(self, sid: str, clip_num: str):

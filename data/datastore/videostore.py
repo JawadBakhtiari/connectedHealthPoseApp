@@ -10,9 +10,9 @@ import cv2
 import shutil
 import tempfile
 import numpy as np
-import datastore.const as const
+import data.datastore.const as const
 from PIL import Image
-from datastore.cloud import get_blob_client
+from data.datastore.cloud import get_blob_client
 
 class VideoStore:
     def __init__(self, sid: str, clip_num: str):
@@ -30,6 +30,12 @@ class VideoStore:
     def get_video_path(self):
         '''Return the path to the video file for this clip.'''
         return os.path.join(tempfile.gettempdir(), self.get_video_name())
+
+
+    def get_images_path(self):
+        '''Return the path to the directory containing images for this clip.'''
+        path = os.path.dirname(__file__)
+        return os.path.join(path, "sessions", "images", self.get_images_name())
 
 
     def set(self, images: list):
@@ -81,8 +87,7 @@ class VideoStore:
     def write_images_locally(self):
         '''Write the image data to local storage on the file system.
         '''
-        path = os.path.dirname(__file__)
-        directory = os.path.join(path, "sessions", "images", self.get_images_name())
+        directory = self.get_images_path()
         os.makedirs(directory, exist_ok=True)
 
         start = self._get_next_image_number(directory)
@@ -100,9 +105,9 @@ class VideoStore:
 
 
     def write_video_to_cloud(self, fps=15):
-        '''Convert directories of images stored on the file system into videos and upload to Azure.'''
-        path = os.path.dirname(__file__)
-        images_path = os.path.join(path, "sessions", "images", self.get_images_name())
+        '''Convert directory of images for this clip into a video and write this video to
+        cloud storage. Delete local copies of video/images for this clip.'''
+        images_path = self.get_images_path()
         
         # ensure that images are sorted correctly
         images = sorted([img for img in os.listdir(images_path) if img.endswith('.jpg')], key=lambda x: int(x[3:len(x)-4]))

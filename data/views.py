@@ -2,11 +2,12 @@ import cv2
 import json
 import uuid
 import matplotlib
+import data.datastore.sessionmeta as sm
 from datetime import datetime
 from rest_framework import status
 from django.shortcuts import render
-from datastore.datastore import DataStore
-from datastore.posestore import PoseStore
+from data.datastore.datastore import DataStore
+from data.datastore.posestore import PoseStore
 from .models import User, InvolvedIn, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse as response, JsonResponse
@@ -51,13 +52,14 @@ def session_init(request):
     '''Initialise session metadata for a newly started session.'''
     data = json.loads(request.body)
 
-    uids = data.get('uids')
+    #uids = data.get('uids')
     session = data.get('session')
 
+    # NOTE -> skip error checking for demo
     # First, ensure every user that is involved in this session exists
-    users = User.objects.filter(id__in=uids)
-    if len(users) != len(uids):
-        return response("one or more invalid users provided", status=status.HTTP_401_UNAUTHORIZED)
+    #users = User.objects.filter(id__in=uids)
+    #if len(users) != len(uids):
+    #    return response("one or more invalid users provided", status=status.HTTP_401_UNAUTHORIZED)
 
     # Create and save new session
     new_sid = str(uuid.uuid4())
@@ -69,9 +71,10 @@ def session_init(request):
     )
     new_session.save()
 
+    # NOTE -> skip for demo
     # Record each user as being involved in this session
-    for user in users:
-        InvolvedIn(id=str(uuid.uuid4()), user=user, session=new_session).save()
+    #for user in users:
+    #    InvolvedIn(id=str(uuid.uuid4()), user=user, session=new_session).save()
 
     return response(
         json.dumps({'sid': new_sid}),
@@ -87,8 +90,7 @@ def frames_upload(request):
 
     #uid = data.get('uid')
     sid = data.get('sid')
-    clip_num = data.get('clipNum')
-    session_finished = data.get('sessionFinished')
+    clipFinished = data.get('clipFinished')
     poses = data.get('poses')
     images = data.get('tensorAsArray')
 
@@ -102,12 +104,14 @@ def frames_upload(request):
     #if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
     #    return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
     
+    clip_num = sm.get_clip_num(sid)
     store = DataStore(sid, clip_num)
     store.set(poses, images)
     store.write_locally()
 
-    if session_finished:
+    if clipFinished:
         store.write_to_cloud()
+        sm.increment_clip_num()
 
     return response(status=status.HTTP_200_OK)
 
