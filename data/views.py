@@ -141,11 +141,10 @@ def visualise_2D(request):
     # use sample data if request is empty (happens when page is first loaded by url)
     sid = "12983129"
     clip_num = "1"
-    if request.body:
+    if request.GET:
         # if request non-empty, use this data
-        data = json.loads(request.body)
-        sid = data.get('sid')
-        clip_num = data.get('clip_num')
+        sid = request.GET.get('sid')
+        clip_num = request.GET.get('clipNum')
 
     store = DataStore()
     if not store.populate_poses(sid, clip_num):
@@ -202,7 +201,7 @@ def visualise_2D(request):
 
     cv2.destroyAllWindows()
     frames = json.dumps(frames)
-    return render(request, 'visualise2D.html', {'frames': frames})
+    return render(request, 'visualise2D.html', {'frames': frames}, content_type='text/html')
 
 
 

@@ -6,6 +6,37 @@
 
 import { getFullUrl } from './helper.js';
 
+
+function requestVisualisation(sessionId, clipNum) {
+    const url = getFullUrl(`/data/visualise2D/?sid=${sessionId}&clipNum=${clipNum}`);
+    window.location.href = url;
+}
+
+export const doVisualisation = (frameData) => {
+    /* Code to display the visualisation (create a video display) */
+    let currentFrame = 0;
+    
+    function updateFrame() {
+        const base64Img = frameData[currentFrame];
+        if (!base64Img) {
+            console.error('Invalid base64 image data:', base64Img);
+            console.error('Current frame:', currentFrame);
+            console.error('Frame data:', frameData);
+            return;
+        }
+        
+        const img = document.getElementById("animation");
+        img.src = "data:image/png;base64," + base64Img;
+        
+        currentFrame++;
+        if (currentFrame >= frameData.length) {
+            currentFrame = 0;
+        }
+    }
+    
+    setInterval(updateFrame, 100);  // Adjust the interval (in milliseconds) to control the animation speed
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     /*  When start button is clicked, send session id and clip number in request 
         to backend. 
@@ -17,25 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
     startButton.addEventListener('click', function() {
         requestVisualisation(sessionId.value, clipNum.value);
     });
+
+    doVisualisation(frameData);
 });
-
-function requestVisualisation(sessionId, clipNum) {
-    const url = getFullUrl('/data/visualise2D/');
-
-    //const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    //xhr.setRequestHeader('X-CSRFToken', csrfToken);
-
-    xhr.onerror = function() {
-        console.error('Request failed');
-    };
-
-    const data = JSON.stringify({ sid: sessionId, clip_num: clipNum });
-    xhr.send(data);
-}
-
-
-
-
