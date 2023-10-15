@@ -1,33 +1,17 @@
-import base64
-from datetime import datetime
 import cv2
-from django.shortcuts import render
-import numpy as np
-import plotly.graph_objs as go
-import plotly.offline as opy
-import plotly.graph_objs as go
-from django.shortcuts import render
-import plotly.graph_objs as go
-import numpy as np
-from datastore.datastore import DataStore
-from .models import User, InvolvedIn, Session
 import json
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
-from django.http import HttpResponse as response, JsonResponse
 import uuid
 import matplotlib
+from datetime import datetime
+from rest_framework import status
+from django.shortcuts import render
+from datastore.datastore import DataStore
+from .models import User, InvolvedIn, Session
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse as response, JsonResponse
+from data.visualise import create_2D_visualisation, create_3D_visualisation
+
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import base64
-import data.const as const
-from io import BytesIO
-
-import mediapipe as mp
-
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
-mp_pose = mp.solutions.pose
 
 def dashboard(request):
     user = request.user
@@ -89,7 +73,7 @@ def session_init(request):
         InvolvedIn(id=str(uuid.uuid4()), user=user, session=new_session).save()
 
     return response(
-        json.dumps({'sid': new_sid, 'debug': len(users)}),
+        json.dumps({'sid': new_sid}),
         content_type="application/json",
         status=status.HTTP_200_OK
     )
@@ -139,7 +123,7 @@ def visualise_2D(request):
     #           don't expect user id in request currently
 
     # use sample data if request is empty (happens when page is first loaded by url)
-    sid = "1818182445799"
+    sid = "12983129"
     clip_num = "1"
     if request.GET:
         # if request non-empty, use this data
@@ -159,51 +143,27 @@ def visualise_2D(request):
         print("Error: Could not open the video file.")
         return render(request, 'visualise2D.html', {'frames': None})
 
-    # overlaying pose data on image data
-    frames = []
-    # Create a Pose model for static images
-    with mp_pose.Pose(
-        static_image_mode=True,
-        model_complexity=0,
-        enable_segmentation=True,
-        min_detection_confidence=0.5) as pose:
-
-        for p in store.get_poses():
-            ret, frame_image = cap.read()
-            if not ret:
-                # video has reached the end
-                break
-
-            frame_height, frame_width, _ = frame_image.shape
-
-            # Convert the BGR image to RGB before processing.
-            results = pose.process(cv2.cvtColor(frame_image, cv2.COLOR_BGR2RGB))
-
-            # Create a copy of the frame for overlaying keypoints
-            overlay_image = frame_image.copy()
-
-            if results.pose_landmarks:
-                # Overlay each keypoint onto the image for this frame
-                keypoints = [(int(lm.x * frame_width), int(lm.y * frame_height)) for lm in results.pose_landmarks.landmark]
-
-                for kp in keypoints:
-                    cv2.circle(overlay_image, kp, radius=2, color=(0, 255, 0), thickness=-1)
-
-                # Connect the dots - draw lines between joints to form a human stick-figure shape
-                for joint1, joint2 in const.KP_CONNS:
-                    pt1 = keypoints[joint1]
-                    pt2 = keypoints[joint2]
-                    cv2.line(overlay_image, pt1, pt2, (0, 255, 0), 1)
-
-            _, buffer = cv2.imencode('.png', overlay_image)
-            img_base64 = base64.b64encode(buffer).decode('utf-8')
-            frames.append(img_base64)
-
-    cv2.destroyAllWindows()
-    frames = json.dumps(frames)
+    frames = json.dumps(create_2D_visualisation(store.get_poses(), cap))
     return render(request, 'visualise2D.html', {'frames': frames}, content_type='text/html')
 
 
+@csrf_exempt
+def visualise_3D(request):
+    '''Present a 3D visualisation of pose data.'''
+    sid = "e73b5edc-7f2f-43ae-acd6-f2b68b3d0497"
+    clip_num = "1"
+    if request.GET:
+        # if request non-empty, use this data
+        sid = request.GET.get('sid')
+        clip_num = request.GET.get('clipNum')
+
+    store = DataStore()
+    if not store.populate_poses(sid, clip_num):
+        print("Error: Pose data not found in Azure Blob Storage.")
+        return render(request, '3D_visualise2D.html', {'image': None})
+    
+    frames = json.dumps(create_3D_visualisation(store.get_poses()))
+    return render(request, '3D_visualise2D.html', {'frames': frames})
 
 # WORK IN PROGRESS 3D VISUALISATION
 # def visualise_3D(request):
@@ -289,103 +249,3 @@ def visualise_2D(request):
 #     plot_div = opy.plot(fig, auto_open=False, output_type='div')
 
 #     return render(request, 'visualise_coordinates.html', context={'plot_div': plot_div})
-
-#2D VISUALISATION - OLD, NO VIDEO BACKGROUND
-# def visualise_coordinates(request):
-#     '''Present an animation of the frame data for a session.'''
-#     # hardcode session id, user id and clip num for now (should actually be obtained from request)
-#     uid = "a4db80a8-bac7-4831-8954-d3e402f469bc"
-#     sid = "e2b7957a-a1e3-490f-a5a3-b4d00905dd6e"
-#     clip_num = 1
-
-#     # Get the user with this user id
-#     user = User.objects.filter(id=uid)
-#     if not len(user):
-#         # user with this id does not exist ...
-#         print("user doesn't exist ... this case is not yet handled!")
-
-#     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
-#         # this session doesn't exist, or it does but this user wasn't part of it
-#         print("user was not involved in this session ... this case is not yet handled!")
-    
-#     store = DataStore()
-#     if not store.populate(sid, clip_num):
-#         print("No session data exists for this session ... this case is not yet handled!")
-
-#     session_frames = store.get()
-#     frames = []
-
-#     for session_frame in session_frames.values():
-#         keypoints3D_arrays = []
-#         for kp in session_frame:
-#             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
-
-#         keypoints2D_arrays = [(int(kp[0] * 100 + 300), int(kp[1] * 100 + 300)) for kp in keypoints3D_arrays]
-
-#         img = np.zeros((600, 600, 3), dtype=np.uint8)
-
-#         for kp in keypoints2D_arrays:
-#             cv2.circle(img, kp, 2, (0, 0, 255), -1)
-
-#         for joint1, joint2 in const.KP_CONNS:
-#             pt1 = keypoints2D_arrays[joint1]
-#             pt2 = keypoints2D_arrays[joint2]
-#             cv2.line(img, pt1, pt2, (255, 0, 0), 1)
-
-#         _, buffer = cv2.imencode('.png', img)
-#         img_base64 = base64.b64encode(buffer).decode('utf-8')
-#         frames.append(img_base64)
-
-#     frames = json.dumps(frames)
-#     return render(request, 'visualise2D.html', {'frames': frames})
-
-
-@csrf_exempt
-def visualise_3D(request):
-    '''Present a 3D visualisation of pose data.'''
-    sid = "e73b5edc-7f2f-43ae-acd6-f2b68b3d0497"
-    clip_num = "1"
-    
-    if request.body:
-        data = json.loads(request.body)
-        sid = data.get('sid')
-        clip_num = data.get('clip_num')
-
-    store = DataStore()
-    if not store.populate_poses(sid, clip_num):
-        print("Error: Pose data not found in Azure Blob Storage.")
-        return render(request, '3D_visualise2D.html', {'image': None})
-    
-    frames = []
-    for p in store.get_poses():
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-
-        keypoints = []
-        for kp in p.get("keypoints3D"):
-            x, y, z = kp['x'], kp['y'], kp['z']
-             
-            # Swap Y and Z axes, and adjust X, Y, Z as needed
-            x_new = x  # X remains the same
-            y_new = z  # Y in Matplotlib is -Z in BlazePose
-            z_new = -y  # Z in Matplotlib is Y in BlazePose
-
-            ax.scatter(x_new, y_new, z_new, c='g', marker='o')
-            keypoints.append((x_new, y_new, z_new))
-
-        for joint1, joint2 in const.KP_CONNS:
-            x1, y1, z1 = keypoints[joint1]
-            x2, y2, z2 = keypoints[joint2]
-            ax.plot([x1, x2], [y1, y2], [z1, z2], c='b')
-        # Set the view angle of the plot here
-        ax.view_init(elev=10, azim=-50) 
-
-        buf = BytesIO()
-        plt.savefig(buf, format='png')
-        plt.close(fig)
-        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
-        frames.append(img_base64)
-
-    frames_json = json.dumps(frames)
-    return render(request, '3D_visualise2D.html', {'frames': frames_json})
-
