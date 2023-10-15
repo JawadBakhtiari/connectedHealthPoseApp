@@ -86,3 +86,61 @@ def create_3D_visualisation(poses):
         img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
         frames.append(img_base64)
     return frames
+
+# WORK IN PROGRESS 3D VISUALISATION
+#def create_3D_visualisation_alt(poses):
+#     frames = []
+#     for frame_num, session_frame in enumerate(poses):
+#         keypoints3D_arrays = []
+#         for kp in session_frame.get("keypoints3D"):
+#             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
+#         xdata = np.array([kp[0] for kp in keypoints3D_arrays])
+#         ydata = np.array([kp[1] for kp in keypoints3D_arrays])
+#         zdata = np.array([kp[2] for kp in keypoints3D_arrays])
+#         trace = go.Scatter3d(
+#             x=xdata,
+#             y=ydata,
+#             z=zdata,
+#             mode='markers',
+#             marker=dict(size=2, color='red')
+#         )
+#         lines = [
+#             go.Scatter3d(
+#                 x=[xdata[joint1], xdata[joint2]],
+#                 y=[ydata[joint1], ydata[joint2]],
+#                 z=[zdata[joint1], zdata[joint2]],
+#                 mode='lines',
+#                 line=dict(width=2, color='blue')
+#             )
+#             for joint1, joint2 in const.KP_CONNS
+#         ]
+#         frames.append(go.Frame(data=[trace] + lines, name=str(frame_num)))
+#     layout = go.Layout(
+#         scene=dict(
+#             aspectmode="data",
+#             aspectratio=dict(x=2, y=2, z=1),
+#             xaxis=dict(range=[-2, 2], visible=False),
+#             yaxis=dict(range=[-2, 2], visible=False),
+#             zaxis=dict(range=[-2, 2]),
+#         ),
+#         showlegend=False,
+#         height=800,
+#         margin=dict(l=0, r=0, b=0, t=0),
+#         plot_bgcolor='rgba(0,0,0,0)',
+#         paper_bgcolor='rgba(0,0,0,0)',
+#         updatemenus=[
+#             dict(
+#                 type="buttons",
+#                 showactive=False,
+#                 buttons=[dict(label="Play",
+#                             method="animate",
+#                             args=[None, {"frame": {"duration": 100, "redraw": True}}])])  # Adjust duration for speed
+#         ]
+#     )
+#     fig = go.Figure(
+#         data=[trace] + lines,
+#         layout=layout,
+#         frames=frames
+#     )
+#     
+#     return frames

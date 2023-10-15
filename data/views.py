@@ -6,6 +6,7 @@ from datetime import datetime
 from rest_framework import status
 from django.shortcuts import render
 from datastore.datastore import DataStore
+from datastore.posestore import PoseStore
 from .models import User, InvolvedIn, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse as response, JsonResponse
@@ -84,12 +85,12 @@ def frames_upload(request):
     '''Receive frame data from the frontend and store this data persistently in the backend.'''
     data = json.loads(request.body)
 
-    uid = data.get('uid')
+    #uid = data.get('uid')
     sid = data.get('sid')
     clip_num = data.get('clipNum')
     session_finished = data.get('sessionFinished')
-    pose_data = data.get('poses')
-    image_data = data.get('tensorAsArray')
+    poses = data.get('poses')
+    images = data.get('tensorAsArray')
 
     # NOTE -> skip error checking for demonstration
     #user = User.objects.filter(id=uid)
@@ -101,16 +102,12 @@ def frames_upload(request):
     #if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
     #    return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
     
-    store = DataStore()
-    store.set_poses(pose_data)
-    store.set_images(image_data)
-    store.write_poses_locally(sid, clip_num)
-    store.write_images_locally(sid, clip_num)
+    store = DataStore(sid, clip_num)
+    store.set(poses, images)
+    store.write_locally()
 
-    # Write to Azure blob only when the session has been completed
     if session_finished:
-        store.write_poses_to_cloud(sid)
-        store.write_images_to_cloud(sid)
+        store.write_to_cloud()
 
     return response(status=status.HTTP_200_OK)
 
@@ -130,15 +127,12 @@ def visualise_2D(request):
         sid = request.GET.get('sid')
         clip_num = request.GET.get('clipNum')
 
-    store = DataStore()
-    if not store.populate_poses(sid, clip_num):
-        print("Error: Pose data not found in Azure Blob Storage.")
-        return render(request, 'visualise2D.html', {'frames': None})
-    if not store.populate_video(sid, clip_num):
-        print("Error: Video not found in Azure Blob Storage.")
+    store = DataStore(sid, clip_num)
+    if not store.populate():
+        print("Error: data (poses or video or both) not found")
         return render(request, 'visualise2D.html', {'frames': None})
 
-    cap = cv2.VideoCapture(store.get_video_path(sid, clip_num))
+    cap = cv2.VideoCapture(store.get_video_path())
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return render(request, 'visualise2D.html', {'frames': None})
@@ -157,95 +151,10 @@ def visualise_3D(request):
         sid = request.GET.get('sid')
         clip_num = request.GET.get('clipNum')
 
-    store = DataStore()
-    if not store.populate_poses(sid, clip_num):
+    pose_store = PoseStore(sid, clip_num)
+    if not pose_store.populate():
         print("Error: Pose data not found in Azure Blob Storage.")
         return render(request, '3D_visualise2D.html', {'image': None})
     
-    frames = json.dumps(create_3D_visualisation(store.get_poses()))
+    frames = json.dumps(create_3D_visualisation(pose_store.get()))
     return render(request, '3D_visualise2D.html', {'frames': frames})
-
-# WORK IN PROGRESS 3D VISUALISATION
-# def visualise_3D(request):
-#     '''Present an animation of the frame data for a session.'''
-#     uid = "a4db80a8-bac7-4831-8954-d3e402f469bc"
-#     sid = "e2b7957a-a1e3-490f-a5a3-b4d00905dd6e"
-#     clip_num = 2
-
-#     user = User.objects.filter(id=uid)
-#     if not len(user):
-#         print("user doesn't exist ... this case is not yet handled!")
-
-#     if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
-#         print("user was not involved in this session ... this case is not yet handled!")
-
-#     store = DataStore()
-#     if not store.populate_poses(sid, clip_num):
-#         print("No session data exists for this session ... this case is not yet handled!")
-
-#     session_frames = store.get_poses()
-
-#     # create a list of numpy arrays for each keypoint
-#     frames = []
-#     for frame_num, session_frame in enumerate(session_frames):
-#         keypoints3D_arrays = []
-#         for kp in session_frame.get("keypoints3D"):
-#             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
-
-#         xdata = np.array([kp[0] for kp in keypoints3D_arrays])
-#         ydata = np.array([kp[1] for kp in keypoints3D_arrays])
-#         zdata = np.array([kp[2] for kp in keypoints3D_arrays])
-
-#         trace = go.Scatter3d(
-#             x=xdata,
-#             y=ydata,
-#             z=zdata,
-#             mode='markers',
-#             marker=dict(size=2, color='red')
-#         )
-
-#         lines = [
-#             go.Scatter3d(
-#                 x=[xdata[joint1], xdata[joint2]],
-#                 y=[ydata[joint1], ydata[joint2]],
-#                 z=[zdata[joint1], zdata[joint2]],
-#                 mode='lines',
-#                 line=dict(width=2, color='blue')
-#             )
-#             for joint1, joint2 in const.KP_CONNS
-#         ]
-
-#         frames.append(go.Frame(data=[trace] + lines, name=str(frame_num)))
-
-#     layout = go.Layout(
-#         scene=dict(
-#             aspectmode="data",
-#             aspectratio=dict(x=2, y=2, z=1),
-#             xaxis=dict(range=[-2, 2], visible=False),
-#             yaxis=dict(range=[-2, 2], visible=False),
-#             zaxis=dict(range=[-2, 2]),
-#         ),
-#         showlegend=False,
-#         height=800,
-#         margin=dict(l=0, r=0, b=0, t=0),
-#         plot_bgcolor='rgba(0,0,0,0)',
-#         paper_bgcolor='rgba(0,0,0,0)',
-#         updatemenus=[
-#             dict(
-#                 type="buttons",
-#                 showactive=False,
-#                 buttons=[dict(label="Play",
-#                             method="animate",
-#                             args=[None, {"frame": {"duration": 100, "redraw": True}}])])  # Adjust duration for speed
-#         ]
-#     )
-
-#     fig = go.Figure(
-#         data=[trace] + lines,
-#         layout=layout,
-#         frames=frames
-#     )
-
-#     plot_div = opy.plot(fig, auto_open=False, output_type='div')
-
-#     return render(request, 'visualise_coordinates.html', context={'plot_div': plot_div})
