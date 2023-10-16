@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import Axios from "axios";
 import React, { useState } from "react";
 
 import { Formik, Form, Field } from "formik";
@@ -15,20 +16,23 @@ import * as Yup from "yup";
 
 // Validation Schema //
 const SignupSchema = Yup.object().shape({
-  uid: Yup.string()
+  first_name: Yup.string()
     .min(5, "Too Short!")
-    .max(15, "Too Long!")
-    .required("Please enter uid."),
-  sid: Yup.string()
-    .min(1, "Too Short!")
-    .max(15, "Too Long!")
-    .required("Please enter sid."),
-  clipNum: Yup.string()
-    .min(1, "Too Short!")
+    .max(20, "Too Long!")
+    .required("Please enter first name."),
+  last_name: Yup.string()
+    .min(5, "Too Short!")
+    .max(20, "Too Long!")
+    .required("Please enter a last name."),
+  session_name: Yup.string()
+    .min(3, "Too Short!")
     .max(100, "Too Long!")
-    .required("Please enter clip Num.")
-    .matches(/^[0-9]+$/, "Must be only digits"),
-  name: Yup.string().min(5, "Too Short!").max(15, "Too Long!"),
+    .required("Please enter a session name."),
+  // .matches(/^[0-9]+$/, "Must be only digits"),
+  session_description: Yup.string()
+    .min(3, "Too Short!")
+    .max(100, "Too Long!")
+    .required("Please enter a session name."),
   // .required("Please enter full name."),
 
   // email: Yup.string()
@@ -45,13 +49,13 @@ export default function HomeScreen({ navigation }) {
   return (
     <Formik
       initialValues={{
-        uid: "",
-        sid: "",
-        clipNum: "",
-        name: "",
+        first_name: "",
+        last_name: "",
+        session_name: "",
+        session_description: "",
       }}
       validationSchema={SignupSchema}
-      onSubmit={(values) => Alert.alert(JSON.stringify(values))}
+      onSubmit={(values) => sendUserInit(values, navigation)}
     >
       {/* Props */}
       {({
@@ -70,70 +74,75 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.formContainer}>
             <Text style={styles.title}>Session Details</Text>
 
-            {/* Input: UID */}
+            {/* Input: First Name */}
             <View style={styles.inputWrapper}>
-              <Text>uID:</Text>
+              <Text>First Name:</Text>
               <TextInput
                 style={styles.inputStyle}
-                // placeholder="Participant Full Name"
-                value={values.uid}
-                onChangeText={handleChange("uid")}
-                onBlur={() => setFieldTouched("uid")}
+                // placeholder={values.last_name}
+                value={values.first_name}
+                onChangeText={handleChange("first_name")}
+                onBlur={() => setFieldTouched("first_name")}
               />
-              {touched.uid && errors.uid && (
-                <Text style={styles.errorTxt}>{errors.uid}</Text>
+              {touched.first_name && errors.first_name && (
+                <Text style={styles.errorTxt}>{errors.first_name}</Text>
               )}
             </View>
 
-            {/* Input: sID */}
+            {/* Input: Last Name */}
             <View style={styles.inputWrapper}>
-              <Text>sID:</Text>
+              <Text>Last Name:</Text>
               <TextInput
                 style={styles.inputStyle}
-                // placeholder="Email Address"
-                autoCapitalize={false}
-                value={values.sid}
-                onChangeText={handleChange("sid")}
-                onBlur={() => setFieldTouched("sid")}
+                // placeholder={values.last_name}
+                value={values.last_name}
+                onChangeText={handleChange("last_name")}
+                onBlur={() => setFieldTouched("last_name")}
               />
-              {touched.sid && errors.sid && (
-                <Text style={styles.errorTxt}>{errors.sid}</Text>
+              {touched.last_name && errors.last_name && (
+                <Text style={styles.errorTxt}>{errors.last_name}</Text>
               )}
             </View>
-            {/* Input: clipNum */}
+
+            {/* Input: Session Name */}
             <View style={styles.inputWrapper}>
-              <Text>Clip Number:</Text>
+              <Text>Session Name:</Text>
               <TextInput
                 style={styles.inputStyle}
-                // placeholder="Mobile Number"
-                keyboardType="phone-pad"
-                value={values.clipNum}
-                onChangeText={handleChange("clipNum")}
-                onBlur={() => setFieldTouched("clipNum")}
+                // placeholder={values.last_name}
+                value={values.session_name}
+                onChangeText={handleChange("session_name")}
+                onBlur={() => setFieldTouched("session_name")}
               />
-              {touched.clipNum && errors.clipNum && (
-                <Text style={styles.errorTxt}>{errors.clipNum}</Text>
+              {touched.session_name && errors.session_name && (
+                <Text style={styles.errorTxt}>{errors.session_name}</Text>
               )}
             </View>
-            {/* Input: Full Name */}
+
+            {/* Input: Session Description */}
             <View style={styles.inputWrapper}>
-              <Text>Full Name:</Text>
+              <Text>Session Description:</Text>
               <TextInput
                 style={styles.inputStyle}
-                // placeholder="Participant Full Name"
-                value={values.name}
-                onChangeText={handleChange("name")}
-                onBlur={() => setFieldTouched("name")}
+                // placeholder={values.last_name}
+                value={values.session_description}
+                onChangeText={handleChange("session_description")}
+                onBlur={() => setFieldTouched("session_description")}
               />
-              {touched.name && errors.name && (
-                <Text style={styles.errorTxt}>{errors.name}</Text>
+              {touched.session_description && errors.session_description && (
+                <Text style={styles.errorTxt}>
+                  {errors.session_description}
+                </Text>
               )}
             </View>
 
             {/* Button*/}
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("Second", { language: "french" })
+              onPress={
+                () => {
+                  handleSubmit();
+                }
+                // navigation.navigate("Second", { language: "french" })
               }
               style={[
                 styles.submitBtn,
@@ -149,6 +158,52 @@ export default function HomeScreen({ navigation }) {
     </Formik>
   );
 }
+
+const sendUserInit = async (values, navigation) => {
+  var uid = "";
+  let sid = "";
+
+  try {
+    const response = await Axios.post(
+      "http://192.168.0.137:8000/data/api/init_user/",
+      {
+        first_name: values.first_name,
+        last_name: values.last_name,
+      }
+    ).then((response) => {
+      // console.log(response.data.uid);
+      uid = response.data.uid;
+    });
+    // Empty Data
+    console.log("Sending User Details");
+  } catch (err) {
+    console.log(err);
+  }
+
+  try {
+    const response = await Axios.post(
+      "http://192.168.0.137:8000/data/session/init/",
+      {
+        session: {
+          name: values.session_name,
+          description: values.session_description,
+        },
+      }
+    ).then((response) => {
+      // console.log(response.data.sid);
+      sid = response.data.sid;
+    });
+    // Empty Data
+    console.log("Sending Session Details");
+  } catch (err) {
+    console.log(err);
+  }
+
+  // console.log(uid);
+  console.log(sid);
+
+  navigation.navigate("Second", { sid: sid, uid: uid });
+};
 
 const styles = StyleSheet.create({
   wrapper: {

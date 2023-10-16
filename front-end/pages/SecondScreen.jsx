@@ -30,7 +30,7 @@ const IS_IOS = Platform.OS === "ios";
 const OUTPUT_TENSOR_WIDTH = 120;
 const OUTPUT_TENSOR_HEIGHT = OUTPUT_TENSOR_WIDTH / (IS_IOS ? 9 / 16 : 3 / 4);
 
-export default function SecondScreen({ navigation }) {
+export default function SecondScreen({ route, navigation }) {
   const cameraRef = useRef(null);
   const [tfReady, setTfReady] = useState(false);
   const [recorded, setRecorded] = useState(false);
@@ -44,6 +44,8 @@ export default function SecondScreen({ navigation }) {
   const tensorAsArray = [];
   const [activateEffect, setActivateEffect] = useState(false);
   const [timer, setTimer] = useState(0);
+  const { uid } = route.params;
+  const { sid } = route.params;
 
   /**
    * This is a React useEffect hook that runs when the component is mounted.
@@ -139,13 +141,14 @@ export default function SecondScreen({ navigation }) {
   const handleTf = () => {
     setActivateEffect((prevEffect) => !prevEffect);
 
+    setRecorded(true);
+
     if (recorded == true) {
       // Send rest of data once user has ended recording and switch to next screen
       sendLastData();
-      navigation.navigate("Uploading", { language: "french " });
+      setRecorded(false);
+      // navigation.navigate("Uploading", { language: "french " });
     }
-
-    setRecorded(true);
   };
 
   /**
@@ -167,8 +170,8 @@ export default function SecondScreen({ navigation }) {
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       if (newPoses.length != 0) {
         poses.push(newPoses);
-        encodeJPG(tensor);
-        // encodeRGB(tensor);
+        // encodeJPG(tensor);
+        encodeRGB(tensor);
         //setPoses(newPoses);
       }
 
@@ -201,10 +204,10 @@ export default function SecondScreen({ navigation }) {
       const response = Axios.post(
         "http://192.168.0.137:8000/data/frames/upload/",
         {
-          uid: "ahmad",
-          sid: "12983129",
-          clipNum: "1",
-          sessionFinished: true,
+          // uid: "ahmad232",
+          sid,
+          // clipNum: "1",
+          clipFinished: true,
           poses,
           tensorAsArray,
         }
@@ -223,10 +226,10 @@ export default function SecondScreen({ navigation }) {
       const response = Axios.post(
         "http://192.168.0.137:8000/data/frames/upload/",
         {
-          uid: "ahmad",
-          sid: "12983129",
-          clipNum: "1",
-          sessionFinished: false,
+          // uid: "ahmad232",
+          sid,
+          // clipNum: "1",
+          clipFinished: false,
           poses,
           tensorAsArray,
         }
