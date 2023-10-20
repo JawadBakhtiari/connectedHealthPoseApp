@@ -1,10 +1,19 @@
 
 import { TouchableOpacity, StyleSheet, Text, View, SafeAreaView, TextInput, Button } from 'react-native';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import ProgressBar from 'react-native-progress/Bar'
-
-
+/*
+Potential function for more randomised upload bar
+const countInterval = useRef(null)
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    countInterval.current = setInterval(() => setCount((prev) => prev + 5), 1000)
+    return () => {
+      clearInterval(countInterval);
+    };
+  }, []);
+*/
 
 export default function UploadingScreen({ navigation }) {
   const [uploadCheck, setUploadCheck] = useState(false)
@@ -14,7 +23,7 @@ export default function UploadingScreen({ navigation }) {
     setUploadCheck(true)
     for (let i = 0; i <= 100; i++) {
       setProgress(i)
-      i = i + 0.25
+      i = i + 0.20
     }
     setSubmitCheck(false)
   };
