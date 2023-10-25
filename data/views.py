@@ -111,7 +111,7 @@ def frames_upload(request):
 
     if clipFinished:
         store.write_to_cloud()
-        sm.increment_clip_num()
+        sm.increment_clip_num(sid)
 
     return response(status=status.HTTP_200_OK)
 
@@ -124,7 +124,7 @@ def visualise_2D(request):
     #           don't expect user id in request currently
 
     # use sample data if request is empty (happens when page is first loaded by url)
-    sid = "12983129"
+    sid = "ccbe340e-f1db-4037-8f91-257bcac2c2f9"
     clip_num = "1"
     if request.GET:
         # if request non-empty, use this data

@@ -37,7 +37,7 @@ class PoseStore:
     def get_path(self):
         '''Return the path to the file containing pose data for this clip in local storage.'''
         path = os.path.dirname(__file__)
-        filename = PoseStore.get_name(self.sid, self.clip_num) + ".json"
+        filename = PoseStore.get_name(self) + ".json"
         return os.path.join(path, "sessions", "poses", filename)
 
 
@@ -89,13 +89,17 @@ class PoseStore:
 
                     # Upload the updated clip data (overwrite with updated information)
                     blob_client.upload_blob(updated_clip_data_bytes, overwrite=True)
+                    print(self.sid)
+                    print(self.clip_num)
                 else:
                     # Upload the clip data as a new blob
                     pose_data_bytes = json.dumps(pose_data).encode('utf-8')
                     blob_client.upload_blob(pose_data_bytes)
+                    print(self.sid)
+                    print(self.clip_num)
         except:
             print(f"Failed to upload clip sid: {self.sid} clip_num: {self.clip_num} to cloud storage.")
-
+        
 
     def delete(self):
         '''Delete the pose data for a given clip from cloud storage.'''
