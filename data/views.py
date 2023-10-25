@@ -148,8 +148,8 @@ def visualise_2D(request):
 @csrf_exempt
 def visualise_3D(request):
     '''Present a 3D visualisation of pose data.'''
-    sid = "e73b5edc-7f2f-43ae-acd6-f2b68b3d0497"
-    clip_num = "1"
+    sid = "215eaafc-41ba-40a2-9a8a-57b73e61b2c0"
+    clip_num = "2"
     if request.GET:
         # if request non-empty, use this data
         sid = request.GET.get('sid')

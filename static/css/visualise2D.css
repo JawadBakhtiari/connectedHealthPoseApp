@@ -33,6 +33,27 @@
 }
 
 img {
-    color: rgb(0, 129, 94);
+    color: rgb(15, 134, 198);
     font-weight: 600;
+}
+
+/* ... existing styles ... */
+
+.session-info {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.info-box {
+    text-align: center;
+}
+
+.info-label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.info-value {
+    font-style: italic;
 }
