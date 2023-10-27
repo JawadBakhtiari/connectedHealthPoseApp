@@ -6,33 +6,39 @@
 
 import { getFullUrl } from './helper.js';
 
-doVisualisation(frameData, chart1Data);
 
 function requestVisualisation(sessionId, clipNum) {
     const url = getFullUrl(`/data/visualise2D/?sid=${sessionId}&clipNum=${clipNum}`);
     window.location.href = url;
 }
 
-export const doVisualisation = (frameData, chart1Data) => {
-    // Display visulisation and graph
+export const doVisualisation = (frameData, chartData) => {
+    /* Code to display the visualisation (create a video display) */
     let currentFrame = 0;
     
     function updateFrame() {
-        const base64Img = frameData[currentFrame];
-        if (!base64Img) {
-            console.error('Invalid base64 image data:', base64Img);
+        const frameBase64Img = frameData[currentFrame];
+        if (!frameBase64Img) {
+            console.error('Invalid base64 image data:', frameBase64Img);
             console.error('Current frame:', currentFrame);
             console.error('Frame data:', frameData);
             return;
         }
-        
-        const img = document.getElementById("animation");
-        img.src = "data:image/png;base64," + base64Img;
 
-        const chart1 = document.getElementById("chart1");
+        const chartBase46Img = chartData[currentFrame];
+        if (!chartBase46Img) {
+            console.error('Invalid base64 chart data:', chartBase46Img);
+            console.error('Current frame:', currentFrame);
+            console.error('Frame data:', chartData);
+            return;
+        }
         
-        chart1.src = "data:image/png;base64," + chart1Data[currentFrame];
-        
+        const image = document.getElementById("animation");
+        image.src = "data:image/png;base64," + frameBase64Img;
+
+        const chart = document.getElementById(chart)
+        chart.src =  "data:image/png;base64," + chartBase46Img
+
         currentFrame++;
         if (currentFrame >= frameData.length) {
             currentFrame = 0;
@@ -54,5 +60,5 @@ document.addEventListener('DOMContentLoaded', function() {
         requestVisualisation(sessionId.value, clipNum.value);
     });
 
-    doVisualisation(frameData, chart1Data);
+    doVisualisation(frameData);
 });
