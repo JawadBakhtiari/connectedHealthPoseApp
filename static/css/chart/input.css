@@ -2,8 +2,9 @@
     margin-bottom: 20px;
 }
 
-#frame {
-    margin-top: 50px;
+#input-form {
+    margin-top: 100px;
+    top: 10px;
 }
 
 #start-graph-button {
