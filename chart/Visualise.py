@@ -1,9 +1,8 @@
 # Imports
+import time
 from . import Parser
 from . import Calculator
 from . import Plotter
-
-import time
 
 
 # Generate all plots to keep in memory
@@ -25,8 +24,8 @@ def generate_plot_for_all_frames(joint, dimension, poseData):
     print(f'Generating {numFrames} plots')
     startTime = time.time()
 
-    # for frame in range(0, len(poseData)):
-    for frame in range(0, 1):
+    for frame in range(0, len(poseData)):
+    # for frame in range(0, 1):
         generated_frame = generate_plot(joint, dimension, numFrames, frame, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d)
         all_frames.append(generated_frame)
 

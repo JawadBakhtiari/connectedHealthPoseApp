@@ -13,7 +13,7 @@
     <div class="title-box">
         Joint Angle Visualisation Graph
     </div>
-    <form method="POST" action="{% url 'result' %}">
+    <form method="POST" action="{% url 'result' %}" id="input-form">
         {% csrf_token %}
         <input type="text" id="sid" class="input-box" name="sid" placeholder="session id ..." onfocus="this.placeholder=''" onblur="this.placeholder='session id ...'">
         <input type="text" id="clipNum" class="input-box" name="clipNum" placeholder="clip number ..." onfocus="this.placeholder=''" onblur="this.placeholder='clip number ...'">
