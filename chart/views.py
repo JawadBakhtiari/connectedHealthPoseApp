@@ -1,10 +1,18 @@
 from django.shortcuts import render
-from . import Plotter
-from . import Visualise
 from .Visualise import generate_plot
 import matplotlib
 matplotlib.use('Agg') 
-import os
+from django.views.decorators.csrf import csrf_exempt
+import cv2
+import json
+import matplotlib
+from django.shortcuts import render
+from data.datastore.datastore import DataStore
+from data.datastore.posestore import PoseStore
+from .models import User, InvolvedIn, Session
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse as response, JsonResponse
+from data.visualise import create_2D_visualisation, create_3D_visualisation
 
 def input_frame(request):
     return render(request, 'chart/input.html')
@@ -13,6 +21,29 @@ def result(request):
     if request.method == 'POST':
         frame = int(request.POST.get('frame'))
         joint = request.POST.get('joint')
-        interval = request.POST.get('interval')
         dimension = request.POST.get('dimension')
-        return generate_plot(joint, interval, dimension, frame)
+        return generate_plot(joint, dimension, frame)
+    
+@csrf_exempt
+def result(request):
+    '''Present a 2D visualisation of pose data overlayed over the video with the joint angle graph'''
+
+    # Use sample data on empty request
+    sid = "ccbe340e-f1db-4037-8f91-257bcac2c2f9"
+    clip_num = "1"
+    if request.GET:
+        sid = request.GET.get('sid')
+        clip_num = request.GET.get('clipNum')
+
+    store = DataStore(sid, clip_num)
+    if not store.populate():
+        print("Error: data (poses or video or both) not found")
+        return render(request, 'visualise2D.html', {'frames': None})
+
+    cap = cv2.VideoCapture(store.get_video_path())
+    if not cap.isOpened():
+        print("Error: Could not open the video file.")
+        return render(request, 'visualise2D.html', {'frames': None})
+
+    frames = json.dumps(create_2D_visualisation(store.get_poses(), cap))
+    return render(request, 'visualise2D.html', {'frames': frames}, content_type='text/html')

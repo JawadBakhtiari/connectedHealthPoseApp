@@ -1,6 +1,8 @@
 {% extends "base_generic.html" %}
 {% load static %}
 
+<script src="{% static 'js/chart/input.js' %}"></script>
+
 {% block title %}Chart | Connected Health{% endblock %}
 
 {% block styles %}
@@ -11,13 +13,12 @@
 {% block content %}
 <div class="centered-vertical-container">
     <div class="title-box">
-        Graph Form
+        Joint Angle Graph
     </div>
     <form method="POST" action="{% url 'result' %}">
         {% csrf_token %}
         <input type="text" id="frame" class="input-box" name="frame" placeholder="frame ..." onfocus="this.placeholder=''" onblur="this.placeholder='frame ...'">
         <input type="text" id="joint" class="input-box" name="joint" placeholder="joint ..." onfocus="this.placeholder=''" onblur="this.placeholder='joint ...'">
-        <input type="text" id="interval" class="input-box" name="interval" placeholder="interval ..." onfocus="this.placeholder=''" onblur="this.placeholder='interval ...'">
         <input type="text" id="dimension" class="input-box" name="dimension" placeholder="dimension ..." onfocus="this.placeholder=''" onblur="this.placeholder='dimension ...'">
         <button class="start-button" id="start-graph-button">START</button>
     </form>

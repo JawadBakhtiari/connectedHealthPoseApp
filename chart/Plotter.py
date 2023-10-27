@@ -9,7 +9,7 @@ import base64
 def nplot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rightPitch, rightYaw):
     fig, axs = plt.subplots(2)
 
-    fig.suptitle('2D ' + joint + ' Angle Visualisation & Graph')
+    fig.suptitle('2D ' + joint + ' Angle Graph')
     fig.tight_layout()
     
     axs[0].plot(range(numFrames), leftRoll, label = 'Roll')
@@ -45,7 +45,7 @@ def nplot3d(numFrames, frame, joint, left3d, right3d):
     fig, axs = plt.subplots(2)
     fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.4)
 
-    fig.suptitle('3D ' + joint + ' Angle Visualisation & Graph')
+    fig.suptitle('3D ' + joint + ' Angle Graph')
     axs[0].plot(range(numFrames), left3d)
     axs[0].set_title('Left ' + joint)
 
