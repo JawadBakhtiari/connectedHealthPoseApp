@@ -12,12 +12,12 @@ from data.visualise import create_2D_visualisation
 def input_frame(request):
     return render(request, 'chart/input.html')
 
-def result(request):
-    if request.method == 'POST':
-        frame = int(request.POST.get('frame'))
-        joint = request.POST.get('joint')
-        dimension = request.POST.get('dimension')
-        return generate_plot(joint, dimension, frame)
+# def result(request):
+#     if request.method == 'POST':
+#         frame = int(request.POST.get('frame'))
+#         joint = request.POST.get('joint')
+#         dimension = request.POST.get('dimension')
+#         return generate_plot(joint, dimension, frame)
     
 @csrf_exempt
 def result(request):
@@ -44,4 +44,4 @@ def result(request):
         return render(request, 'visualise2D.html', {'frames': None})
 
     frames = json.dumps(create_2D_visualisation(store.get_poses(), cap))
-    return render(request, 'visualise2D.html', {'frames': frames}, content_type='text/html')
+    return render(request, 'result.html', {'frames': frames}, content_type='text/html')
