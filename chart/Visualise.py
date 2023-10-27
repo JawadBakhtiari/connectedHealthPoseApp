@@ -32,7 +32,7 @@ def generate_plot_for_all_frames(joint, dimension, poseData):
         all_frames.append(generated_frame)
         print("Generated no." + str(frame))
 
-    print("Time taken: " + str((time.time() - start)/60))
+    print("Time taken: " + str((time.time() - start)))
     return all_frames
 
 
