@@ -6,6 +6,7 @@
 
 import { getFullUrl } from './helper.js';
 
+doVisualisation(frameData, chart1Data);
 
 function requestVisualisation(sessionId, clipNum) {
     const url = getFullUrl(`/data/visualise2D/?sid=${sessionId}&clipNum=${clipNum}`);
