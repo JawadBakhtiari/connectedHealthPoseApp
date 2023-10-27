@@ -13,11 +13,11 @@
     <div class="title-box">
         Joint Angle Visualisation Graph
     </div>
-    <form method="POST" action="{% url 'result' %}">
+    <form method="POST" action="{% url 'result' %}" id="input-form">
         {% csrf_token %}
-        <input type="text" id="frame" class="input-box" name="frame" placeholder="frame ..." onfocus="this.placeholder=''" onblur="this.placeholder='frame ...'">
+        <input type="text" id="session" class="input-box" name="session" placeholder="session ..." onfocus="this.placeholder=''" onblur="this.placeholder='session ...'">
+        <input type="text" id="clipNum" class="input-box" name="clipNum" placeholder="clipNum ..." onfocus="this.placeholder=''" onblur="this.placeholder='clipNum ...'">
         <input type="text" id="joint" class="input-box" name="joint" placeholder="joint ..." onfocus="this.placeholder=''" onblur="this.placeholder='joint ...'">
-        <input type="text" id="interval" class="input-box" name="interval" placeholder="interval ..." onfocus="this.placeholder=''" onblur="this.placeholder='interval ...'">
         <input type="text" id="dimension" class="input-box" name="dimension" placeholder="dimension ..." onfocus="this.placeholder=''" onblur="this.placeholder='dimension ...'">
         <button class="start-button" id="start-graph-button">START</button>
     </form>
