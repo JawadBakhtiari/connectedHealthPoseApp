@@ -3,9 +3,6 @@ from . import Parser
 from . import Calculator
 from . import Plotter
 
-import sys
-import os
-
 import time
 
 
@@ -24,23 +21,26 @@ def generate_plot_for_all_frames(joint, dimension, poseData):
     calculator = Calculator.Calculator(numFrames, leftUpperPoints, leftMiddlePoints, leftLowerPoints, rightUpperPoints, rightMiddlePoints, rightLowerPoints)
     leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d = calculator.Calculate()
 
+    # Generate plots
     print(f'Generating {numFrames} plots')
-    start = time.time()
+    startTime = time.time()
 
-    for frame in range(0, len(poseData)):
+    # for frame in range(0, len(poseData)):
+    for frame in range(0, 1):
         generated_frame = generate_plot(joint, dimension, numFrames, frame, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d)
         all_frames.append(generated_frame)
-        print("Generated no." + str(frame))
 
-    print("Time taken: " + str((time.time() - start)))
+    timeTaken = round(time.time() - startTime, 2)
+    print("Time elapsed: " + str(timeTaken) + " seconds")
+
     return all_frames
 
 
 # Generate a single plot
 def generate_plot(joint, dimension, numFrames, frame, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d):
     if dimension == '2d':
-        data = Plotter.nplot2d(numFrames, frame, joint, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw)
+        data = Plotter.plot2d(numFrames, frame, joint, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw)
     else:
-        data = Plotter.nplot3d(numFrames, frame, joint, left3d, right3d)
+        data = Plotter.plot3d(numFrames, frame, joint, left3d, right3d)
     
     return data

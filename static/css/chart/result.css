@@ -1,11 +1,19 @@
 #animation-holder {
     display: flex;
     justify-content: center;
+    padding-block: 15px;
 }
 
 #animation-holder #animation {
-    width: 450px;
-    height: 620px;
+    width: 350px;
+    height: 500px;
+    border-radius: 15px;
+    margin-right: 15px;
+}
+
+#animation-holder #chart {
+    width: 680px;
+    height: 500px;
     border-radius: 15px;
 }
 
@@ -14,25 +22,28 @@
     margin-top: -10px;
 }
 
-.inputs-holder {
+.button-group {
+    border: solid;
+    border-color: lightblue;
+    padding: 15px;
+    border-radius: 10px;
     display: flex;
     position: absolute;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    left: 85%;
-    margin-top: 15%;
-    transform: translate(-65%, 0);
+    bottom: 15%;
+    left: 50%;
+    gap: 25px;
+    transform: translate(-50%, 0);
 }
 
-#session-id-input {
-    margin-bottom: 8%;
-}
-
-#clip-num-input {
-    margin-bottom: 20%;
-}
-
-img {
-    color: rgb(0, 129, 94);
-    font-weight: 600;
+.control-button {
+    width: 50px;
+    height: 50px;
+    border: solid;
+    background-color: transparent;
+    border-color: lightblue;
+    border-radius: 25px;
+    transition: background-color 0.3s, transform 0.1s;
+    cursor: pointer;
 }

@@ -1,11 +1,10 @@
-from django.shortcuts import render
-from .Visualise import generate_plot
-import matplotlib
-matplotlib.use('Agg') 
-from django.views.decorators.csrf import csrf_exempt
-
 import cv2
 import json
+import matplotlib
+matplotlib.use('Agg')
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from .Visualise import generate_plot
 from data.datastore.datastore import DataStore
 from data.visualise import create_2D_visualisation
 from chart.Visualise import generate_plot_for_all_frames
@@ -13,13 +12,6 @@ from chart.Visualise import generate_plot_for_all_frames
 def input_frame(request):
     return render(request, 'chart/input.html')
 
-# def result(request):
-#     if request.method == 'POST':
-#         frame = int(request.POST.get('frame'))
-#         joint = request.POST.get('joint')
-#         dimension = request.POST.get('dimension')
-#         return generate_plot(joint, dimension, frame)
-    
 @csrf_exempt
 def result(request):
     '''Present a 2D visualisation of pose data overlayed over the video with the joint angle graph'''

@@ -2,6 +2,7 @@
 import math
 import numpy as np
 
+
 # Calculator class
 class Calculator:
     # Instantiate class

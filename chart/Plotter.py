@@ -1,16 +1,17 @@
 # Imports
-import matplotlib.pyplot as plt
-import numpy as np
-from io import BytesIO
 import base64
+import numpy as np
+import matplotlib.pyplot as plt
+from io import BytesIO
 
 
 # Plot 2D Graph
-def nplot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rightPitch, rightYaw):
+def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rightPitch, rightYaw):
     fig, axs = plt.subplots(2)
 
-    fig.suptitle('2D ' + joint + ' Angle Visualisation Graph')
+    fig.suptitle('2D ' + joint + ' Angle Visualisation Graph', y=1.005)
     fig.tight_layout()
+    fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.6)
     
     axs[0].plot(range(numFrames), leftRoll, label = 'Roll')
     axs[0].plot(range(numFrames), leftPitch, label = 'Pitch')
@@ -33,7 +34,7 @@ def nplot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, ri
         ax.legend()
 
     buf = BytesIO()
-    plt.savefig(buf, format='png')
+    plt.savefig(buf, format='png', bbox_inches="tight", dpi=200)
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     plt.close()
 
@@ -41,11 +42,13 @@ def nplot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, ri
 
 
 # Plot 3D Graph
-def nplot3d(numFrames, frame, joint, left3d, right3d):
+def plot3d(numFrames, frame, joint, left3d, right3d):
     fig, axs = plt.subplots(2)
-    fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.4)
 
-    fig.suptitle('3D ' + joint + ' Angle Visualisation Graph')
+    fig.suptitle('3D ' + joint + ' Angle Visualisation Graph', y=1.005)
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.6)
+
     axs[0].plot(range(numFrames), left3d)
     axs[0].set_title('Left ' + joint)
 
@@ -62,7 +65,7 @@ def nplot3d(numFrames, frame, joint, left3d, right3d):
         ax.grid()
 
     buf = BytesIO()
-    plt.savefig(buf, format='png')
+    plt.savefig(buf, format='png', bbox_inches="tight")
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     plt.close()
 
