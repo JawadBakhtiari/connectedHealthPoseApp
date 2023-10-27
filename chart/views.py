@@ -3,16 +3,11 @@ from .Visualise import generate_plot
 import matplotlib
 matplotlib.use('Agg') 
 from django.views.decorators.csrf import csrf_exempt
+
 import cv2
 import json
-import matplotlib
-from django.shortcuts import render
 from data.datastore.datastore import DataStore
-from data.datastore.posestore import PoseStore
-from .models import User, InvolvedIn, Session
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse as response, JsonResponse
-from data.visualise import create_2D_visualisation, create_3D_visualisation
+from data.visualise import create_2D_visualisation
 
 def input_frame(request):
     return render(request, 'chart/input.html')
@@ -31,9 +26,12 @@ def result(request):
     # Use sample data on empty request
     sid = "ccbe340e-f1db-4037-8f91-257bcac2c2f9"
     clip_num = "1"
-    if request.GET:
+
+    if request.method == 'POST':
         sid = request.GET.get('sid')
         clip_num = request.GET.get('clipNum')
+        joint = request.POST.get('joint')
+        dimension = request.POST.get('dimension')
 
     store = DataStore(sid, clip_num)
     if not store.populate():
