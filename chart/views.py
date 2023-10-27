@@ -8,6 +8,7 @@ import cv2
 import json
 from data.datastore.datastore import DataStore
 from data.visualise import create_2D_visualisation
+from chart.Visualise import generate_plot_for_all_frames
 
 def input_frame(request):
     return render(request, 'chart/input.html')
@@ -44,4 +45,5 @@ def result(request):
         return render(request, 'visualise2D.html', {'frames': None})
 
     frames = json.dumps(create_2D_visualisation(store.get_poses(), cap))
+    charts = json.dumps(generate_plot_for_all_frames(joint, dimension, store.get_poses()))
     return render(request, 'result.html', {'frames': frames, 'charts': charts}, content_type='text/html')
