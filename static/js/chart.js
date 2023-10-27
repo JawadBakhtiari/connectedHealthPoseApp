@@ -6,23 +6,13 @@
 
 import { getFullUrl } from './helper.js';
 
-// Navigation bar
-document.getElementById('back-button').addEventListener('click', function() {
-    const url = getFullUrl(`/chart`);
-    window.location.href = url;
-});
-
-document.getElementById('table-button').addEventListener('click', function() {
-    const url = getFullUrl(`/chart`);
-    window.location.href = url;
-});
-
 
 // Set initial variables for control bar
 let currentFrame = 0;
 let numFrames = frameData.length;
 let paused = false;
 let loop = false;
+let speed = 2;
 let delay = 100;
 updateFrame()
 
@@ -32,7 +22,7 @@ document.getElementById('rewind-control-button').addEventListener('click', funct
 });
 
 document.getElementById('backward-control-button').addEventListener('click', function() {
-    currentFrame-=2;
+    currentFrame--;
     if (currentFrame < 0) {
         currentFrame = numFrames - 1
     }
@@ -128,3 +118,40 @@ function enableForwardBackward() {
     document.getElementById('forward-control-button').style.borderColor = "#ADD8E6";
     document.getElementById('forward-control-button').style.backgroundColor = "#ADD8E6";
 }
+
+
+// Navigation bar
+document.getElementById('back-button').addEventListener('click', function() {
+    const url = getFullUrl(`/chart`);
+    window.location.href = url;
+});
+
+document.getElementById('playback-speed-button').addEventListener('click', function() {
+    speed++;
+    if (speed > 4) {
+        speed = 0
+    }
+
+    switch (speed) {
+        case (0):
+            document.getElementById('playback-speed-button').innerHTML = "x0.25";
+            delay = 400;
+            break;
+        case (1):
+            document.getElementById('playback-speed-button').innerHTML = "x0.5";
+            delay = 200;
+            break;
+        case (2):
+            document.getElementById('playback-speed-button').innerHTML = "x1";
+            delay = 100;
+            break;
+        case (3):
+            document.getElementById('playback-speed-button').innerHTML = "x2";
+            delay = 50;
+            break;
+        case (4):
+            document.getElementById('playback-speed-button').innerHTML = "x4";
+            delay = 25;
+            break;
+    }
+});

@@ -27,7 +27,7 @@ def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rig
         ax.axvline(x=frame, color='r', linestyle='--')
 
     for ax in axs.flat:
-        ax.set(xlabel='Frames', ylabel='Angle(Degrees)')
+        ax.set(xlabel='Frames', ylabel='Angle (Degrees)')
         ax.set(ylim=[0, 180])
         ax.set_yticks(list(np.linspace(start=0, stop=180, num=10)))
         ax.grid()
@@ -59,7 +59,7 @@ def plot3d(numFrames, frame, joint, left3d, right3d):
         ax.axvline(x=frame, color='r', linestyle='--')
 
     for ax in axs.flat:
-        ax.set(xlabel='Frames', ylabel='Angle(Degrees)')
+        ax.set(xlabel='Frames', ylabel='Angle (Degrees)')
         ax.set(ylim=[0, 180])
         ax.set_yticks(list(np.linspace(start=0, stop=180, num=10)))
         ax.grid()

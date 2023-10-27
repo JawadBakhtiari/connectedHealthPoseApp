@@ -4,6 +4,8 @@ from . import Parser
 from . import Calculator
 from . import Plotter
 
+import matplotlib
+
 
 # Generate all plots to keep in memory
 def generate_plot_for_all_frames(joint, dimension, poseData):

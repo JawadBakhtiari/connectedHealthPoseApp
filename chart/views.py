@@ -23,7 +23,7 @@ def result(request):
         dimension = request.POST.get('dimension')
 
     # Use sample data on empty request
-    if sid == None or clip_num == None:  
+    if len(sid) == 0 or len(clip_num) == 0:
         sid = "ccbe340e-f1db-4037-8f91-257bcac2c2f9"
         clip_num = "1"
 
