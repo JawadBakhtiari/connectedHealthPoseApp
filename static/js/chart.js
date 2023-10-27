@@ -13,7 +13,7 @@ function requestVisualisation(sessionId, clipNum) {
 }
 
 export const doVisualisation = (frameData, chart1Data) => {
-    /* Code to display the visualisation (create a video display) */
+    // Display visulisation and graph
     let currentFrame = 0;
     
     function updateFrame() {
