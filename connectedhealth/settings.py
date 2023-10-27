@@ -60,6 +60,7 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'templates/visualise_coordinates'),
             os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'templates/chart'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

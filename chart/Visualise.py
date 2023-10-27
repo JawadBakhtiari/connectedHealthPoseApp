@@ -14,6 +14,7 @@ def generate_plot_for_all_frames(joint, dimension, poseData):
     all_frames = []
     numFrames = len(poseData)
     joint = joint.lower().capitalize()
+    dimension = dimension.lower()
 
     # Parse pose data
     parser = Parser.Parser(joint, poseData)

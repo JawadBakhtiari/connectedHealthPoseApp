@@ -1,1 +1,31 @@
-<img src="{{ chart_file }}" alt="Chart">
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Visualisation | Connected Health{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/chart/result.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="centered-vertical-container">
+        <div id="animation-title" class="title-box">
+            Joint Angle Visualisation Graph
+        </div>
+        <div id="animation-holder">
+            <img id="animation" alt="Animation pending ..." />
+            <img id="chart" alt="Chart pending ..." />
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        const frameData = JSON.parse('{{ frames|safe }}');
+        const chartData = JSON.parse('{{ chart|safe }}');
+    </script>
+    <script type="module" src="{% static 'js/chart.js' %}"></script>
+{% endblock %} 
