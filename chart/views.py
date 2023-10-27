@@ -44,4 +44,4 @@ def result(request):
         return render(request, 'visualise2D.html', {'frames': None})
 
     frames = json.dumps(create_2D_visualisation(store.get_poses(), cap))
-    return render(request, 'result.html', {'frames': frames}, content_type='text/html')
+    return render(request, 'result.html', {'frames': frames, 'charts': charts}, content_type='text/html')
