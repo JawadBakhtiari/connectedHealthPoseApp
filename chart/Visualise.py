@@ -25,9 +25,10 @@ def generate_plot_for_all_frames(joint, dimension, poseData):
     startTime = time.time()
 
     for frame in range(0, len(poseData)):
-    # for frame in range(0, 1):
         generated_frame = generate_plot(joint, dimension, numFrames, frame, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d)
         all_frames.append(generated_frame)
+        if frame % 5 == 0:
+            print(f'Generated plot number {frame}')
 
     timeTaken = round(time.time() - startTime, 2)
     print("Time elapsed: " + str(timeTaken) + " seconds")

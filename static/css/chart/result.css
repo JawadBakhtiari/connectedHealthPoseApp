@@ -1,3 +1,7 @@
+.centered-vertical-container {
+    height: 80%;
+}
+
 #animation-holder {
     display: flex;
     justify-content: center;
@@ -5,15 +9,15 @@
 }
 
 #animation-holder #animation {
-    width: 350px;
-    height: 500px;
+    width: 380px;
+    height: 550px;
     border-radius: 15px;
     margin-right: 15px;
 }
 
 #animation-holder #chart {
-    width: 680px;
-    height: 500px;
+    width: 730px;
+    height: 550px;
     border-radius: 15px;
 }
 
@@ -22,7 +26,7 @@
     margin-top: -10px;
 }
 
-.button-group {
+.control-group {
     border: solid;
     border-color: lightblue;
     padding: 15px;
@@ -31,7 +35,7 @@
     position: absolute;
     flex-direction: row;
     align-items: center;
-    bottom: 15%;
+    top: 700px;
     left: 50%;
     gap: 25px;
     transform: translate(-50%, 0);
@@ -41,9 +45,40 @@
     width: 50px;
     height: 50px;
     border: solid;
-    background-color: transparent;
+    background-color: lightblue;
     border-color: lightblue;
     border-radius: 25px;
     transition: background-color 0.3s, transform 0.1s;
     cursor: pointer;
+    opacity: 0.75;
+}
+
+.control-button:hover {
+    opacity: 1;
+}
+
+#top-nav {
+    display: flex;
+    width: 1125px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.top-bar {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 30px;
+    margin-top: -10px;
+    background-color: white;
+    color: rgb(11, 42, 110);
+    border: solid;
+    border-width: 1px;
+    border-color: lightblue;
+    border-radius: 25px;
+    opacity: 0.75;
+}
+
+.top-bar:hover {
+    opacity: 1;
 }

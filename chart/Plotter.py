@@ -9,7 +9,7 @@ from io import BytesIO
 def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rightPitch, rightYaw):
     fig, axs = plt.subplots(2)
 
-    fig.suptitle('2D ' + joint + ' Angle Visualisation Graph', y=1.005)
+    fig.suptitle('2D ' + joint + ' Angle Graph', y=1.005)
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.6)
     
@@ -45,7 +45,7 @@ def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rig
 def plot3d(numFrames, frame, joint, left3d, right3d):
     fig, axs = plt.subplots(2)
 
-    fig.suptitle('3D ' + joint + ' Angle Visualisation Graph', y=1.005)
+    fig.suptitle('3D ' + joint + ' Angle Graph', y=1.005)
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.6)
 
@@ -65,7 +65,7 @@ def plot3d(numFrames, frame, joint, left3d, right3d):
         ax.grid()
 
     buf = BytesIO()
-    plt.savefig(buf, format='png', bbox_inches="tight")
+    plt.savefig(buf, format='png', bbox_inches="tight", dpi=200)
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     plt.close()
 

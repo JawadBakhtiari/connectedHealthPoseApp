@@ -4,120 +4,127 @@
     process this input and display a graph of the corresponding clip.
 */
 
+import { getFullUrl } from './helper.js';
+
+// Navigation bar
+document.getElementById('back-button').addEventListener('click', function() {
+    const url = getFullUrl(`/chart`);
+    window.location.href = url;
+});
+
+document.getElementById('table-button').addEventListener('click', function() {
+    const url = getFullUrl(`/chart`);
+    window.location.href = url;
+});
+
+
+// Set initial variables for control bar
 let currentFrame = 0;
 let numFrames = frameData.length;
+let paused = false;
 let loop = false;
-
-const image = document.getElementById("animation");
-image.src = "data:image/png;base64," + frameData[currentFrame];
-
-const chart = document.getElementById("chart")
-chart.src =  "data:image/png;base64," + chartData[currentFrame];
+let delay = 100;
+updateFrame()
 
 document.getElementById('rewind-control-button').addEventListener('click', function() {
     currentFrame = 0;
+    updateFrame();
 });
 
 document.getElementById('backward-control-button').addEventListener('click', function() {
-    currentFrame--;
-
+    currentFrame-=2;
     if (currentFrame < 0) {
-        currentFrame = 0
+        currentFrame = numFrames - 1
     }
+    updateFrame();
 });
 
 document.getElementById('play-control-button').addEventListener('click', function() {
-    document.getElementById('play-control-button').style.visibility = 'hidden';
-    console.log("HERE")
-    document.getElementById('pause-control-button').style.visibility = 'visable';
-    console.log("HERE")
+    document.getElementById('play-control-button').hidden = true;
+    document.getElementById('pause-control-button').hidden = false;
+    paused = false;
+    disableForwardBackward()
     doGraphVisualisation()
 });
 
 document.getElementById('pause-control-button').addEventListener('click', function() {
-    document.getElementById('pause-control-button').style.visibility = 'hidden';
-    document.getElementById('play-control-button').style.visibility = 'visable';
+    document.getElementById('pause-control-button').hidden = true;
+    document.getElementById('play-control-button').hidden = false;
+    paused = true;
+    enableForwardBackward()
 });
 
 document.getElementById('forward-control-button').addEventListener('click', function() {
     currentFrame++;
-
     if (currentFrame >= numFrames) {
         currentFrame = 0
     }
+    updateFrame();
 });
 
-//
 document.getElementById('loop-control-button').addEventListener('click', function() {
-    document.getElementById('play-control-button').style.visibility = 'hidden';
-    document.getElementById('pause-control-button').style.visibility = 'visable';
-    looping = true;
+    if (loop) {
+        loop = false;
+        document.getElementById('loop-control-button').style.backgroundColor = "#ADD8E6";
+    } else {
+        loop = true;
+        document.getElementById('loop-control-button').style.backgroundColor = "#6693F5";
+    }
 });
 
-function doGraphVisualisation() {
-    setInterval(updateFrame, 100);
+const sleep = (delay) => {
+    return new Promise(resolve => setTimeout(resolve, delay))
+}
 
-    function updateFrame() {
-        const frameBase64Img = frameData[currentFrame];
-        const chartBase46Img = chartData[currentFrame];
-    
-        const image = document.getElementById("animation");
-        image.src = "data:image/png;base64," + frameBase64Img;
-
-        const chart = document.getElementById("chart")
-        chart.src =  "data:image/png;base64," + chartBase46Img
-    }
-
+const doGraphVisualisation = async() => {
     while (true) {
-        updateFrame();
+        if (paused) {
+            break;
+        }
+
+        updateFrame()
 
         currentFrame++;
         if (currentFrame >= numFrames) {
             currentFrame = 0;
 
             if (!loop) {
-                document.getElementById('pause-control-button').style.visibility = 'hidden';
-                document.getElementById('play-control-button').style.visibility = 'visable';
-    
-                const image = document.getElementById("animation");
-                image.src = "data:image/png;base64," + frameData[currentFrame];
-        
-                const chart = document.getElementById("chart")
-                chart.src =  "data:image/png;base64," + chartData[currentFrame];
+                document.getElementById('pause-control-button').hidden = true;
+                document.getElementById('play-control-button').hidden = false;
+                paused = false;
+                enableForwardBackward()
+                updateFrame()
+                break;
             }
         }
+
+        await sleep(delay);
     }
 };
 
-// function doGraphVisualisation(frameData, chartData) {
-//     function updateFrame() {
-//         const frameBase64Img = frameData[currentFrame];
-//         if (!frameBase64Img) {
-//             console.error('Invalid base64 image data:', frameBase64Img);
-//             console.error('Current frame:', currentFrame);
-//             console.error('Frame data:', frameData);
-//             return;
-//         }
+function updateFrame() {
+    const frameBase64Img = frameData[currentFrame];
+    const chartBase46Img = chartData[currentFrame];
+    const image = document.getElementById("animation");
+    image.src = "data:image/png;base64," + frameBase64Img;
+    const chart = document.getElementById("chart")
+    chart.src =  "data:image/png;base64," + chartBase46Img
+}
 
-//         const chartBase46Img = chartData[currentFrame];
-//         if (!chartBase46Img) {
-//             console.error('Invalid base64 chart data:', chartBase46Img);
-//             console.error('Current frame:', currentFrame);
-//             console.error('Frame data:', chartData);
-//             return;
-//         }
-        
-//         const image = document.getElementById("animation");
-//         image.src = "data:image/png;base64," + frameBase64Img;
+function disableForwardBackward() {
+    document.getElementById('backward-control-button').disabled = true;
+    document.getElementById('backward-control-button').style.borderColor = "#D3D3D3";
+    document.getElementById('backward-control-button').style.backgroundColor = "#E6F7FD";
+    document.getElementById('forward-control-button').disabled = true;
+    document.getElementById('forward-control-button').style.borderColor = "#D3D3D3";
+    document.getElementById('forward-control-button').style.backgroundColor = "#E6F7FD";
+}
 
-//         const chart = document.getElementById("chart")
-//         chart.src =  "data:image/png;base64," + chartBase46Img
-
-//         currentFrame++;
-//         if (currentFrame >= frameData.length) {
-//             currentFrame = 0;
-//         }
-//     }
-
-//     setInterval(updateFrame, 100);  // Adjust the interval (in milliseconds) to control the animation speed
-// };
+function enableForwardBackward() {
+    document.getElementById('backward-control-button').disabled = false;
+    document.getElementById('backward-control-button').style.borderColor = "#ADD8E6";
+    document.getElementById('backward-control-button').style.backgroundColor = "#ADD8E6";
+    document.getElementById('forward-control-button').disabled = false;
+    document.getElementById('forward-control-button').style.borderColor = "#ADD8E6";
+    document.getElementById('forward-control-button').style.backgroundColor = "#ADD8E6";
+}
