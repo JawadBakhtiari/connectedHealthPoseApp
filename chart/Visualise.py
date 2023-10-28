@@ -30,7 +30,8 @@ def generate_plot_for_all_frames(joint, dimension, numFrames, angleData):
     print(f'Generating {numFrames} plots')
     startTime = time.time()
 
-    for frame in range(0, numFrames):
+    # for frame in range(0, numFrames):
+    for frame in range(0, 1):
         generated_frame = generate_plot(joint, dimension, numFrames, frame, angleData)
         all_frames.append(generated_frame)
         if frame % 5 == 0:

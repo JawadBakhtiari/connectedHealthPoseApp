@@ -10,6 +10,10 @@ import { getFullUrl } from './helper.js';
 // Navigation Bar
 let tablePopupOpened = false;
 let numFrames = frameData.length;
+let keypoints = []
+
+formatAngleData()
+drawTable();
 
 document.getElementById('back-button').addEventListener('click', function() {
     const url = getFullUrl(`/chart`);
@@ -18,7 +22,6 @@ document.getElementById('back-button').addEventListener('click', function() {
 
 
 document.getElementById('table-button').addEventListener('click', function() {
-    return;
     if (!tablePopupOpened) {
         tablePopupOpened = true;
         window.location.href = `http://127.0.0.1:8000/chart/result/#popup-table`;
@@ -28,21 +31,87 @@ document.getElementById('table-button').addEventListener('click', function() {
     }
 });
 
-// drawTable();
+function formatAngleData() {
+    for (let i = 0; i < 8; i++) {
+        let angles = []
+        for (let j = 0; j < numFrames; j++) {
+            angles.push(angleData[i][j].toFixed(2))
+        }
+        keypoints.push(angles)
+    }
+}
 
-// function drawTable() {
-//     if (dimension === '2d') {
-//         for (let i = 0; i < 6; i++) {
-//             document.getElementById('angle-table').appendChild(document.createElement("tr"));
-//         }
+function drawTable() {
+    const tblbody = document.getElementById('angle-table-body');
 
-//         for (let i = 0; i < numFrames; i++) {
-//             document.getElementById('angle-table').appendChild(document.createElement("td"));
-//         }
-//     } else {
+    if (dimensionData === '2d') {
+        for (let i = 0; i < 7; i++) {
+            const row = document.createElement("tr");
 
-//     }
-// }
+            for (let j = 0; j < numFrames; j++) {
+                const cell = document.createElement("td");
+                let celltext = document.createTextNode(String(j));
+
+                if (i === 0) {
+                    celltext = document.createTextNode(String(j));
+                    if (j === 0) {
+                        celltext = document.createTextNode('Frames');
+                    }
+                }
+
+                if (i === 1) {
+                    celltext = document.createTextNode(keypoints[0][j]);
+                    if (j === 0) {
+                        celltext = document.createTextNode('Left Roll');
+                    }
+                }
+
+                if (i === 2) {
+                    celltext = document.createTextNode(keypoints[1][j]);
+                    if (j === 0) {
+                        celltext = document.createTextNode('Left Pitch');
+                    }
+                }
+
+                if (i === 3) {
+                    celltext = document.createTextNode(keypoints[2][j]);
+                    if (j === 0) {
+                        celltext = document.createTextNode('Left Yaw');
+                    }
+                }
+
+                if (i === 4) {
+                    celltext = document.createTextNode(keypoints[3][j]);
+                    if (j === 0) {
+                        celltext = document.createTextNode('Right Roll');
+                    }
+                }
+
+                if (i === 5) {
+                    celltext = document.createTextNode(keypoints[4][j]);
+                    if (j === 0) {
+                        celltext = document.createTextNode('Right Pitch');
+                    }
+                }
+
+                if (i === 6) {
+                    celltext = document.createTextNode(keypoints[5][j]);
+                    if (j === 0) {
+                        celltext = document.createTextNode('Right Yaw');
+                    }
+                }
+
+                cell.appendChild(celltext);
+                row.appendChild(cell);
+            }
+
+            tblbody.appendChild(row);
+        }
+
+    } else {
+
+    }
+}
 
 
 // Control Bar

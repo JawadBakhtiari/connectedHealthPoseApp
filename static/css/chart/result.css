@@ -106,8 +106,8 @@
     border: solid;
     border-color: lightblue;
     background-color: #e6f7fd;
-    width: 75vw;
-    height: 75vh;
+    width: 95vw;
+    height: 65vh;
     border-radius: 15px;
 }
 
@@ -125,9 +125,19 @@
     font-size: 30px;
 }
 
-#angle-table {
+#angle-table, angle-table-body {
     border: solid;
     border-width: 1px;
     border-color: black;
-    margin: 10%;
+    margin: 3%;
+}
+
+table, th, td {
+    margin-top: 50%;
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    border-collapse: collapse;
+    font-size: 7pt;
+    font-weight: 10;
 }
