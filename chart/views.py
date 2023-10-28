@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .Visualise import generate_plot
 from data.datastore.datastore import DataStore
 from data.visualise import create_2D_visualisation
-from chart.Visualise import generate_plot_for_all_frames
+from chart.Visualise import calculate_angles, generate_plot_for_all_frames
 
 def input_frame(request):
     return render(request, 'chart/input.html')
@@ -45,6 +45,12 @@ def result(request):
         print("Error: invalid dimension.")
         return render(request, 'result.html', {'frames': None})
 
-    frames = json.dumps(create_2D_visualisation(store.get_poses(), cap))
-    charts = json.dumps(generate_plot_for_all_frames(joint, dimension, store.get_poses()))
-    return render(request, 'result.html', {'frames': frames, 'charts': charts}, content_type='text/html')
+    poseData = store.get_poses()
+    angleData = calculate_angles(joint, dimension, poseData)
+
+    dimensions = json.dumps(dimension)
+    angles = json.dumps(angleData)
+    frames = json.dumps(create_2D_visualisation(poseData, cap))
+    charts = json.dumps(generate_plot_for_all_frames(joint, dimension, len(poseData), angleData))
+
+    return render(request, 'result.html', {'frames': frames, 'charts': charts, 'angles': angles, 'dimension': dimensions}, content_type='text/html')

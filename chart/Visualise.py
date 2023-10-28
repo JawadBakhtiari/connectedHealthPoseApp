@@ -4,12 +4,9 @@ from . import Parser
 from . import Calculator
 from . import Plotter
 
-import matplotlib
 
-
-# Generate all plots to keep in memory
-def generate_plot_for_all_frames(joint, dimension, poseData):
-    all_frames = []
+# Calculate angles
+def calculate_angles(joint, dimension, poseData):
     numFrames = len(poseData)
     joint = joint.lower().capitalize()
     dimension = dimension.lower()
@@ -22,12 +19,19 @@ def generate_plot_for_all_frames(joint, dimension, poseData):
     calculator = Calculator.Calculator(numFrames, leftUpperPoints, leftMiddlePoints, leftLowerPoints, rightUpperPoints, rightMiddlePoints, rightLowerPoints)
     leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d = calculator.Calculate()
 
+    return [leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d]
+
+
+# Generate all plots to keep in memory
+def generate_plot_for_all_frames(joint, dimension, numFrames, angleData):
+    all_frames = []
+
     # Generate plots
     print(f'Generating {numFrames} plots')
     startTime = time.time()
 
-    for frame in range(0, len(poseData)):
-        generated_frame = generate_plot(joint, dimension, numFrames, frame, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d)
+    for frame in range(0, numFrames):
+        generated_frame = generate_plot(joint, dimension, numFrames, frame, angleData)
         all_frames.append(generated_frame)
         if frame % 5 == 0:
             print(f'Generated plot number {frame}')
@@ -39,10 +43,10 @@ def generate_plot_for_all_frames(joint, dimension, poseData):
 
 
 # Generate a single plot
-def generate_plot(joint, dimension, numFrames, frame, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw, left3d, right3d):
+def generate_plot(joint, dimension, numFrames, frame, angleData):
     if dimension == '2d':
-        data = Plotter.plot2d(numFrames, frame, joint, leftJointRoll, leftJointPitch, leftJointYaw, rightJointRoll, rightJointPitch, rightJointYaw)
+        data = Plotter.plot2d(numFrames, frame, joint, angleData[0], angleData[1], angleData[2], angleData[3], angleData[4], angleData[5])
     else:
-        data = Plotter.plot3d(numFrames, frame, joint, left3d, right3d)
+        data = Plotter.plot3d(numFrames, frame, joint, angleData[6], angleData[7])
     
     return data

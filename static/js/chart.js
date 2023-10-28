@@ -7,14 +7,65 @@
 import { getFullUrl } from './helper.js';
 
 
-// Set initial variables for control bar
-let currentFrame = 0;
+// Navigation Bar
+let tablePopupOpened = false;
 let numFrames = frameData.length;
+
+document.getElementById('back-button').addEventListener('click', function() {
+    const url = getFullUrl(`/chart`);
+    window.location.href = url;
+});
+
+
+document.getElementById('table-button').addEventListener('click', function() {
+    return;
+    if (!tablePopupOpened) {
+        tablePopupOpened = true;
+        window.location.href = `http://127.0.0.1:8000/chart/result/#popup-table`;
+    } else {
+        tablePopupOpened = false;
+        window.location.href = `http://127.0.0.1:8000/chart/result/#`;
+    }
+});
+
+// drawTable();
+
+// function drawTable() {
+//     if (dimension === '2d') {
+//         for (let i = 0; i < 6; i++) {
+//             document.getElementById('angle-table').appendChild(document.createElement("tr"));
+//         }
+
+//         for (let i = 0; i < numFrames; i++) {
+//             document.getElementById('angle-table').appendChild(document.createElement("td"));
+//         }
+//     } else {
+
+//     }
+// }
+
+
+// Control Bar
+let currentFrame = 0;
+let previousFrame = 0;
 let paused = false;
 let loop = false;
+let forward = true;
 let speed = 2;
 let delay = 100;
 updateFrame()
+
+document.getElementById('right-control-button').addEventListener('click', function() {
+    document.getElementById('right-control-button').hidden = true;
+    document.getElementById('left-control-button').hidden = false;
+    forward = false;
+});
+
+document.getElementById('left-control-button').addEventListener('click', function() {
+    document.getElementById('left-control-button').hidden = true;
+    document.getElementById('right-control-button').hidden = false;
+    forward = true;
+});
 
 document.getElementById('rewind-control-button').addEventListener('click', function() {
     currentFrame = 0;
@@ -62,6 +113,36 @@ document.getElementById('loop-control-button').addEventListener('click', functio
     }
 });
 
+document.getElementById('speed-control-button').addEventListener('click', function() {
+    speed++;
+    if (speed > 4) {
+        speed = 0
+    }
+
+    switch (speed) {
+        case (0):
+            document.getElementById('speed-control-button').innerHTML = "x0.25";
+            delay = 400;
+            break;
+        case (1):
+            document.getElementById('speed-control-button').innerHTML = "x0.5";
+            delay = 200;
+            break;
+        case (2):
+            document.getElementById('speed-control-button').innerHTML = "x1";
+            delay = 100;
+            break;
+        case (3):
+            document.getElementById('speed-control-button').innerHTML = "x2";
+            delay = 50;
+            break;
+        case (4):
+            document.getElementById('speed-control-button').innerHTML = "x4";
+            delay = 25;
+            break;
+    }
+});
+
 const sleep = (delay) => {
     return new Promise(resolve => setTimeout(resolve, delay))
 }
@@ -69,25 +150,38 @@ const sleep = (delay) => {
 const doGraphVisualisation = async() => {
     while (true) {
         if (paused) {
+            currentFrame = previousFrame;
             break;
         }
 
         updateFrame()
 
-        currentFrame++;
-        if (currentFrame >= numFrames) {
-            currentFrame = 0;
+        if (forward) {
+            previousFrame = currentFrame;
+            currentFrame++;
 
-            if (!loop) {
-                document.getElementById('pause-control-button').hidden = true;
-                document.getElementById('play-control-button').hidden = false;
-                paused = false;
-                enableForwardBackward()
-                updateFrame()
-                break;
+            if (currentFrame >= numFrames) {
+                currentFrame = 0;
+    
+                if (!loop) {
+                    updatePlayPause();
+                    break;
+                }
+            }
+        } else {
+            previousFrame = currentFrame;
+            currentFrame--;
+
+            if (currentFrame < 0) {
+                currentFrame = numFrames - 1;
+    
+                if (!loop) {
+                    updatePlayPause();
+                    break;
+                }
             }
         }
-
+        
         await sleep(delay);
     }
 };
@@ -119,39 +213,10 @@ function enableForwardBackward() {
     document.getElementById('forward-control-button').style.backgroundColor = "#ADD8E6";
 }
 
-
-// Navigation bar
-document.getElementById('back-button').addEventListener('click', function() {
-    const url = getFullUrl(`/chart`);
-    window.location.href = url;
-});
-
-document.getElementById('playback-speed-button').addEventListener('click', function() {
-    speed++;
-    if (speed > 4) {
-        speed = 0
-    }
-
-    switch (speed) {
-        case (0):
-            document.getElementById('playback-speed-button').innerHTML = "x0.25";
-            delay = 400;
-            break;
-        case (1):
-            document.getElementById('playback-speed-button').innerHTML = "x0.5";
-            delay = 200;
-            break;
-        case (2):
-            document.getElementById('playback-speed-button').innerHTML = "x1";
-            delay = 100;
-            break;
-        case (3):
-            document.getElementById('playback-speed-button').innerHTML = "x2";
-            delay = 50;
-            break;
-        case (4):
-            document.getElementById('playback-speed-button').innerHTML = "x4";
-            delay = 25;
-            break;
-    }
-});
+function updatePlayPause() {
+    document.getElementById('pause-control-button').hidden = true;
+    document.getElementById('play-control-button').hidden = false;
+    paused = false;
+    enableForwardBackward()
+    updateFrame()
+}

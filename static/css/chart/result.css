@@ -1,5 +1,5 @@
 .centered-vertical-container {
-    height: 80%;
+    height: 775px;
 }
 
 #animation-holder {
@@ -35,7 +35,7 @@
     position: absolute;
     flex-direction: row;
     align-items: center;
-    top: 700px;
+    bottom: 0;
     left: 50%;
     gap: 25px;
     transform: translate(-50%, 0);
@@ -84,4 +84,50 @@
 
 .top-bar:hover {
     opacity: 1;
+}
+
+.modal {
+    align-items: center;
+    display: flex;
+    justify-content: center; 
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transition: all 0.4s;
+    visibility: hidden;
+    opacity: 0;
+    z-index: 100;
+}
+
+.content {
+    position: absolute;
+    border: solid;
+    border-color: lightblue;
+    background-color: #e6f7fd;
+    width: 75vw;
+    height: 75vh;
+    border-radius: 15px;
+}
+
+.modal:target {
+    visibility: visible;
+    opacity: 1;
+}
+
+.box-close {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    color: rgb(11, 42, 110);
+    text-decoration: none;
+    font-size: 30px;
+}
+
+#angle-table {
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    margin: 10%;
 }
