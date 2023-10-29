@@ -13,21 +13,34 @@ let numFrames = frameData.length;
 let keypoints = []
 
 formatAngleData()
-drawTable();
+drawTable()
 
 document.getElementById('back-button').addEventListener('click', function() {
     const url = getFullUrl(`/chart`);
     window.location.href = url;
 });
 
-
 document.getElementById('table-button').addEventListener('click', function() {
     if (!tablePopupOpened) {
         tablePopupOpened = true;
+        document.getElementById('table-button').style.backgroundColor = "#6693F5";
         window.location.href = `http://127.0.0.1:8000/chart/result/#popup-table`;
     } else {
         tablePopupOpened = false;
+        document.getElementById('table-button').style.backgroundColor = "white";
         window.location.href = `http://127.0.0.1:8000/chart/result/#`;
+    }
+});
+
+document.getElementById('popup-table-close-button').addEventListener('click', function() {
+    document.getElementById('table-button').style.backgroundColor = "white";
+});
+
+window.addEventListener('hashchange', function() {
+    if (window.location.href.includes('popup-table')) {
+        document.getElementById('table-button').style.backgroundColor = "#6693F5";
+    } else {
+        document.getElementById('table-button').style.backgroundColor = "white";
     }
 });
 
@@ -35,81 +48,189 @@ function formatAngleData() {
     for (let i = 0; i < 8; i++) {
         let angles = []
         for (let j = 0; j < numFrames; j++) {
-            angles.push(angleData[i][j].toFixed(2))
+            angles.push(angleData[i][j].toFixed(2) + '°')
         }
         keypoints.push(angles)
     }
 }
 
-function drawTable() {
-    const tblbody = document.getElementById('angle-table-body');
-
+function drawTable() {  
     if (dimensionData === '2d') {
-        for (let i = 0; i < 7; i++) {
-            const row = document.createElement("tr");
+        drawTable2d();
+    } else {
+        drawTable3d();
+    }
+}
 
-            for (let j = 0; j < numFrames; j++) {
-                const cell = document.createElement("td");
-                let celltext = document.createTextNode(String(j));
+function drawTable2d() {
+    let tbl = document.getElementById('angle-table-left');
 
-                if (i === 0) {
-                    celltext = document.createTextNode(String(j));
-                    if (j === 0) {
-                        celltext = document.createTextNode('Frames');
-                    }
+    for (let i = 0; i < 4; i++) {
+        const row = document.createElement("tr");
+
+        for (let j = -1; j < numFrames; j++) {
+            let cell = 0;
+            if (j == -1 || i == 0) {
+                cell = document.createElement("th");
+            } else {
+                cell = document.createElement("td");
+            }
+            
+            let celltext = document.createTextNode(String(j));
+
+            if (i == 0) {
+                if (j == -1) {
+                    celltext = document.createTextNode('Frame');
                 }
-
-                if (i === 1) {
-                    celltext = document.createTextNode(keypoints[0][j]);
-                    if (j === 0) {
-                        celltext = document.createTextNode('Left Roll');
-                    }
-                }
-
-                if (i === 2) {
-                    celltext = document.createTextNode(keypoints[1][j]);
-                    if (j === 0) {
-                        celltext = document.createTextNode('Left Pitch');
-                    }
-                }
-
-                if (i === 3) {
-                    celltext = document.createTextNode(keypoints[2][j]);
-                    if (j === 0) {
-                        celltext = document.createTextNode('Left Yaw');
-                    }
-                }
-
-                if (i === 4) {
-                    celltext = document.createTextNode(keypoints[3][j]);
-                    if (j === 0) {
-                        celltext = document.createTextNode('Right Roll');
-                    }
-                }
-
-                if (i === 5) {
-                    celltext = document.createTextNode(keypoints[4][j]);
-                    if (j === 0) {
-                        celltext = document.createTextNode('Right Pitch');
-                    }
-                }
-
-                if (i === 6) {
-                    celltext = document.createTextNode(keypoints[5][j]);
-                    if (j === 0) {
-                        celltext = document.createTextNode('Right Yaw');
-                    }
-                }
-
-                cell.appendChild(celltext);
-                row.appendChild(cell);
             }
 
-            tblbody.appendChild(row);
+            if (i == 1) {
+                celltext = document.createTextNode(keypoints[0][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Roll');
+                }
+            }
+
+            if (i == 2) {
+                celltext = document.createTextNode(keypoints[1][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Pitch');
+                }
+            }
+
+            if (i == 3) {
+                celltext = document.createTextNode(keypoints[2][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Yaw');
+                }
+            }
+
+            cell.appendChild(celltext);
+            row.appendChild(cell);
         }
 
-    } else {
+        tbl.appendChild(row);
+    }
 
+    tbl = document.getElementById('angle-table-right');
+
+    for (let i = 0; i < 4; i++) {
+        const row = document.createElement("tr");
+
+        for (let j = -1; j < numFrames; j++) {
+            let cell = 0;
+            if (j == -1 || i == 0) {
+                cell = document.createElement("th");
+            } else {
+                cell = document.createElement("td");
+            }
+            
+            let celltext = document.createTextNode(String(j));
+
+            if (i == 0) {
+                if (j == -1) {
+                    celltext = document.createTextNode('Frame');
+                }
+            }
+
+            if (i == 1) {
+                celltext = document.createTextNode(keypoints[3][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Roll');
+                }
+            }
+
+            if (i == 2) {
+                celltext = document.createTextNode(keypoints[4][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Pitch');
+                }
+            }
+
+            if (i == 3) {
+                celltext = document.createTextNode(keypoints[5][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Yaw');
+                }
+            }
+
+            cell.appendChild(celltext);
+            row.appendChild(cell);
+        }
+
+        tbl.appendChild(row);
+    }
+}
+
+function drawTable3d() {
+    let tbl = document.getElementById('angle-table-left');
+
+    for (let i = 0; i < 2; i++) {
+        const row = document.createElement("tr");
+
+        for (let j = -1; j < numFrames; j++) {
+            let cell = 0;
+            if (j == -1 || i == 0) {
+                cell = document.createElement("th");
+            } else {
+                cell = document.createElement("td");
+            }
+            
+            let celltext = document.createTextNode(String(j));
+
+            if (i == 0) {
+                if (j == -1) {
+                    celltext = document.createTextNode('Frame');
+                }
+            }
+
+            if (i == 1) {
+                celltext = document.createTextNode(keypoints[6][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Angle');
+                }
+            }
+
+            cell.appendChild(celltext);
+            row.appendChild(cell);
+        }
+
+        tbl.appendChild(row);
+    }
+
+    tbl = document.getElementById('angle-table-right');
+
+    for (let i = 0; i < 2; i++) {
+        const row = document.createElement("tr");
+
+        for (let j = -1; j < numFrames; j++) {
+            let cell = 0;
+            if (j == -1 || i == 0) {
+                cell = document.createElement("th");
+            } else {
+                cell = document.createElement("td");
+            }
+            
+            let celltext = document.createTextNode(String(j));
+
+            if (i == 0) {
+                if (j == -1) {
+                    celltext = document.createTextNode('Frame');
+                }
+            }
+
+            if (i == 1) {
+                celltext = document.createTextNode(keypoints[7][j]);
+                if (j == -1) {
+                    celltext = document.createTextNode('Angle');
+                }
+            }
+
+            cell.appendChild(celltext);
+            row.appendChild(cell);
+        }
+
+        tbl.appendChild(row);
     }
 }
 
@@ -268,18 +389,23 @@ function disableForwardBackward() {
     document.getElementById('backward-control-button').disabled = true;
     document.getElementById('backward-control-button').style.borderColor = "#D3D3D3";
     document.getElementById('backward-control-button').style.backgroundColor = "#E6F7FD";
+    document.getElementById('backward-control-button').style.cursor = "default";
     document.getElementById('forward-control-button').disabled = true;
     document.getElementById('forward-control-button').style.borderColor = "#D3D3D3";
     document.getElementById('forward-control-button').style.backgroundColor = "#E6F7FD";
+    document.getElementById('forward-control-button').style.cursor = "default";
 }
 
 function enableForwardBackward() {
     document.getElementById('backward-control-button').disabled = false;
     document.getElementById('backward-control-button').style.borderColor = "#ADD8E6";
     document.getElementById('backward-control-button').style.backgroundColor = "#ADD8E6";
+    document.getElementById('backward-control-button').style.cursor = "pointer";
     document.getElementById('forward-control-button').disabled = false;
     document.getElementById('forward-control-button').style.borderColor = "#ADD8E6";
     document.getElementById('forward-control-button').style.backgroundColor = "#ADD8E6";
+    document.getElementById('forward-control-button').style.cursor = "pointer";
+    
 }
 
 function updatePlayPause() {

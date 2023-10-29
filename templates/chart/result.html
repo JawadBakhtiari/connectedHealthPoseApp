@@ -30,15 +30,28 @@
             </button>
 
             <div id="popup-table" class="modal">
-                <div class="content">
-                    <table id="angle-table">
-                        Joint Angle Data
-                        <tbody id="angle-table-body">
-                        </tbody>
-                    </table>
+                <div class="popup-table-content">
+                    <div class="popup-table-title">
+                        Joint Angle Values
+                    </div>
 
-                    <a href="#"
-                       class="box-close">
+                    <div id="popup-table-left" class="popup-table-body-title">
+                        Left Joint
+                        <div class="popup-table-body">
+                            <table id="angle-table-left"  class="angle-table">
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="popup-table-right" class="popup-table-body-title">
+                        Right Joint
+                        <div class="popup-table-body">
+                            <table id="angle-table-right"  class="angle-table">
+                            </table>
+                        </div>
+                    </div>
+
+                    <a href="#" id="popup-table-close-button" class="popup-table-close">
                         ×
                     </a>
                 </div>

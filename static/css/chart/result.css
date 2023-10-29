@@ -77,9 +77,6 @@
     border-color: lightblue;
     border-radius: 25px;
     opacity: 0.75;
-    font-size: 15px;
-    color: black; /* Dark blue-grey text */
-    font-weight: 400;
 }
 
 .top-bar:hover {
@@ -87,7 +84,6 @@
 }
 
 .modal {
-    align-items: center;
     display: flex;
     justify-content: center; 
     position: absolute;
@@ -95,20 +91,11 @@
     bottom: 0;
     left: 0;
     right: 0;
+    margin-top: 80px;
     transition: all 0.4s;
     visibility: hidden;
     opacity: 0;
     z-index: 100;
-}
-
-.content {
-    position: absolute;
-    border: solid;
-    border-color: lightblue;
-    background-color: #e6f7fd;
-    width: 95vw;
-    height: 65vh;
-    border-radius: 15px;
 }
 
 .modal:target {
@@ -116,7 +103,47 @@
     opacity: 1;
 }
 
-.box-close {
+.popup-table-content {
+    color: rgb(11, 42, 110);
+    position: absolute;
+    border: solid;
+    border-color: lightblue;
+    background-color: #e6f7fd;
+    width: 95vw;
+    height: 580px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+}
+
+.popup-table-title {
+    font-size: 20pt;
+    text-align: center;
+    margin-top: 35px;
+    text-decoration: underline;
+}
+
+.popup-table-body-title {
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow: auto;
+    text-align: center;
+    font-size: 15pt;
+}
+
+.popup-table-body {
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow: auto;
+    padding: 5px;
+    margin-top: 5px;
+    padding-bottom: 10px;
+    border: solid;
+    border-color: lightblue;
+}
+
+.popup-table-close {
     position: absolute;
     top: 0;
     right: 15px;
@@ -125,19 +152,31 @@
     font-size: 30px;
 }
 
-#angle-table, angle-table-body {
-    border: solid;
-    border-width: 1px;
-    border-color: black;
-    margin: 3%;
-}
-
-table, th, td {
-    margin-top: 50%;
+.angle-table {
     border: solid;
     border-width: 1px;
     border-color: black;
     border-collapse: collapse;
-    font-size: 7pt;
-    font-weight: 10;
+}
+
+th {
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    color: black;
+    font-size: 13pt;
+    font-weight: bold;
+    white-space: nowrap;
+    padding: 3px;
+    text-align: center;
+}
+
+td {
+    border: solid;
+    border-width: 1px;
+    border-color: black;
+    color: black;
+    font-size: 13pt;
+    padding: 2px;
+    text-align: center;
 }
