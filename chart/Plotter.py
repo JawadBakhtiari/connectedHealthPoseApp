@@ -7,17 +7,18 @@ from io import BytesIO
 
 
 def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rightPitch, rightYaw):
-    # Pre-compute common values
+    # Preload common parameters
     time_frames = np.arange(numFrames)
     yticks = np.linspace(start=0, stop=180, num=10)
-    # Switch to a non-interactive backend for faster rendering
+
+    # Use non-interactive backend for faster rendering
     plt.switch_backend('agg')
 
+    # Add plots and titles
     fig, axs = plt.subplots(2)
-
     fig.suptitle('2D ' + joint + ' Angle Graph')
     
-    # Plot data and rasterize for speed
+    # Plot data with bitmaps
     axs[0].plot(time_frames, leftRoll, label='Roll', rasterized=True)
     axs[0].plot(time_frames, leftPitch, label='Pitch', rasterized=True)
     axs[0].plot(time_frames, leftYaw, label='Yaw', rasterized=True)
@@ -28,6 +29,7 @@ def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rig
     axs[1].plot(time_frames, rightYaw, label='Yaw', rasterized=True)
     axs[1].set_title('Right ' + joint)
 
+    # Add line and labels
     for ax in axs:
         ax.axvline(x=frame, color='r', linestyle='--')
         ax.set(xlabel='Time (Seconds)', ylabel='Angle (Degrees)')
@@ -35,11 +37,12 @@ def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rig
         ax.set_yticks(yticks)
         ax.grid()
 
-    # Only add legend once if it's the same for all subplots
+    # Add legend
     axs[0].legend()
 
+    # Convert plot to image
     buf = BytesIO()
-    plt.savefig(buf, format='png', bbox_inches="tight", dpi=100)  # Lower DPI unless high res is required
+    plt.savefig(buf, format='png', bbox_inches="tight", dpi=150)
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     plt.close(fig)
 
