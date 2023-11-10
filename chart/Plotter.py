@@ -5,68 +5,78 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 
 
-# Plot 2D Graph
+
 def plot2d(numFrames, frame, joint, leftRoll, leftPitch, leftYaw, rightRoll, rightPitch, rightYaw):
+    # Pre-compute common values
+    time_frames = np.arange(numFrames)
+    yticks = np.linspace(start=0, stop=180, num=10)
+    # Switch to a non-interactive backend for faster rendering
+    plt.switch_backend('agg')
+
     fig, axs = plt.subplots(2)
 
-    fig.suptitle('2D ' + joint + ' Angle Graph', y=1.005)
-    fig.tight_layout()
-    fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.6)
+    fig.suptitle('2D ' + joint + ' Angle Graph')
     
-    axs[0].plot(range(numFrames), leftRoll, label = 'Roll')
-    axs[0].plot(range(numFrames), leftPitch, label = 'Pitch')
-    axs[0].plot(range(numFrames), leftYaw, label = 'Yaw')
+    # Plot data and rasterize for speed
+    axs[0].plot(time_frames, leftRoll, label='Roll', rasterized=True)
+    axs[0].plot(time_frames, leftPitch, label='Pitch', rasterized=True)
+    axs[0].plot(time_frames, leftYaw, label='Yaw', rasterized=True)
     axs[0].set_title('Left ' + joint)
 
-    axs[1].plot(range(numFrames), rightRoll, label = 'Roll')
-    axs[1].plot(range(numFrames), rightPitch, label = 'Pitch')
-    axs[1].plot(range(numFrames), rightYaw, label = 'Yaw')
+    axs[1].plot(time_frames, rightRoll, label='Roll', rasterized=True)
+    axs[1].plot(time_frames, rightPitch, label='Pitch', rasterized=True)
+    axs[1].plot(time_frames, rightYaw, label='Yaw', rasterized=True)
     axs[1].set_title('Right ' + joint)
 
     for ax in axs:
         ax.axvline(x=frame, color='r', linestyle='--')
-
-    for ax in axs.flat:
         ax.set(xlabel='Time (Seconds)', ylabel='Angle (Degrees)')
         ax.set(ylim=[0, 180])
-        ax.set_yticks(list(np.linspace(start=0, stop=180, num=10)))
+        ax.set_yticks(yticks)
         ax.grid()
-        ax.legend()
+
+    # Only add legend once if it's the same for all subplots
+    axs[0].legend()
 
     buf = BytesIO()
-    plt.savefig(buf, format='png', bbox_inches="tight", dpi=200)
+    plt.savefig(buf, format='png', bbox_inches="tight", dpi=100)  # Lower DPI unless high res is required
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    plt.close()
+    plt.close(fig)
 
     return data
 
 
-# Plot 3D Graph
 def plot3d(numFrames, frame, joint, left3d, right3d):
+    x_range = np.arange(numFrames)
+    yticks = np.linspace(start=0, stop=180, num=10)
+    # Optimization: Use the 'agg' backend for faster rendering
+    plt.switch_backend('agg')
+
     fig, axs = plt.subplots(2)
 
-    fig.suptitle('3D ' + joint + ' Angle Graph', y=1.005)
-    fig.tight_layout()
-    fig.subplots_adjust(bottom=0.1, wspace=0.4, hspace=0.6)
-
-    axs[0].plot(range(numFrames), left3d)
+    fig.suptitle('3D ' + joint + ' Angle Graph')
+    
+    # Optimization: Plot with precomputed x_range
+    axs[0].plot(x_range, left3d)
     axs[0].set_title('Left ' + joint)
 
-    axs[1].plot(range(numFrames), right3d)
+    axs[1].plot(x_range, right3d)
     axs[1].set_title('Right ' + joint)
 
+    # Optimization: Vectorize the repetitive axvline setting
     for ax in axs:
         ax.axvline(x=frame, color='r', linestyle='--')
-
-    for ax in axs.flat:
         ax.set(xlabel='Time (Seconds)', ylabel='Angle (Degrees)')
         ax.set(ylim=[0, 180])
-        ax.set_yticks(list(np.linspace(start=0, stop=180, num=10)))
+        ax.set_yticks(yticks)
         ax.grid()
 
+    # Optimization: Use a BytesIO buffer and reduce the dpi if high resolution is not required
     buf = BytesIO()
-    plt.savefig(buf, format='png', bbox_inches="tight", dpi=200)
+    plt.savefig(buf, format='png', bbox_inches="tight", dpi=100)  # Reduced dpi for speed
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    plt.close()
+    
+    # Optimization: Explicitly close the plt to free up memory
+    plt.close(fig)
 
     return data
