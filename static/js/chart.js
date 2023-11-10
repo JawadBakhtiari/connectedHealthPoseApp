@@ -80,7 +80,7 @@ function drawTable2d() {
 
             if (i == 0) {
                 if (j == -1) {
-                    celltext = document.createTextNode('Frame');
+                    celltext = document.createTextNode('Second');
                 }
             }
 
@@ -129,7 +129,7 @@ function drawTable2d() {
 
             if (i == 0) {
                 if (j == -1) {
-                    celltext = document.createTextNode('Frame');
+                    celltext = document.createTextNode('Second');
                 }
             }
 
@@ -180,7 +180,7 @@ function drawTable3d() {
 
             if (i == 0) {
                 if (j == -1) {
-                    celltext = document.createTextNode('Frame');
+                    celltext = document.createTextNode('Second');
                 }
             }
 
@@ -215,7 +215,7 @@ function drawTable3d() {
 
             if (i == 0) {
                 if (j == -1) {
-                    celltext = document.createTextNode('Frame');
+                    celltext = document.createTextNode('Second');
                 }
             }
 

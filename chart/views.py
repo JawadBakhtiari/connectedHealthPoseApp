@@ -4,7 +4,6 @@ import matplotlib
 matplotlib.use('Agg')
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from .Visualise import generate_plot
 from data.datastore.datastore import DataStore
 from data.visualise import create_2D_visualisation
 from chart.Visualise import calculate_angles, generate_plot_for_all_frames
@@ -27,6 +26,10 @@ def result(request):
         sid = "ccbe340e-f1db-4037-8f91-257bcac2c2f9"
         clip_num = "1"
 
+    if joint == None or dimension == None or len(joint) == 0 or len(dimension) == 0:
+        joint = 'shoulder'
+        dimension = '2d'
+
     store = DataStore(sid, clip_num)
     if not store.populate():
         print("Error: data (poses or video or both) not found")
@@ -44,6 +47,10 @@ def result(request):
     if dimension.lower() not in ['2d', '3d']:
         print("Error: invalid dimension.")
         return render(request, 'result.html', {'frames': None})
+
+    # Format parameters
+    joint = joint.lower().capitalize()
+    dimension = dimension.lower()
 
     poseData = store.get_poses()
     angleData = calculate_angles(joint, dimension, poseData)

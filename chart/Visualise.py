@@ -5,11 +5,10 @@ from . import Calculator
 from . import Plotter
 import concurrent.futures
 
+
 # Calculate angles
 def calculate_angles(joint, dimension, poseData):
     numFrames = len(poseData)
-    joint = joint.lower().capitalize()
-    dimension = dimension.lower()
 
     # Parse pose data
     parser = Parser.Parser(joint, poseData)
@@ -24,8 +23,10 @@ def calculate_angles(joint, dimension, poseData):
 
 # Generate all plots to keep in memory
 def generate_plot_for_all_frames(joint, dimension, numFrames, angleData):
-    all_frames_ordered = [None] * numFrames  # Preallocate the list to hold the results in order
+    # List of frames
+    all_frames = [None] * numFrames
 
+    # Start timer
     print(f'Generating {numFrames} plots')
     startTime = time.time()
 
@@ -34,16 +35,17 @@ def generate_plot_for_all_frames(joint, dimension, numFrames, angleData):
         # Map over the frames to maintain order, the executor will handle the task distribution
         results = executor.map(generate_plot, [joint]*numFrames, [dimension]*numFrames, [numFrames]*numFrames, range(numFrames), [angleData]*numFrames)
         
-        # Iterate over the results in the order they were started
+        # Sort generated plots
         for i, generated_frame in enumerate(results):
-            all_frames_ordered[i] = generated_frame
+            all_frames[i] = generated_frame
             if i % 5 == 0:
                 print(f'Generated plot number {i}')
 
+    # Print statistics
     timeTaken = round(time.time() - startTime, 2)
     print("Time elapsed: " + str(timeTaken) + " seconds")
 
-    return all_frames_ordered
+    return all_frames
 
 
 # Generate a single plot
