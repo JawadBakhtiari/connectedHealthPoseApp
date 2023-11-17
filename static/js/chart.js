@@ -15,8 +15,44 @@ const formatedAngles = formatAngleData();
 const tableAngles = formatedAngles.tableAngles;
 const graphAngles = formatedAngles.graphAngles;
 const labels = getGraphLabels();
+let leftChart, rightChart;
 
 // Draw table and graph
+
+// Vertical Line Indicator
+let verticalLinePlugin = {
+    afterDraw: function(chart) {
+        console.log("BYE")
+        const ctx = chart.ctx;
+        const xAxis = chart.scales['x-axis-0'];
+        const topY = chart.chartArea.top;
+        const bottomY = chart.chartArea.bottom;
+
+        console.log(xAxis)
+    
+        if (xAxis) {
+            console.log("HERE")
+            const labelz = chart.data.labels;
+            console.log(labelz)
+            const indexC = labels.indexOf('C');
+
+            if (indexC !== -1) {
+              const barWidth = xAxis.width / labels.length;
+              const xValue = xAxis.left + (barWidth * (indexC + 0.5));
+            }
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            ctx.moveTo(xValue, topY);
+            ctx.lineTo(xValue, bottomY);
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+};
+
 draw()
 
 // Format Angle Data
@@ -40,11 +76,11 @@ function formatAngleData() {
 
 // Get Graph Labels
 function getGraphLabels() {
-    var labels = [];
+    var labels = ['C'];
     for (let i = 0; i < numFrames; i += 1) {
         labels.push(i);
     }
-    
+
     return labels;
 }
 
@@ -68,9 +104,10 @@ function draw() {
     rightConfig = getGraphConfig(rightData, "Right " + jointData);
     const leftAngleChart = document.getElementById('chart-left');
     const rightAngleChart = document.getElementById('chart-right');
-    new Chart(leftAngleChart, leftConfig);
-    new Chart(rightAngleChart, rightConfig);
+    leftChart = new Chart(leftAngleChart, leftConfig);
+    rightChart = new Chart(rightAngleChart, rightConfig);
 }
+
 
 // Get Graph Configuration
 function getGraphConfig(data, title) {
@@ -82,7 +119,13 @@ function getGraphConfig(data, title) {
                 title: {
                     display: true,
                     text: title
-                }
+                },
+                tooltip: {
+                    enabled: true,
+                    intersect: false,
+                    mode: 'nearest',
+                },
+                verticalLine: verticalLinePlugin,
             },
             scales: {
                 x: {
@@ -132,11 +175,7 @@ function get2dGraphData() {
             label: 'Yaw',
             data: graphAngles[2],
             borderColor: 'blue',
-        }],
-        options: {
-            fill: false,
-            borderWidth: 2
-        }
+        }]
     };
 
     const rightData = {
@@ -396,6 +435,23 @@ let speed = 2;
 let delay = 100;
 updateFrame()
 
+let myChart = document.getElementById("chart-left");
+function moveLine(direction) {
+    const xAxis = myChart.scales['x-axis-0'];
+    const labels = myChart.data.labels;
+    const currentIndex = labels.indexOf('C'); // Assuming initial position at label 'C'
+  
+    if (direction === 'left' && currentIndex > 0) {
+      labels[currentIndex] = labels[currentIndex - 1];
+      labels[currentIndex - 1] = 'C';
+    } else if (direction === 'right' && currentIndex < labels.length - 1) {
+      labels[currentIndex] = labels[currentIndex + 1];
+      labels[currentIndex + 1] = 'C';
+    }
+  
+    myChart.update();
+}
+
 document.getElementById('right-control-button').addEventListener('click', function() {
     document.getElementById('right-control-button').hidden = true;
     document.getElementById('left-control-button').hidden = false;
@@ -406,6 +462,7 @@ document.getElementById('left-control-button').addEventListener('click', functio
     document.getElementById('left-control-button').hidden = true;
     document.getElementById('right-control-button').hidden = false;
     forward = true;
+    moveLine('left')
 });
 
 document.getElementById('rewind-control-button').addEventListener('click', function() {
@@ -442,6 +499,7 @@ document.getElementById('forward-control-button').addEventListener('click', func
         currentFrame = 0
     }
     updateFrame();
+    moveLine('right')
 });
 
 document.getElementById('loop-control-button').addEventListener('click', function() {
@@ -529,11 +587,8 @@ const doGraphVisualisation = async() => {
 
 function updateFrame() {
     const frameBase64Img = frameData[currentFrame];
-    const chartBase46Img = chartData[currentFrame];
     const image = document.getElementById("animation");
     image.src = "data:image/png;base64," + frameBase64Img;
-    const chart = document.getElementById("chart")
-    chart.src =  "data:image/png;base64," + chartBase46Img
 }
 
 function disableForwardBackward() {
