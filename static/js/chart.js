@@ -18,41 +18,6 @@ const labels = getGraphLabels();
 let leftChart, rightChart;
 
 // Draw table and graph
-
-// Vertical Line Indicator
-let verticalLinePlugin = {
-    afterDraw: function(chart) {
-        console.log("BYE")
-        const ctx = chart.ctx;
-        const xAxis = chart.scales['x-axis-0'];
-        const topY = chart.chartArea.top;
-        const bottomY = chart.chartArea.bottom;
-
-        console.log(xAxis)
-    
-        if (xAxis) {
-            console.log("HERE")
-            const labelz = chart.data.labels;
-            console.log(labelz)
-            const indexC = labels.indexOf('C');
-
-            if (indexC !== -1) {
-              const barWidth = xAxis.width / labels.length;
-              const xValue = xAxis.left + (barWidth * (indexC + 0.5));
-            }
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 2;
-            ctx.moveTo(xValue, topY);
-            ctx.lineTo(xValue, bottomY);
-            ctx.stroke();
-            ctx.restore();
-        }
-    }
-};
-
 draw()
 
 // Format Angle Data
@@ -76,7 +41,7 @@ function formatAngleData() {
 
 // Get Graph Labels
 function getGraphLabels() {
-    var labels = ['C'];
+    var labels = [];
     for (let i = 0; i < numFrames; i += 1) {
         labels.push(i);
     }
@@ -115,6 +80,7 @@ function getGraphConfig(data, title) {
         type: 'line',
         data: data,
         options: {
+            animations: false,
             plugins: {
                 title: {
                     display: true,
@@ -122,10 +88,38 @@ function getGraphConfig(data, title) {
                 },
                 tooltip: {
                     enabled: true,
-                    intersect: false,
+                    intersect: true,
                     mode: 'nearest',
                 },
-                verticalLine: verticalLinePlugin,
+                annotation: {
+                    annotations: {
+                        line: {
+                            type: 'line',
+                            mode: 'vertical',
+                            scaleID: 'x',
+                            borderColor: 'red',
+                            borderWidth: 2,
+                            value: 0,
+                            draggable: true,
+                        }
+                    }
+                },
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: 'xy',
+                        threshold: 5,
+                    },
+                    zoom: {
+                        wheel: {
+                            enabled: true
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'xy',
+                    },
+                }
             },
             scales: {
                 x: {
@@ -141,15 +135,9 @@ function getGraphConfig(data, title) {
                     },
                 }
             },
-            zoom: {
-                zoom: {
-                  wheel: {
-                    enabled: true,
-                  },
-                  pinch: {
-                    enabled: true
-                  },
-                  mode: 'xy'
+            elements: {
+                point:{
+                    radius: 0
                 }
             }
         }
@@ -163,18 +151,21 @@ function get2dGraphData() {
         datasets: [{
             label: 'Roll',
             data: graphAngles[0],
-            borderColor: 'red',
+            borderColor: 'orange',
+            borderWidth: 2
     
         },
         {
             label: 'Pitch',
             data: graphAngles[1],
             borderColor: 'green',
+            borderWidth: 2
         },
         {
             label: 'Yaw',
             data: graphAngles[2],
-            borderColor: 'blue',
+            borderColor: 'rgb(66, 135, 245)',
+            borderWidth: 2
         }]
     };
 
@@ -183,23 +174,22 @@ function get2dGraphData() {
         datasets: [{
             label: 'Roll',
             data: graphAngles[3],
-            borderColor: 'red',
+            borderColor: 'orange',
+            borderWidth: 2
     
         },
         {
             label: 'Pitch',
             data: graphAngles[4],
             borderColor: 'green',
+            borderWidth: 2
         },
         {
             label: 'Yaw',
             data: graphAngles[5],
-            borderColor: 'blue',
-        }],
-        options: {
-            fill: false,
+            borderColor: 'rgb(66, 135, 245)',
             borderWidth: 2
-        }
+        }]
     };
 
     return { leftData, rightData };
@@ -208,12 +198,16 @@ function get2dGraphData() {
 function get3dGraphData() {
     const leftData = {
         labels: labels,
-        data: graphAngles[6]
+        data: graphAngles[6],
+        borderColor: 'rgb(66, 135, 245)',
+        borderWidth: 2
     };
 
     const rightData = {
         labels: labels,
-        data: graphAngles[7]
+        data: graphAngles[7],
+        borderColor: 'rgb(66, 135, 245)',
+        borderWidth: 2
     };
 
     return { leftData, rightData };
@@ -435,23 +429,6 @@ let speed = 2;
 let delay = 100;
 updateFrame()
 
-let myChart = document.getElementById("chart-left");
-function moveLine(direction) {
-    const xAxis = myChart.scales['x-axis-0'];
-    const labels = myChart.data.labels;
-    const currentIndex = labels.indexOf('C'); // Assuming initial position at label 'C'
-  
-    if (direction === 'left' && currentIndex > 0) {
-      labels[currentIndex] = labels[currentIndex - 1];
-      labels[currentIndex - 1] = 'C';
-    } else if (direction === 'right' && currentIndex < labels.length - 1) {
-      labels[currentIndex] = labels[currentIndex + 1];
-      labels[currentIndex + 1] = 'C';
-    }
-  
-    myChart.update();
-}
-
 document.getElementById('right-control-button').addEventListener('click', function() {
     document.getElementById('right-control-button').hidden = true;
     document.getElementById('left-control-button').hidden = false;
@@ -462,7 +439,6 @@ document.getElementById('left-control-button').addEventListener('click', functio
     document.getElementById('left-control-button').hidden = true;
     document.getElementById('right-control-button').hidden = false;
     forward = true;
-    moveLine('left')
 });
 
 document.getElementById('rewind-control-button').addEventListener('click', function() {
@@ -499,7 +475,6 @@ document.getElementById('forward-control-button').addEventListener('click', func
         currentFrame = 0
     }
     updateFrame();
-    moveLine('right')
 });
 
 document.getElementById('loop-control-button').addEventListener('click', function() {
@@ -589,6 +564,10 @@ function updateFrame() {
     const frameBase64Img = frameData[currentFrame];
     const image = document.getElementById("animation");
     image.src = "data:image/png;base64," + frameBase64Img;
+    leftChart.options.plugins.annotation.annotations.line.value = currentFrame;
+    rightChart.options.plugins.annotation.annotations.line.value = currentFrame;
+    leftChart.update();
+    rightChart.update();
 }
 
 function disableForwardBackward() {
@@ -621,3 +600,27 @@ function updatePlayPause() {
     enableForwardBackward()
     updateFrame()
 }
+
+document.addEventListener('mousedown', (event) => {
+    const annotation = leftChart.getAnnotation('');
+
+    if (annotation && annotation.options.draggable) {
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+
+      const canvasRect = ctx.canvas.getBoundingClientRect();
+      const annotationY = myChart.scales['y-axis-0'].getPixelForValue(annotation.value);
+
+      if (
+        mouseX >= canvasRect.left &&
+        mouseX <= canvasRect.right &&
+        mouseY >= canvasRect.top &&
+        mouseY <= canvasRect.bottom &&
+        mouseY >= annotationY - 5 &&
+        mouseY <= annotationY + 5
+      ) {
+        isDragging = true;
+      }
+    }
+  });
+

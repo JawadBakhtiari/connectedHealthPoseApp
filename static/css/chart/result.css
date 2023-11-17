@@ -1,20 +1,17 @@
 .centered-vertical-container {
-    height: 825px;
+    height: 820px;
 }
 
 #animation-holder {
     display: flex;
     justify-content: center;
-    padding-block: 15px;
-    border: 1px red solid;
     width: 80vw;
-    height: 63vh;
+    height: 65vh;
 }
 
 #animation-holder #animation {
-    margin-top: 20px;
-    width: 380px;
-    height: 550px;
+    width: 410px;
+    height: 615px;
     margin-right: 15px;
     border: solid;
     border-color: lightblue;
@@ -23,13 +20,13 @@
 
 #animation-holder #chart {
     width: 800px;
-    height: 600px;
+    height: 620px;
     max-height: 600px;
     border-radius: 15px;
 }
 
 .subcharts {
-    max-height: 48%;
+    max-height: 300px;
     border: solid;
     border-color: lightblue;
     border-radius: 15px;
@@ -109,7 +106,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    margin-top: 80px;
+    margin-top: 70px;
     transition: all 0.4s;
     visibility: hidden;
     opacity: 0;
@@ -128,11 +125,11 @@
     border-color: lightblue;
     background-color: #e6f7fd;
     width: 95vw;
-    height: 580px;
+    height: 620px;
     border-radius: 15px;
     display: flex;
     flex-direction: column;
-    gap: 35px;
+    gap: 40px;
 }
 
 .popup-table-title {
