@@ -62,6 +62,7 @@ function draw() {
         data = get3dGraphData();
         leftData = data.leftData;
         rightData = data.rightData;
+        console.log(rightData)
     }
 
     // Draw Graph
@@ -88,7 +89,7 @@ function getGraphConfig(data, title) {
                 },
                 tooltip: {
                     enabled: true,
-                    intersect: true,
+                    intersect: false,
                     mode: 'nearest',
                 },
                 annotation: {
@@ -198,16 +199,22 @@ function get2dGraphData() {
 function get3dGraphData() {
     const leftData = {
         labels: labels,
-        data: graphAngles[6],
-        borderColor: 'rgb(66, 135, 245)',
-        borderWidth: 2
+        datasets: [{
+            label: '3D Angles',
+            data: graphAngles[6],
+            borderColor: 'rgb(66, 135, 245)',
+            borderWidth: 2
+        }]
     };
 
     const rightData = {
         labels: labels,
-        data: graphAngles[7],
-        borderColor: 'rgb(66, 135, 245)',
-        borderWidth: 2
+        datasets: [{
+            label: '3D Angles',
+            data: graphAngles[7],
+            borderColor: 'rgb(66, 135, 245)',
+            borderWidth: 2
+        }]
     };
 
     return { leftData, rightData };
