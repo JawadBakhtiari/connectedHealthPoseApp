@@ -1,12 +1,10 @@
 import cv2
 import json
-import matplotlib
-matplotlib.use('Agg')
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from data.datastore.datastore import DataStore
 from data.visualise import create_2D_visualisation
-from chart.Visualise import calculate_angles, generate_plot_for_all_frames
+from chart.Visualise import calculate_angles
 
 def input_frame(request):
     return render(request, 'chart/input.html')
@@ -55,9 +53,9 @@ def result(request):
     poseData = store.get_poses()
     angleData = calculate_angles(joint, dimension, poseData)
 
+    joints = json.dumps(joint)
     dimensions = json.dumps(dimension)
     angles = json.dumps(angleData)
     frames = json.dumps(create_2D_visualisation(poseData, cap))
-    charts = "null"
 
-    return render(request, 'result.html', {'frames': frames, 'charts': charts, 'angles': angles, 'dimension': dimensions}, content_type='text/html')
+    return render(request, 'result.html', {'frames': frames, 'angles': angles, 'joint': joints, 'dimension': dimensions}, content_type='text/html')

@@ -7,52 +7,22 @@
 import { getFullUrl } from './helper.js';
 
 
+
 // Navigation Bar
 let tablePopupOpened = false;
 const numFrames = frameData.length;
 const formatedAngles = formatAngleData();
 const tableAngles = formatedAngles.tableAngles;
-const graphAngles = formatedAngles.graphAngle;
+const graphAngles = formatedAngles.graphAngles;
 const labels = getGraphLabels();
 
 // Draw table and graph
 draw()
 
-// Back Button
-document.getElementById('back-button').addEventListener('click', function() {
-    const url = getFullUrl(`/chart`);
-    window.location.href = url;
-});
-
-// Table Button
-document.getElementById('table-button').addEventListener('click', function() {
-    if (!tablePopupOpened) {
-        tablePopupOpened = true;
-        document.getElementById('table-button').style.backgroundColor = "#6693F5";
-        window.location.href = `http://127.0.0.1:8000/chart/result/#popup-table`;
-    } else {
-        tablePopupOpened = false;
-        document.getElementById('table-button').style.backgroundColor = "white";
-        window.location.href = `http://127.0.0.1:8000/chart/result/#`;
-    }
-});
-
-document.getElementById('popup-table-close-button').addEventListener('click', function() {
-    document.getElementById('table-button').style.backgroundColor = "white";
-});
-
-window.addEventListener('hashchange', function() {
-    if (window.location.href.includes('popup-table')) {
-        document.getElementById('table-button').style.backgroundColor = "#6693F5";
-    } else {
-        document.getElementById('table-button').style.backgroundColor = "white";
-    }
-});
-
 // Format Angle Data
 function formatAngleData() {
     let tableAngles = [];
-    let graphAngle = [];
+    let graphAngles = [];
     for (let i = 0; i < 8; i++) {
         let currentTableAngles = [];
         let currentGraphAngles = [];
@@ -62,10 +32,10 @@ function formatAngleData() {
             currentGraphAngles.push(rounded);
         }
         tableAngles.push(currentTableAngles);
-        graphAngle.push(currentGraphAngles);
+        graphAngles.push(currentGraphAngles);
     }
 
-    return { tableAngles, graphAngle };
+    return { tableAngles, graphAngles };
 }
 
 // Get Graph Labels
@@ -80,18 +50,22 @@ function getGraphLabels() {
 
 // Draw table and graph
 function draw() {
-    let data;
+    let data, leftData, rightData, leftConfig, rightConfig;
     if (dimensionData === '2d') {
         drawTable2d();
         data = get2dGraphData();
+        leftData = data.leftData;
+        rightData = data.rightData;
     } else {
         drawTable3d();
         data = get3dGraphData();
+        leftData = data.leftData;
+        rightData = data.rightData;
     }
 
     // Draw Graph
-    const leftConfig = getGraphConfig(data);
-    const rightConfig = getGraphConfig(data);
+    leftConfig = getGraphConfig(leftData, "Left " + jointData);
+    rightConfig = getGraphConfig(rightData, "Right " + jointData);
     const leftAngleChart = document.getElementById('chart-left');
     const rightAngleChart = document.getElementById('chart-right');
     new Chart(leftAngleChart, leftConfig);
@@ -99,7 +73,7 @@ function draw() {
 }
 
 // Get Graph Configuration
-function getGraphConfig(data, side, ) {
+function getGraphConfig(data, title) {
     return {
         type: 'line',
         data: data,
@@ -107,7 +81,7 @@ function getGraphConfig(data, side, ) {
             plugins: {
                 title: {
                     display: true,
-                    text: side
+                    text: title
                 }
             },
             scales: {
@@ -123,6 +97,17 @@ function getGraphConfig(data, side, ) {
                         text: 'Angle (°)'
                     },
                 }
+            },
+            zoom: {
+                zoom: {
+                  wheel: {
+                    enabled: true,
+                  },
+                  pinch: {
+                    enabled: true
+                  },
+                  mode: 'xy'
+                }
             }
         }
     };
@@ -130,33 +115,55 @@ function getGraphConfig(data, side, ) {
 
 // Get Graph Data
 function get2dGraphData() {
-    return {
+    const leftData = {
         labels: labels,
         datasets: [{
             label: 'Roll',
-            data: angleData[0],
+            data: graphAngles[0],
             borderColor: 'red',
     
         },
         {
             label: 'Pitch',
-            data: angleData[1],
+            data: graphAngles[1],
             borderColor: 'green',
-            // fill: false,
-            // borderWidth: 2
         },
         {
             label: 'Yaw',
-            data: angleData[2],
+            data: graphAngles[2],
             borderColor: 'blue',
-            // fill: false,
-            // borderWidth: 2
         }],
         options: {
             fill: false,
             borderWidth: 2
         }
     };
+
+    const rightData = {
+        labels: labels,
+        datasets: [{
+            label: 'Roll',
+            data: graphAngles[3],
+            borderColor: 'red',
+    
+        },
+        {
+            label: 'Pitch',
+            data: graphAngles[4],
+            borderColor: 'green',
+        },
+        {
+            label: 'Yaw',
+            data: graphAngles[5],
+            borderColor: 'blue',
+        }],
+        options: {
+            fill: false,
+            borderWidth: 2
+        }
+    };
+
+    return { leftData, rightData };
 }
 
 function get3dGraphData() {
@@ -189,6 +196,7 @@ function get3dGraphData() {
     };
 }
 
+// Draw Table
 function drawTable2d() {
     let tbl = document.getElementById('angle-table-left');
 
@@ -361,184 +369,216 @@ function drawTable3d() {
     }
 }
 
+// Back Button
+document.getElementById('back-button').addEventListener('click', function() {
+    const url = getFullUrl(`/chart`);
+    window.location.href = url;
+});
 
-// // Control Bar
-// let currentFrame = 0;
-// let previousFrame = 0;
-// let paused = false;
-// let loop = false;
-// let forward = true;
-// let speed = 2;
-// let delay = 100;
-// updateFrame()
+// Table Button
+document.getElementById('table-button').addEventListener('click', function() {
+    if (!tablePopupOpened) {
+        tablePopupOpened = true;
+        document.getElementById('table-button').style.backgroundColor = "#6693F5";
+        window.location.href = `http://127.0.0.1:8000/chart/result/#popup-table`;
+    } else {
+        tablePopupOpened = false;
+        document.getElementById('table-button').style.backgroundColor = "white";
+        window.location.href = `http://127.0.0.1:8000/chart/result/#`;
+    }
+});
 
-// document.getElementById('right-control-button').addEventListener('click', function() {
-//     document.getElementById('right-control-button').hidden = true;
-//     document.getElementById('left-control-button').hidden = false;
-//     forward = false;
-// });
+document.getElementById('popup-table-close-button').addEventListener('click', function() {
+    document.getElementById('table-button').style.backgroundColor = "white";
+});
 
-// document.getElementById('left-control-button').addEventListener('click', function() {
-//     document.getElementById('left-control-button').hidden = true;
-//     document.getElementById('right-control-button').hidden = false;
-//     forward = true;
-// });
+window.addEventListener('hashchange', function() {
+    if (window.location.href.includes('popup-table')) {
+        document.getElementById('table-button').style.backgroundColor = "#6693F5";
+    } else {
+        document.getElementById('table-button').style.backgroundColor = "white";
+    }
+});
 
-// document.getElementById('rewind-control-button').addEventListener('click', function() {
-//     currentFrame = 0;
-//     updateFrame();
-// });
 
-// document.getElementById('backward-control-button').addEventListener('click', function() {
-//     currentFrame--;
-//     if (currentFrame < 0) {
-//         currentFrame = numFrames - 1
-//     }
-//     updateFrame();
-// });
 
-// document.getElementById('play-control-button').addEventListener('click', function() {
-//     document.getElementById('play-control-button').hidden = true;
-//     document.getElementById('pause-control-button').hidden = false;
-//     paused = false;
-//     disableForwardBackward()
-//     doGraphVisualisation()
-// });
+// Control Bar
+let currentFrame = 0;
+let previousFrame = 0;
+let paused = false;
+let loop = false;
+let forward = true;
+let speed = 2;
+let delay = 100;
+updateFrame()
 
-// document.getElementById('pause-control-button').addEventListener('click', function() {
-//     document.getElementById('pause-control-button').hidden = true;
-//     document.getElementById('play-control-button').hidden = false;
-//     paused = true;
-//     enableForwardBackward()
-// });
+document.getElementById('right-control-button').addEventListener('click', function() {
+    document.getElementById('right-control-button').hidden = true;
+    document.getElementById('left-control-button').hidden = false;
+    forward = false;
+});
 
-// document.getElementById('forward-control-button').addEventListener('click', function() {
-//     currentFrame++;
-//     if (currentFrame >= numFrames) {
-//         currentFrame = 0
-//     }
-//     updateFrame();
-// });
+document.getElementById('left-control-button').addEventListener('click', function() {
+    document.getElementById('left-control-button').hidden = true;
+    document.getElementById('right-control-button').hidden = false;
+    forward = true;
+});
 
-// document.getElementById('loop-control-button').addEventListener('click', function() {
-//     if (loop) {
-//         loop = false;
-//         document.getElementById('loop-control-button').style.backgroundColor = "#ADD8E6";
-//     } else {
-//         loop = true;
-//         document.getElementById('loop-control-button').style.backgroundColor = "#6693F5";
-//     }
-// });
+document.getElementById('rewind-control-button').addEventListener('click', function() {
+    currentFrame = 0;
+    updateFrame();
+});
 
-// document.getElementById('speed-control-button').addEventListener('click', function() {
-//     speed++;
-//     if (speed > 4) {
-//         speed = 0
-//     }
+document.getElementById('backward-control-button').addEventListener('click', function() {
+    currentFrame--;
+    if (currentFrame < 0) {
+        currentFrame = numFrames - 1
+    }
+    updateFrame();
+});
 
-//     switch (speed) {
-//         case (0):
-//             document.getElementById('speed-control-button').innerHTML = "x0.25";
-//             delay = 400;
-//             break;
-//         case (1):
-//             document.getElementById('speed-control-button').innerHTML = "x0.5";
-//             delay = 200;
-//             break;
-//         case (2):
-//             document.getElementById('speed-control-button').innerHTML = "x1";
-//             delay = 100;
-//             break;
-//         case (3):
-//             document.getElementById('speed-control-button').innerHTML = "x2";
-//             delay = 50;
-//             break;
-//         case (4):
-//             document.getElementById('speed-control-button').innerHTML = "x4";
-//             delay = 25;
-//             break;
-//     }
-// });
+document.getElementById('play-control-button').addEventListener('click', function() {
+    document.getElementById('play-control-button').hidden = true;
+    document.getElementById('pause-control-button').hidden = false;
+    paused = false;
+    disableForwardBackward()
+    doGraphVisualisation()
+});
 
-// const sleep = (delay) => {
-//     return new Promise(resolve => setTimeout(resolve, delay))
-// }
+document.getElementById('pause-control-button').addEventListener('click', function() {
+    document.getElementById('pause-control-button').hidden = true;
+    document.getElementById('play-control-button').hidden = false;
+    paused = true;
+    enableForwardBackward()
+});
 
-// const doGraphVisualisation = async() => {
-//     while (true) {
-//         if (paused) {
-//             currentFrame = previousFrame;
-//             break;
-//         }
+document.getElementById('forward-control-button').addEventListener('click', function() {
+    currentFrame++;
+    if (currentFrame >= numFrames) {
+        currentFrame = 0
+    }
+    updateFrame();
+});
 
-//         updateFrame()
+document.getElementById('loop-control-button').addEventListener('click', function() {
+    if (loop) {
+        loop = false;
+        document.getElementById('loop-control-button').style.backgroundColor = "#ADD8E6";
+    } else {
+        loop = true;
+        document.getElementById('loop-control-button').style.backgroundColor = "#6693F5";
+    }
+});
 
-//         if (forward) {
-//             previousFrame = currentFrame;
-//             currentFrame++;
+document.getElementById('speed-control-button').addEventListener('click', function() {
+    speed++;
+    if (speed > 4) {
+        speed = 0
+    }
 
-//             if (currentFrame >= numFrames) {
-//                 currentFrame = 0;
+    switch (speed) {
+        case (0):
+            document.getElementById('speed-control-button').innerHTML = "x0.25";
+            delay = 400;
+            break;
+        case (1):
+            document.getElementById('speed-control-button').innerHTML = "x0.5";
+            delay = 200;
+            break;
+        case (2):
+            document.getElementById('speed-control-button').innerHTML = "x1";
+            delay = 100;
+            break;
+        case (3):
+            document.getElementById('speed-control-button').innerHTML = "x2";
+            delay = 50;
+            break;
+        case (4):
+            document.getElementById('speed-control-button').innerHTML = "x4";
+            delay = 25;
+            break;
+    }
+});
+
+const sleep = (delay) => {
+    return new Promise(resolve => setTimeout(resolve, delay))
+}
+
+const doGraphVisualisation = async() => {
+    while (true) {
+        if (paused) {
+            currentFrame = previousFrame;
+            break;
+        }
+
+        updateFrame()
+
+        if (forward) {
+            previousFrame = currentFrame;
+            currentFrame++;
+
+            if (currentFrame >= numFrames) {
+                currentFrame = 0;
     
-//                 if (!loop) {
-//                     updatePlayPause();
-//                     break;
-//                 }
-//             }
-//         } else {
-//             previousFrame = currentFrame;
-//             currentFrame--;
+                if (!loop) {
+                    updatePlayPause();
+                    break;
+                }
+            }
+        } else {
+            previousFrame = currentFrame;
+            currentFrame--;
 
-//             if (currentFrame < 0) {
-//                 currentFrame = numFrames - 1;
+            if (currentFrame < 0) {
+                currentFrame = numFrames - 1;
     
-//                 if (!loop) {
-//                     updatePlayPause();
-//                     break;
-//                 }
-//             }
-//         }
+                if (!loop) {
+                    updatePlayPause();
+                    break;
+                }
+            }
+        }
         
-//         await sleep(delay);
-//     }
-// };
+        await sleep(delay);
+    }
+};
 
-// function updateFrame() {
-//     const frameBase64Img = frameData[currentFrame];
-//     const chartBase46Img = chartData[currentFrame];
-//     const image = document.getElementById("animation");
-//     image.src = "data:image/png;base64," + frameBase64Img;
-//     const chart = document.getElementById("chart")
-//     chart.src =  "data:image/png;base64," + chartBase46Img
-// }
+function updateFrame() {
+    const frameBase64Img = frameData[currentFrame];
+    const chartBase46Img = chartData[currentFrame];
+    const image = document.getElementById("animation");
+    image.src = "data:image/png;base64," + frameBase64Img;
+    const chart = document.getElementById("chart")
+    chart.src =  "data:image/png;base64," + chartBase46Img
+}
 
-// function disableForwardBackward() {
-//     document.getElementById('backward-control-button').disabled = true;
-//     document.getElementById('backward-control-button').style.borderColor = "#D3D3D3";
-//     document.getElementById('backward-control-button').style.backgroundColor = "#E6F7FD";
-//     document.getElementById('backward-control-button').style.cursor = "default";
-//     document.getElementById('forward-control-button').disabled = true;
-//     document.getElementById('forward-control-button').style.borderColor = "#D3D3D3";
-//     document.getElementById('forward-control-button').style.backgroundColor = "#E6F7FD";
-//     document.getElementById('forward-control-button').style.cursor = "default";
-// }
+function disableForwardBackward() {
+    document.getElementById('backward-control-button').disabled = true;
+    document.getElementById('backward-control-button').style.borderColor = "#D3D3D3";
+    document.getElementById('backward-control-button').style.backgroundColor = "#E6F7FD";
+    document.getElementById('backward-control-button').style.cursor = "default";
+    document.getElementById('forward-control-button').disabled = true;
+    document.getElementById('forward-control-button').style.borderColor = "#D3D3D3";
+    document.getElementById('forward-control-button').style.backgroundColor = "#E6F7FD";
+    document.getElementById('forward-control-button').style.cursor = "default";
+}
 
-// function enableForwardBackward() {
-//     document.getElementById('backward-control-button').disabled = false;
-//     document.getElementById('backward-control-button').style.borderColor = "#ADD8E6";
-//     document.getElementById('backward-control-button').style.backgroundColor = "#ADD8E6";
-//     document.getElementById('backward-control-button').style.cursor = "pointer";
-//     document.getElementById('forward-control-button').disabled = false;
-//     document.getElementById('forward-control-button').style.borderColor = "#ADD8E6";
-//     document.getElementById('forward-control-button').style.backgroundColor = "#ADD8E6";
-//     document.getElementById('forward-control-button').style.cursor = "pointer";
+function enableForwardBackward() {
+    document.getElementById('backward-control-button').disabled = false;
+    document.getElementById('backward-control-button').style.borderColor = "#ADD8E6";
+    document.getElementById('backward-control-button').style.backgroundColor = "#ADD8E6";
+    document.getElementById('backward-control-button').style.cursor = "pointer";
+    document.getElementById('forward-control-button').disabled = false;
+    document.getElementById('forward-control-button').style.borderColor = "#ADD8E6";
+    document.getElementById('forward-control-button').style.backgroundColor = "#ADD8E6";
+    document.getElementById('forward-control-button').style.cursor = "pointer";
     
-// }
+}
 
-// function updatePlayPause() {
-//     document.getElementById('pause-control-button').hidden = true;
-//     document.getElementById('play-control-button').hidden = false;
-//     paused = false;
-//     enableForwardBackward()
-//     updateFrame()
-// }
+function updatePlayPause() {
+    document.getElementById('pause-control-button').hidden = true;
+    document.getElementById('play-control-button').hidden = false;
+    paused = false;
+    enableForwardBackward()
+    updateFrame()
+}

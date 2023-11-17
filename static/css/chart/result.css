@@ -15,16 +15,28 @@
     margin-top: 20px;
     width: 380px;
     height: 550px;
-    border-radius: 15px;
     margin-right: 15px;
-    border: 1px green solid;
+    border: solid;
+    border-color: lightblue;
+    border-radius: 15px;
 }
 
 #animation-holder #chart {
-    width: 730px;
+    width: 800px;
     height: 600px;
+    max-height: 600px;
     border-radius: 15px;
-    border: 1px blue solid;
+}
+
+.subcharts {
+    max-height: 48%;
+    border: solid;
+    border-color: lightblue;
+    border-radius: 15px;
+}
+
+#chart-right {
+    margin-top: 20px;
 }
 
 #animation-title {
@@ -35,8 +47,8 @@
 .control-group {
     border: solid;
     border-color: lightblue;
-    padding: 15px;
     border-radius: 10px;
+    padding: 15px;
     display: flex;
     position: absolute;
     flex-direction: row;
