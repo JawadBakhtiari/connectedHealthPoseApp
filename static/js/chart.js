@@ -600,27 +600,3 @@ function updatePlayPause() {
     enableForwardBackward()
     updateFrame()
 }
-
-document.addEventListener('mousedown', (event) => {
-    const annotation = leftChart.getAnnotation('');
-
-    if (annotation && annotation.options.draggable) {
-      const mouseX = event.clientX;
-      const mouseY = event.clientY;
-
-      const canvasRect = ctx.canvas.getBoundingClientRect();
-      const annotationY = myChart.scales['y-axis-0'].getPixelForValue(annotation.value);
-
-      if (
-        mouseX >= canvasRect.left &&
-        mouseX <= canvasRect.right &&
-        mouseY >= canvasRect.top &&
-        mouseY <= canvasRect.bottom &&
-        mouseY >= annotationY - 5 &&
-        mouseY <= annotationY + 5
-      ) {
-        isDragging = true;
-      }
-    }
-  });
-
