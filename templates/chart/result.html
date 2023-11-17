@@ -60,7 +60,10 @@
         
         <div id="animation-holder">
             <img id="animation" alt="Animation pending ..." />
-            <img id="chart" alt="Chart pending ..." />
+            <div id="chart" alt="Chart pending ...">
+                <canvas id="chart-left"></canvas>
+                <canvas id="chart-right"></canvas>
+            </div>
         </div>
 
         <div class="control-group" id="animation-control">
@@ -121,6 +124,9 @@
 
 {% block scripts %}
     {{ block.super }}
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.4.1/chart.js">
+    </script>
     <script>
         const frameData = JSON.parse('{{ frames|safe }}');
         const chartData = JSON.parse('{{ charts|safe }}');

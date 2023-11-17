@@ -58,6 +58,6 @@ def result(request):
     dimensions = json.dumps(dimension)
     angles = json.dumps(angleData)
     frames = json.dumps(create_2D_visualisation(poseData, cap))
-    charts = json.dumps(generate_plot_for_all_frames(joint, dimension, len(poseData), angleData))
+    charts = "null"
 
     return render(request, 'result.html', {'frames': frames, 'charts': charts, 'angles': angles, 'dimension': dimensions}, content_type='text/html')

@@ -1,24 +1,30 @@
 .centered-vertical-container {
-    height: 775px;
+    height: 825px;
 }
 
 #animation-holder {
     display: flex;
     justify-content: center;
     padding-block: 15px;
+    border: 1px red solid;
+    width: 80vw;
+    height: 63vh;
 }
 
 #animation-holder #animation {
+    margin-top: 20px;
     width: 380px;
     height: 550px;
     border-radius: 15px;
     margin-right: 15px;
+    border: 1px green solid;
 }
 
 #animation-holder #chart {
     width: 730px;
-    height: 550px;
+    height: 600px;
     border-radius: 15px;
+    border: 1px blue solid;
 }
 
 #animation-title {
