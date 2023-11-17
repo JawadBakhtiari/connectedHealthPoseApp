@@ -167,33 +167,17 @@ function get2dGraphData() {
 }
 
 function get3dGraphData() {
-    return {
+    const leftData = {
         labels: labels,
-        datasets: [{
-            label: 'Roll',
-            data: angleData[0],
-            borderColor: 'red',
-    
-        },
-        {
-            label: 'Pitch',
-            data: angleData[1],
-            borderColor: 'green',
-            // fill: false,
-            // borderWidth: 2
-        },
-        {
-            label: 'Yaw',
-            data: angleData[2],
-            borderColor: 'blue',
-            // fill: false,
-            // borderWidth: 2
-        }],
-        options: {
-            fill: false,
-            borderWidth: 2
-        }
+        data: graphAngles[6]
     };
+
+    const rightData = {
+        labels: labels,
+        data: graphAngles[7]
+    };
+
+    return { leftData, rightData };
 }
 
 // Draw Table
