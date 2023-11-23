@@ -170,9 +170,8 @@ export default function SecondScreen({ route, navigation }) {
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       if (newPoses.length != 0) {
         poses.push(newPoses);
-        // encodeJPG(tensor);
-        encodeRGB(tensor);
-        //setPoses(newPoses);
+        encodeJPG(tensor);
+        // encodeRGB(tensor);
       }
 
       // Disposes image tensor to free memery resources after used
@@ -202,7 +201,7 @@ export default function SecondScreen({ route, navigation }) {
   const sendLastData = async () => {
     try {
       const response = Axios.post(
-        "http://192.168.0.137:8000/data/frames/upload/",
+        "http://172.20.10.5:8000/data/frames/upload/",
         {
           // uid: "ahmad232",
           sid,
@@ -224,7 +223,7 @@ export default function SecondScreen({ route, navigation }) {
   const sendData = async () => {
     try {
       const response = Axios.post(
-        "http://192.168.0.137:8000/data/frames/upload/",
+        "http://172.20.10.5:8000/data/frames/upload/",
         {
           // uid: "ahmad232",
           sid,
@@ -299,15 +298,15 @@ export default function SecondScreen({ route, navigation }) {
 
   const renderExitButton = () => {
     return (
-      <View style={styles.ExitButton} onTouchEnd={() =>
-        navigation.navigate("Home", { language: "french" })
-      }>
+      <View
+        style={styles.ExitButton}
+        onTouchEnd={() => navigation.navigate("Home", { language: "french" })}
+      >
         <Image
-          source={require('./assets/exitB.png')}
+          source={require("./assets/exitB.png")}
           style={styles.ExitImage}
         />
       </View>
-      
     );
   };
 
@@ -340,10 +339,8 @@ export default function SecondScreen({ route, navigation }) {
       <View style={styles.container}>
         <View style={styles.top}>
           {renderExitButton()}
-          <View style={styles.timercontain}>
-            {rendertimer()}
-          </View>
-          <View style={{flex: 1}}></View>
+          <View style={styles.timercontain}>{rendertimer()}</View>
+          <View style={{ flex: 1 }}></View>
         </View>
         <Camera ref={cameraRef} style={styles.camera} type={cameraType} />
         <View style={styles.bottom}>
@@ -418,7 +415,7 @@ const styles = StyleSheet.create({
   ExitButton: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   ExitImage: {
     width: 40,
@@ -444,7 +441,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: 100,
     height: 35,
-
   },
   notactiveTimer: {
     top: 20,
