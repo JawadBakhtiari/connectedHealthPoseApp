@@ -17,15 +17,16 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView
 from django.urls import include
+from data.views import visualise_2D
 
 from data.views import dashboard
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('data/', include('data.urls')),
+    path('chart/', include('chart.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('', RedirectView.as_view(url='accounts/login')),
     path('dashboard/', dashboard, name='dashboard'),
+    path('', visualise_2D, name='visualise_2D'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

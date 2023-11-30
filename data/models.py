@@ -22,6 +22,7 @@ class Session(models.Model):
     name = models.TextField(max_length=100, help_text='Enter the name of this session: ')
     date = models.DateTimeField(help_text='Enter date and time that this session started: ')
     description = models.TextField(max_length=1000, help_text='Enter description of the session: ')
+    clip_num = models.IntegerField(default=1)
 
     def __str__(self) -> str:
         """String for representing the Model object."""

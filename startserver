@@ -1,0 +1,24 @@
+#!/bin/dash
+
+if [ "$#" -ge 2 ]; then
+    echo "Usage: $0 <port(optionally)>"
+    exit 1
+fi
+
+# use port 8000, unless a command line argument is provided, in which case use that
+port="8000"
+if [ "$#" -eq 1 ]; then
+    port="$1"
+fi
+
+# find machine ip address within LAN
+OS=$(uname)
+if [ "$OS" = "Linux" ]; then
+    ip=$(hostname -I | xargs)
+elif [ "$OS" = "Darwin" ]; then
+    ip=$(ipconfig getifaddr en0)
+fi
+
+# add new known host (if necessary) and start the server
+./addknownhost.py "$ip"
+python3 manage.py runserver "$ip":"$port"

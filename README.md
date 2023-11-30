@@ -48,10 +48,16 @@ The application has two main view functions: `frames_upload` and `visualise_coor
     python3 manage.py makemigrations
     ```
 5. Run the server:
+
+    Local (on loopback IP address):
     ```
     python3 manage.py runserver
     ```
-6. Visit `localhost:8000` on your web browser to start using the application.
+    On IP address within LAN:
+    ```
+    ./startserver
+    ```
+6. Visit link in server terminal output to view application in browser.
 
 ## Future Work
 
