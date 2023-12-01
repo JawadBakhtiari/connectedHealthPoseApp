@@ -183,9 +183,11 @@ const sendUserInit = async (values, navigation) => {
   let uid = "";
   let sid = "";
 
+  // console.log("http://django:8000/data/api/init_user/");
+
   try {
     const response = await Axios.post(
-      "http://" + values.code + "/data/api/init_user/",
+      "http://" + code + "/data/api/init_user/",
       {
         first_name: values.first_name,
         last_name: values.last_name,
@@ -202,7 +204,7 @@ const sendUserInit = async (values, navigation) => {
 
   try {
     const response = await Axios.post(
-      "http://" + values.code + "/data/session/init/",
+      "http://" + code + "/data/session/init/",
       {
         session: {
           name: values.session_name,
