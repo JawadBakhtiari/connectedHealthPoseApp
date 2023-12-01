@@ -201,14 +201,17 @@ export default function SecondScreen({ route, navigation }) {
 
   const sendLastData = async () => {
     try {
-      const response = Axios.post("http://" + code + "/data/frames/upload/", {
-        // uid: "ahmad232",
-        sid,
-        // clipNum: "1",
-        clipFinished: true,
-        poses,
-        tensorAsArray,
-      });
+      const response = Axios.post(
+        "http://192.168.0.137:8000/data/frames/upload/",
+        {
+          // uid: "ahmad232",
+          sid,
+          // clipNum: "1",
+          clipFinished: true,
+          poses,
+          tensorAsArray,
+        }
+      );
       // Empty Data
       poses.splice(0, poses.length);
       tensorAsArray.splice(0, tensorAsArray.length);
@@ -220,14 +223,17 @@ export default function SecondScreen({ route, navigation }) {
 
   const sendData = async () => {
     try {
-      const response = Axios.post("http://" + code + "/data/frames/upload/", {
-        // uid: "ahmad232",
-        sid,
-        // clipNum: "1",
-        clipFinished: false,
-        poses,
-        tensorAsArray,
-      });
+      const response = Axios.post(
+        "http://192.168.0.137:8000/data/frames/upload/",
+        {
+          // uid: "ahmad232",
+          sid,
+          // clipNum: "1",
+          clipFinished: false,
+          poses,
+          tensorAsArray,
+        }
+      );
       // Empty Data
       poses.splice(0, poses.length);
       tensorAsArray.splice(0, tensorAsArray.length);
