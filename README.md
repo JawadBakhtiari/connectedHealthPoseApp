@@ -7,6 +7,7 @@ Written in Django.
 
 ## Whole application and frontend
 To clone and run the entire application (this repository and the associated mobile application), go [here](https://github.com/SIXRIP7ER/connectedHealthApp).
+
 The frontend (mobile application) can be found [here](https://github.com/realRickyNguyen/ExpoCAMwithTensor).
 
 ## Run connectedhealth
