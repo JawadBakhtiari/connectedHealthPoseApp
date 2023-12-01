@@ -11,7 +11,7 @@ To clone and run the entire application (this repository and the associated mobi
 The frontend (mobile application) can be found [here](https://github.com/realRickyNguyen/ExpoCAMwithTensor).
 
 ## Run connectedhealth
-To run the entire application, it is prefereable to follow the instructions [here](https://github.com/SIXRIP7ER/connectedHealthApp). However, if you want to clone and run this repository in isolation, this can be done as follows:
+To run the **entire application**, it is prefereable to follow the instructions [here](https://github.com/SIXRIP7ER/connectedHealthApp). However, if you want to clone and run this repository in isolation, this can be done as follows:
 
 First:
 ```
