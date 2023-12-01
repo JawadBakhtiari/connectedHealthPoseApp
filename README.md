@@ -1,7 +1,7 @@
 # connectedhealth
 Backend application for Connected Health VIP UNSW, a web application aimed at providing healthcare professionals conducting remote sessions with more meaningful data, so that they can provide a higher level of care to clients in these sessions.
 
-Video and [pose data](https://viso.ai/deep-learning/pose-estimation-ultimate-overview/#:~:text=Accordingly%2C%20pose%20estimation%20allows%20programs,of%20a%20person%20or%20object.) received from a [mobile application](https://github.com/realRickyNguyen/ExpoCAMwithTensor) running on a patient's phone is processed and stored. These clips may be viewed by the healthcare professional at a later point, with the associated keypoints and graph indicating the angles between a given joint and the rest of the body at any given time.
+Video and [pose data](https://viso.ai/deep-learning/pose-estimation-ultimate-overview) received from a [mobile application](https://github.com/realRickyNguyen/ExpoCAMwithTensor) running on a patient's phone is processed and stored. These clips may be viewed by the healthcare professional at a later point, with the associated keypoints and graph indicating the angles between a given joint and the rest of the body at any given time.
 
 Written in Django.
 
