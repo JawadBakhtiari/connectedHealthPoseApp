@@ -6,3 +6,4 @@ db.sqlite3
 media
 datastore/sessions/images/*
 datastore/sessions/poses/*
+ip.txt
