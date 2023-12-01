@@ -15,6 +15,7 @@ from data.visualise import create_2D_visualisation, create_3D_visualisation
 
 matplotlib.use('Agg')
 
+
 def dashboard(request):
     user = request.user
     involvements = InvolvedIn.objects.filter(user=user)
@@ -28,7 +29,7 @@ def user_init(request):
     '''Initialise a new user.'''
     if request.method == 'POST':
         data = json.loads(request.body)
-        
+
         # Get user details from request data
         first_name = data.get('first_name')
         last_name = data.get('last_name')
@@ -46,19 +47,20 @@ def user_init(request):
     # Handle non-POST requests
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
-    
+
+
 @csrf_exempt
 def session_init(request):
     '''Initialise session metadata for a newly started session.'''
     data = json.loads(request.body)
 
-    #uids = data.get('uids')
+    # uids = data.get('uids')
     session = data.get('session')
 
     # NOTE -> skip error checking for demo
     # First, ensure every user that is involved in this session exists
-    #users = User.objects.filter(id__in=uids)
-    #if len(users) != len(uids):
+    # users = User.objects.filter(id__in=uids)
+    # if len(users) != len(uids):
     #    return response("one or more invalid users provided", status=status.HTTP_401_UNAUTHORIZED)
 
     # Create and save new session
@@ -73,7 +75,7 @@ def session_init(request):
 
     # NOTE -> skip for demo
     # Record each user as being involved in this session
-    #for user in users:
+    # for user in users:
     #    InvolvedIn(id=str(uuid.uuid4()), user=user, session=new_session).save()
 
     return response(
@@ -83,27 +85,29 @@ def session_init(request):
     )
 
 # Decorator is just to mitigate some cookies problem that was preventing testing
+
+
 @csrf_exempt
 def frames_upload(request):
     '''Receive frame data from the frontend and store this data persistently in the backend.'''
     data = json.loads(request.body)
 
-    #uid = data.get('uid')
+    # uid = data.get('uid')
     sid = data.get('sid')
     clipFinished = data.get('clipFinished')
     poses = data.get('poses')
     images = data.get('tensorAsArray')
 
     # NOTE -> skip error checking for demonstration
-    #user = User.objects.filter(id=uid)
-    #if not len(user):
+    # user = User.objects.filter(id=uid)
+    # if not len(user):
     #    return response("user with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
-    #session = Session.objects.filter(id=sid)
-    #if not len(session):
+    # session = Session.objects.filter(id=sid)
+    # if not len(session):
     #    return response("session with this id does not exist", status=status.HTTP_401_UNAUTHORIZED)
-    #if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
+    # if not len(InvolvedIn.objects.filter(session=sid, user=uid)):
     #    return response("user was not involved in this session", status=status.HTTP_403_FORBIDDEN)
-    
+
     clip_num = sm.get_clip_num(sid)
     store = DataStore(sid, clip_num)
     store.set(poses, images)
@@ -124,8 +128,8 @@ def visualise_2D(request):
     #           don't expect user id in request currently
 
     # use sample data if request is empty (happens when page is first loaded by url)
-    sid = "ccbe340e-f1db-4037-8f91-257bcac2c2f9"
-    clip_num = "1"
+    sid = "215eaafc-41ba-40a2-9a8a-57b73e61b2c0"
+    clip_num = "2"
     if request.GET:
         # if request non-empty, use this data
         sid = request.GET.get('sid')
@@ -159,6 +163,6 @@ def visualise_3D(request):
     if not pose_store.populate():
         print("Error: Pose data not found in Azure Blob Storage.")
         return render(request, '3D_visualise2D.html', {'image': None})
-    
+
     frames = json.dumps(create_3D_visualisation(pose_store.get()))
     return render(request, '3D_visualise2D.html', {'frames': frames})

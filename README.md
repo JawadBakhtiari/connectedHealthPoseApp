@@ -1,5 +1,7 @@
 # connectedhealth
+
 Backend application for Connected Health VIP UNSW
+
 # BlazePose Analysis App
 
 This is a web-based application that aids physicians in analysing their patients' health remotely. It is built using Django for backend operations and uses Azure Blob Storage for persistent data storage. The application analyzes BlazePose keypoints sent by the frontend, which are then stored and can be visualized by the physicians.
@@ -27,36 +29,43 @@ The application has two main view functions: `frames_upload` and `visualise_coor
 ## How to Use
 
 1. Clone the repository:
-    ```
-    git clone https://github.com/nick-maiden/connectedhealth/tree/main/connectedhealth
-    ```
+   ```
+   git clone https://github.com/nick-maiden/connectedhealth/tree/main/connectedhealth
+   ```
 2. Navigate to the project directory:
-    ```
-    cd connectedhealth
-    ```
+   ```
+   cd connectedhealth
+   ```
 3. Install Django and other necessary libraries:
-    ```
-    pip install django
-    pip install azure-storage-blob
-    pip install orjson
-    pip install opencv-python
-    pip install plotly
-    ```
+   ```
+   pip install django
+   pip install djangorestframework
+   pip install azure-storage-blob
+   pip install orjson
+   pip install opencv-python
+   pip install plotly
+   pip install matplotlib
+   pip install mediapipe
+   ```
 4. Initialize the database:
-    ```
-    python3 manage.py migrate
-    python3 manage.py makemigrations
-    ```
+   ```
+   python3 manage.py migrate
+   python3 manage.py makemigrations
+   ```
 5. Run the server:
 
-    Local (on loopback IP address):
-    ```
-    python3 manage.py runserver
-    ```
-    On IP address within LAN:
-    ```
-    ./startserver
-    ```
+   Local (on loopback IP address):
+
+   ```
+   python3 manage.py runserver
+   ```
+
+   On IP address within LAN:
+
+   ```
+   ./startserver
+   ```
+
 6. Visit link in server terminal output to view application in browser.
 
 ## Future Work
