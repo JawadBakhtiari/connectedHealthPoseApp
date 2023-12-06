@@ -15,5 +15,4 @@ fi
 ./addknownhost.py $(cat "ip.txt")
 
 # add new known host (if necessary) and start the server
-./addknownhost.py "$ip"
-python3 manage.py runserver "$ip":"$port"
+python3 manage.py runserver
