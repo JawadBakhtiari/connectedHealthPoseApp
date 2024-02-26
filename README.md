@@ -5,13 +5,11 @@ Video and [pose data](https://viso.ai/deep-learning/pose-estimation-ultimate-ove
 
 Written in Django.
 
-## Whole application and frontend
-To clone and run the **entire application** (this repository and the associated mobile application), go [here](https://github.com/SIXRIP7ER/connectedHealthApp).
-
+# Front-end
 The frontend (mobile application) can be found [here](https://github.com/realRickyNguyen/ExpoCAMwithTensor).
 
-## Run connectedhealth
-To run the entire application, it is prefereable to follow the instructions [here](https://github.com/SIXRIP7ER/connectedHealthApp). However, if you want to clone and run this repository in isolation, this can be done as follows:
+## Run connectedhealth back-end
+To clone and run the back-end, this can be done as follows:
 
 First:
 ```
@@ -29,7 +27,7 @@ get local IP Address:
 insert local IP -> connectedhealth/settings -> ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.137']
 
 
-Now, to run with mobile application (using ip on local network):
+To run (using ip on local network):
 ```
 ./startserver
 ```
@@ -38,5 +36,6 @@ To run on loopback ip (note that this won't work when running with mobile applic
 ```
 python3 manage.py runserver
 ```
+Note the ip address and port number that is returned, this is needed on the front-end to connect to the back-end.
 
 Visit [here](https://github.com/realRickyNguyen/ExpoCAMwithTensor) to clone and run the mobile application.
