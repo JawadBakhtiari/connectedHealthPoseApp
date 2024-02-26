@@ -22,6 +22,13 @@ python3 manage.py migrate
 python3 manage.py makemigrations
 ```
 
+get local IP Address:
+```
+./getip
+```
+insert local IP -> connectedhealth/settings -> ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.137']
+
+
 Now, to run with mobile application (using ip on local network):
 ```
 ./startserver

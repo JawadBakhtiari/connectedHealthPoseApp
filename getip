@@ -1,0 +1,11 @@
+# find machine ip address within LAN
+OS=$(uname)
+if [ "$OS" = "Linux" ]; then
+    ip=$(hostname -I | xargs)
+    echo '\n':::::   Connection Code: $ip  :::::'\n'
+    echo $ip > connectedhealth/ip.txt
+elif [ "$OS" = "Darwin" ]; then
+    ip=$(ipconfig getifaddr en0)
+    echo '\n':::::   Connection Code = $ip   :::::'\n'
+    echo $ip > connectedhealth/ip.txt
+fi
