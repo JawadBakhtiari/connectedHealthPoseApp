@@ -20,5 +20,5 @@ elif [ "$OS" = "Darwin" ]; then
 fi
 
 # add new known host (if necessary) and start the server
-# ./addknownhost.py "$ip"
+./addknownhost.py "$ip"
 python3 manage.py runserver "$ip":"$port"
