@@ -53,11 +53,11 @@ export default function HomeScreen({ navigation }) {
   return (
     <Formik
       initialValues={{
-        code: "",  // Enter IP Address and port of back-end i.e 192.168.0.137:8000
-        first_name: "",
-        last_name: "",
-        session_name: "",
-        session_description: "",
+        code: "192.168.0.137:8000", // Enter IP Address and port of back-end i.e 192.168.0.137:8000
+        first_name: "Ahmad",
+        last_name: "Bakhtiari",
+        session_name: "Elbow Physio",
+        session_description: "elbow movement excercizes",
       }}
       validationSchema={SignupSchema}
       onSubmit={(values) => sendUserInit(values, navigation)}
