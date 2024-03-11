@@ -10,4 +10,4 @@ RUN yarn install --ignore-engines
 
 COPY . .
 
-CMD [ "npx", "expo", "start" ]
+CMD [ "yarn", "expo", "start"]
