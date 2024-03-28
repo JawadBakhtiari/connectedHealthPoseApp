@@ -1,6 +1,6 @@
 # Installation Instructions
 
-First clone Github
+First clone and navigate into Github Repository
 
 ```
 git clone https://github.com/JawadBakhtiari/connectedHealthPoseApp.git
