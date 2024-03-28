@@ -5,9 +5,6 @@ Video and [pose data](https://viso.ai/deep-learning/pose-estimation-ultimate-ove
 
 Written in Django.
 
-# Front-end
-The frontend (mobile application) can be found [here](https://github.com/realRickyNguyen/ExpoCAMwithTensor).
-
 ## Run connectedhealth back-end
 To clone and run the back-end, this can be done as follows:
 
@@ -37,5 +34,3 @@ To run on loopback ip (note that this won't work when running with mobile applic
 python3 manage.py runserver
 ```
 Note the ip address and port number that is returned, this is needed on the front-end to connect to the back-end.
-
-Visit [here](https://github.com/realRickyNguyen/ExpoCAMwithTensor) to clone and run the mobile application.
