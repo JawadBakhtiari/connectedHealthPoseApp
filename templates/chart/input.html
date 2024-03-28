@@ -1,0 +1,29 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Chart | Connected Health{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/chart/input.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="centered-vertical-container">
+    <div class="title-box">
+        Joint Angle Visualisation
+    </div>
+    <form method="POST" action="{% url 'result' %}" id="input-form">
+        {% csrf_token %}
+        <input type="text" id="sid" class="input-box" name="sid" placeholder="session ..." onfocus="this.placeholder=''" onblur="this.placeholder='session ...'">
+        <input type="text" id="clipNum" class="input-box" name="clipNum" placeholder="clip number ..." onfocus="this.placeholder=''" onblur="this.placeholder='clip number ...'">
+        <input type="text" id="joint" class="input-box" name="joint" placeholder="joint ..." onfocus="this.placeholder=''" onblur="this.placeholder='joint ...'">
+        <input type="text" id="dimension" class="input-box" name="dimension" placeholder="dimension ..." onfocus="this.placeholder=''" onblur="this.placeholder='dimension ...'">
+        <button class="start-button" id="start-graph-button">START</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+{% endblock %}

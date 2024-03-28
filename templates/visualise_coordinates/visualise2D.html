@@ -1,0 +1,34 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Visualisation | Connected Health{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/visualise2D.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="centered-vertical-container">
+        <div id="animation-title" class="title-box">
+            Human Pose Visualisation
+        </div>
+        <div id="animation-holder">
+            <img id="animation" alt="Animation pending ..." />
+        </div>
+    </div>
+    <div class="inputs-holder">
+        <input type="text" id="session-id-input" class="input-box" placeholder="session id ..." onfocus="this.placeholder=''" onblur="this.placeholder='session id ...'">
+        <input type="text" id="clip-num-input" class="input-box" placeholder="clip number ..." onfocus="this.placeholder=''" onblur="this.placeholder='clip number ...'">
+        <button class="start-button" id="start-visualisation-button">START</button>
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        const frameData = JSON.parse('{{ frames|safe }}');
+    </script>
+    <script type="module" src="{% static 'js/visualise2D.js' %}"></script>
+{% endblock %} 

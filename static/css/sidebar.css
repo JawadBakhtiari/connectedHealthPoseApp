@@ -1,0 +1,98 @@
+/* styling for side bar */
+
+*{
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    text-decoration: none;
+}
+
+body {
+    font-weight: 500;
+}
+.sidebar {
+    position: fixed;
+    left: -280px;
+    width: 270px;
+    height: 100%;
+    background: white;
+    transition: all .5s ease;
+    box-shadow: 5px 5px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+.sidebar header {
+    font-size: 28px;
+    color: white;
+    line-height: 70px;
+    text-align: center;
+    background: rgb(11, 42, 110);
+    user-select: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.sidebar ul a{
+    display: block;
+    height: 100%;
+    width: 100%;
+    line-height: 65px;
+    font-size: 20px;
+    color: rgb(14, 30, 103);
+    font-weight: 600;
+    padding-left: 40px;
+    box-sizing: border-box;
+    border-bottom: 2px solid rgba(11, 42, 110, 0.7);
+    border-top: 1px solid rgba(11,42,110,.1);
+    transition: .4s;
+}
+ul li:hover a{
+    padding-left: 50px;
+}
+.sidebar ul a i{
+    margin-right: 16px;
+}
+#check{
+    display: none;
+}
+label #btn,label #cancel{
+    position: absolute;
+    background: rgb(11, 42, 110);
+    border-radius: 3px;
+    cursor: pointer;
+}
+label #btn{
+    left: 30px;
+    top: 25px;
+    font-size: 35px;
+    color: white;
+    padding: 6px 12px;
+    transition: all .5s;
+}
+label #cancel{
+    z-index: 1111;
+    left: -195px;
+    top: 17px;
+    font-size: 30px;
+    color: white;
+    padding: 4px 9px;
+    transition: all .5s ease;
+}
+#check:checked ~ .sidebar{
+    left: 0;
+}
+#check:checked ~ label #btn{
+    left: 250px;
+    opacity: 0;
+    pointer-events: none;
+}
+#check:checked ~ label #cancel{
+    left: 300px;
+}
+#check:checked ~ section{
+    margin-left: 250px;
+}
+section {
+    background-position: center;
+    background-size: cover;
+    height: 60px;
+    transition: all .5s;
+}

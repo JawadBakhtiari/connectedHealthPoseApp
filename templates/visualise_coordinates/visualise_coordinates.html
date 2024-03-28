@@ -1,0 +1,26 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <div class="plot-container">
+    <div id="plot">{{ plot_div|safe }}</div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block styles %}
+  {{ block.super }}
+  <style>
+    .plot-container {
+      margin: 0 auto;
+      width: 80%;
+    }
+    .js-plotly-plot {
+      margin-top: 50px;
+      height: calc(100vh - 200px);
+    }
+  </style>
+{% endblock %}
