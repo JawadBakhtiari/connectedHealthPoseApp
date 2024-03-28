@@ -1,12 +1,10 @@
 # Installation Instructions
 
-First clone then retrieve front-end and back-end
+First clone Github
 
 ```
-git clone https://github.com/SIXRIP7ER/connectedHealthApp.git
-cd connectedHealthApp/
-git clone https://github.com/realRickyNguyen/ExpoCAMwithTensor.git
-git clone https://github.com/nick-maiden/connectedhealth.git
+git clone https://github.com/JawadBakhtiari/connectedHealthPoseApp.git
+cd connectedHealthPoseApp/
 ```
 
 # Running using Docker
