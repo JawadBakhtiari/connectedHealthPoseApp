@@ -1,8 +1,4 @@
-# Run ExpoCamera and TensorFlow Posemodel
-
-The backend can be found [here](https://github.com/nick-maiden/connectedhealth).
-
-However, if you want to clone and run this repository in isolation, this can be done as follows:
+# Running ExpoCamera and TensorFlow Posemodel
 
 Requires:
 
