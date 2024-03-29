@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  django:
+    container_name: django-container
+    build:
+      context: ./djangoWebAppStaff
+    command: >
+      sh -c "python manage.py migrate &&
+             python3 manage.py makemigrations &&
+             ./startserver"
+    ports:
+      - 8000:8000
+    volumes:
+      - ./djangoWebAppStaff:/app
+    stdin_open: true
+    tty: true
+  react-native:
+    container_name: react-native-container
+    build:
+      context: ./reactNativePoseAppClient
+    ports:
+      - 8081:8081
+    volumes:
+      - ./reactNativePoseAppClient:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
