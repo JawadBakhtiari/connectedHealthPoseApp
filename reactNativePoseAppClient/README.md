@@ -11,7 +11,7 @@ First:
 ```
 git clone https://github.com/realRickyNguyen/ExpoCAMwithTensor.git
 cd ExpoCAMwithTensor
-yarn
+yarn install
 ```
 
 Now, to run with mobile application (using ip on local network):

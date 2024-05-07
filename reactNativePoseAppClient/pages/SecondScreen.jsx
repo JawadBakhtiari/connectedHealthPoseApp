@@ -236,8 +236,27 @@ export default function SecondScreen({ route, navigation }) {
       console.log(err);
     }
   };
+  12;
 
   const encodeJPG = async (tensor) => {
+    // Get Time photo was taken
+    var today = new Date();
+    var date =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getDate();
+    var time =
+      today.getHours() +
+      ":" +
+      today.getMinutes() +
+      ":" +
+      today.getSeconds() +
+      ":" +
+      today.getMilliseconds();
+    var dateTime = date + " " + time;
+
     // JPEG conversion
     const [height, width] = tensor.shape;
     const data = new Buffer.from(
@@ -249,7 +268,9 @@ export default function SecondScreen({ route, navigation }) {
     const rawImageData = { data, width, height };
     const jpegImageData = jpeg.encode(rawImageData, 100);
     const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
-    tensorAsArray.push(base64jpeg);
+
+    tensorAsArray.push([base64jpeg, dateTime]);
+    console.log(dateTime);
     if (tensorAsArray.length == 15) {
       sendData();
       // console.log("sending data");
@@ -257,7 +278,7 @@ export default function SecondScreen({ route, navigation }) {
   };
 
   const encodeRGB = async (tensor) => {
-    const data = tensor.arraySync();
+    const data = [tensor.arraySync(), Date.now()];
     tensorAsArray.push(data);
     // Send 15 frames per request
     if (tensorAsArray.length == 15) {
