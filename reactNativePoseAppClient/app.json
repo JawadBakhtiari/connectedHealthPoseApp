@@ -1,0 +1,23 @@
+{
+  "name": "connected health",
+  "plugins": [
+    [
+      "react-native-vision-camera",
+      {
+        "cameraPermissionText": "connected health needs access to your Camera."
+      }
+    ]
+  ],
+  "android": {
+    "permissions": [
+      "android.permission.CAMERA"
+    ],
+    "package": "com.anonymous.connectedhealth"
+  },
+  "ios": {
+    "infoPlist": {
+      "NSCameraUsageDescription": "connected health needs access to your Camera."
+    },
+    "bundleIdentifier": "com.anonymous.connectedhealth"
+  }
+}
