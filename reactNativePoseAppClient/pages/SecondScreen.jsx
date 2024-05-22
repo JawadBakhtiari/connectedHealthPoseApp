@@ -1,18 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import * as tf from "@tensorflow/tfjs";
-import * as posedetection from "@tensorflow-models/pose-detection";
 import * as jpeg from "jpeg-js";
 import Axios from "axios";
 import { useCameraPermission, useCameraDevice, Camera, useFrameProcessor } from "react-native-vision-camera";
 import { loadTensorflowModel } from "react-native-fast-tflite";
 import { useResizePlugin } from "vision-camera-resize-plugin";
 
+const MODEL_NAME = 'movenetLightning.tflite';
+const MODEL_PATH = `./assets/${MODEL_NAME}`
 
 export default async function SecondScreen({ route, navigation }) {
-  // const poseDetection = await loadTensorflowModel('assets/movenetLightning.tflite');
-  // const model = poseDetection.state === 'loaded' ? poseDetection.model : null;
-  const model = null;
+  const [model, setModel] = useState(null);
   const [recorded, setRecorded] = useState(false);
   const { requestPermission } = useCameraPermission();
   // const [cameraType, setCameraType] = useState('back');
@@ -24,6 +23,32 @@ export default async function SecondScreen({ route, navigation }) {
   const [activateEffect, setActivateEffect] = useState(false);
   const { resize } = useResizePlugin();
   const { sid, code } = route.params;
+
+  useEffect(() => {
+    /**
+     * Request camera permission from user and load pose detection model.
+     **/
+    const loadModel = async () => {
+        rafId.current = null;
+        await requestPermission();
+        const poseDetection = await loadTensorflowModel(require(MODEL_PATH));
+        setModel(poseDetection);
+    };
+
+    loadModel();
+
+    return () => {
+      /**
+       * The cleanup function checks if the rafId (requestAnimationFrame ID) is set
+       * and cancels the animation frame using cancelAnimationFrame() if needed.
+       * It ensures that any pending animation frames are cleared when the component is unmounted.
+       **/
+      if (rafId.current != null && rafId.current !== 0) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = 0;
+      }
+    };
+  }, [activateEffect]);
 
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet'
@@ -46,84 +71,6 @@ export default async function SecondScreen({ route, navigation }) {
     // TODO : now what ???
 
 }, [model])
-
-  /**
-   * This is a React useEffect hook that runs when the component is mounted.
-   * The dependency array ([activateEffect]) ensures that the effect is run every time we press the button.
-   * Inside this effect, an asynchronous function prepare() is defined.
-   **/
-  useEffect(() => {
-    /**
-     * This is an asynchronous function named prepare(), defined inside the useEffect hook.
-     * It initializes the camera permissions, waits for TensorFlow.js to be ready,
-     * and prepares the pose detection model.
-     **/
-    async function prepare() {
-      rafId.current = null;
-
-      await requestPermission();
-      await tf.ready();
-      /**
-       * Pose Detection Setup:
-       * The code sets up the configuration object for the pose detector, specifying runtime, smoothing, and model type.
-       * It then calls the createDetector() function provided by the posedetection module to create the pose detection model.
-       * The created model is stored in the state using the setModel() function.
-       * The state variable tfReady is set to true using the setTfReady() function.
-       **/
-      const detectorConfig = {
-        runtime: "tfjs",
-        enableSmoothing: true,
-        modelType: "lite",
-      };
-
-      const model = await posedetection.createDetector(
-        posedetection.SupportedModels.BlazePose,
-        detectorConfig
-      );
-      setModel(model);
-      setTfReady(true);
-    }
-    if (activateEffect) {
-      prepare();
-    } else {
-      // If activateEffect is false, setModel to empty and setTfReady to false
-      setModel(null);
-      setTfReady(false);
-    }
-  }, [activateEffect]);
-
-  /**
-   * This is another useEffect hook that runs when the component is mounted.
-   * Inside this effect, a cleanup function is defined.
-   **/
-  useEffect(() => {
-    return () => {
-      /**
-       * The cleanup function checks if the rafId (requestAnimationFrame ID) is set
-       * and cancels the animation frame using cancelAnimationFrame() if needed.
-       * It ensures that any pending animation frames are cleared when the component is unmounted.
-       **/
-      if (rafId.current != null && rafId.current !== 0) {
-        cancelAnimationFrame(rafId.current);
-        rafId.current = 0;
-      }
-    };
-  }, [activateEffect]);
-
-  //useEffect(() => {
-  //  let interval;
-//
-  //  if (tfReady) {
-  //    interval = setInterval(() => {
-  //      setTimer((prevTimer) => prevTimer + 1);
-  //    }, 1000);
-  //  } else {
-  //    clearInterval(interval);
-  //    setTimer(0);
-  //  }
-//
-  //  return () => clearInterval(interval);
-  //}, [tfReady]);
 
   const formatTime = (timeInSeconds) => {
     const hours = Math.floor(timeInSeconds / 3600);

@@ -19,5 +19,12 @@
       "NSCameraUsageDescription": "connected health needs access to your Camera."
     },
     "bundleIdentifier": "com.anonymous.connectedhealth"
+  },
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "05f65977-bd43-4545-8c7f-b9714d1cbf2c"
+      }
+    }
   }
 }
