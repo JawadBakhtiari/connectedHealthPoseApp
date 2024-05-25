@@ -161,6 +161,24 @@ export default function SecondScreen({ route, navigation }) {
       // This marks the starting time of the image processing for measuring latency.
       const startTs = Date.now();
 
+      // Get Time photo was taken
+      var today = new Date();
+      var date =
+        today.getFullYear() +
+        "-" +
+        (today.getMonth() + 1) +
+        "-" +
+        today.getDate();
+      var time =
+        today.getHours() +
+        ":" +
+        today.getMinutes() +
+        ":" +
+        today.getSeconds() +
+        ":" +
+        today.getMilliseconds();
+      var dateTime = date + " " + time;
+
       /**
        * This line retrieves the next image from the images object using the next() method.
        * The value property contains the actual image tensor data.
@@ -170,7 +188,8 @@ export default function SecondScreen({ route, navigation }) {
       // KeyPoint Calculation
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       if (newPoses.length != 0) {
-        poses.push(newPoses);
+        poses.push([dateTime, newPoses]);
+        console.log(dateTime);
         encodeJPG(tensor);
         // encodeRGB(tensor);
       }
@@ -239,24 +258,6 @@ export default function SecondScreen({ route, navigation }) {
   12;
 
   const encodeJPG = async (tensor) => {
-    // Get Time photo was taken
-    var today = new Date();
-    var date =
-      today.getFullYear() +
-      "-" +
-      (today.getMonth() + 1) +
-      "-" +
-      today.getDate();
-    var time =
-      today.getHours() +
-      ":" +
-      today.getMinutes() +
-      ":" +
-      today.getSeconds() +
-      ":" +
-      today.getMilliseconds();
-    var dateTime = date + " " + time;
-
     // JPEG conversion
     const [height, width] = tensor.shape;
     const data = new Buffer.from(
@@ -269,8 +270,8 @@ export default function SecondScreen({ route, navigation }) {
     const jpegImageData = jpeg.encode(rawImageData, 100);
     const base64jpeg = tf.util.decodeString(jpegImageData.data, "base64");
 
-    tensorAsArray.push([base64jpeg, dateTime]);
-    console.log(dateTime);
+    tensorAsArray.push(base64jpeg);
+
     if (tensorAsArray.length == 15) {
       sendData();
       // console.log("sending data");

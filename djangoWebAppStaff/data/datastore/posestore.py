@@ -25,7 +25,7 @@ class PoseStore:
         if not isinstance(poses, list):
             raise TypeError('poses must be of type list')
         # restructure formatting of pose data so it's easier to interact with
-        self.poses = list(map(lambda p: p[0], poses))
+        self.poses = list(map(lambda p: [p[0],p[1]], poses))
 
 
     def get_name(self):
@@ -68,6 +68,7 @@ class PoseStore:
 
         # Update the existing data with the new pose data
         existing_data += self.poses
+
         with open(file_path, "w") as f:
             json.dump(existing_data, f, indent=4)
 
