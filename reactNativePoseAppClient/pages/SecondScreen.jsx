@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#9e1919",
     width: "100%",
     height: "100%",
-    borderRadius: "50%",
+    borderRadius: 50,
     transitionProperty: "all",
     transitionDuration: 200,
     transitionTimingFunction: "ease",
