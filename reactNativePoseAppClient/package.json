@@ -13,6 +13,7 @@
     "base64-arraybuffer": "^1.0.2",
     "expo": "^50.0.11",
     "expo-camera": "~14.0.6",
+    "expo-dev-client": "~3.3.12",
     "expo-file-system": "~16.0.8",
     "expo-gl": "~13.6.0",
     "expo-image-picker": "~14.7.1",
@@ -33,5 +34,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0"
+  },
+  "name": "reactNativePoseAppClient",
+  "version": "1.0.0",
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   }
 }

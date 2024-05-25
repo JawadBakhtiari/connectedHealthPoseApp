@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "reactNativePoseAppClient",
+    "slug": "reactnativeposeappclient",
+    "version": "1.0.0",
+    "sdkVersion": "50.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.jawadbakhtiari.reactnativeposeappclient"
+    },
+    "android": {
+      "package": "com.jawadbakhtiari.reactnativeposeappclient"
+    }
+  }
+}
