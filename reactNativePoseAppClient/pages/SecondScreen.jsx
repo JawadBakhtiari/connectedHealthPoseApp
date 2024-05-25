@@ -1,24 +1,18 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
   View,
   Platform,
   Image,
-  Dimensions,
-  Modal,
-  Button,
   TouchableOpacity,
+  Button
 } from "react-native";
-import { Camera } from "expo-camera";
-import { GLView } from "expo-gl";
+import { CameraView, useCameraPermissions, Camera } from "expo-camera";
 import * as tf from "@tensorflow/tfjs";
 import * as posedetection from "@tensorflow-models/pose-detection";
 import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
-import * as FileSystem from "expo-file-system";
 import * as jpeg from "jpeg-js";
-import * as MediaLibrary from "expo-media-library";
-import { encode, decode } from "base64-arraybuffer";
 import Axios from "axios";
 import { Fontisto } from "@expo/vector-icons";
 
@@ -35,18 +29,15 @@ export default function SecondScreen({ route, navigation }) {
   const [tfReady, setTfReady] = useState(false);
   const [recorded, setRecorded] = useState(false);
   const [model, setModel] = useState(null);
-  //const [poses, setPoses] = useState([]);
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
+  const [cameraFacing, setCameraFacing] = useState('front');
+  const [permission, requestPermission] = useCameraPermissions();
   const rafId = useRef(null);
   const [fps, setFps] = useState(0);
-  let lastSendTime = Date.now();
   const poses = [];
   const tensorAsArray = [];
-  const [activateEffect, setActivateEffect] = useState(false);
+  const [activateEffect, setActivateEffect] = useState(true);
   const [timer, setTimer] = useState(0);
-  const { uid } = route.params;
-  const { sid } = route.params;
-  const { code } = route.params;
+  const { sid, code } = route.params;
 
   /**
    * This is a React useEffect hook that runs when the component is mounted.
@@ -84,14 +75,8 @@ export default function SecondScreen({ route, navigation }) {
       setModel(model);
       setTfReady(true);
     }
-    if (activateEffect) {
-      prepare();
-    } else {
-      // If activateEffect is false, setModel to empty and setTfReady to false
-      setModel(null);
-      setTfReady(false);
-    }
-  }, [activateEffect]);
+    prepare();
+  }, []);
 
   /**
    * This is another useEffect hook that runs when the component is mounted.
@@ -140,9 +125,9 @@ export default function SecondScreen({ route, navigation }) {
    * This toggles the activateeffect state variable
    **/
   const handleTf = () => {
-    setActivateEffect((prevEffect) => !prevEffect);
+    //setActivateEffect((prevEffect) => !prevEffect);
 
-    setRecorded(true);
+    //setRecorded(true);
 
     if (recorded == true) {
       // Send rest of data once user has ended recording and switch to next screen
@@ -294,13 +279,7 @@ export default function SecondScreen({ route, navigation }) {
     }
   };
 
-  const handleSwitchCameraType = () => {
-    if (cameraType === Camera.Constants.Type.front) {
-      setCameraType(Camera.Constants.Type.back);
-    } else {
-      setCameraType(Camera.Constants.Type.front);
-    }
-  };
+  const switchCameraFacing = () => { setCameraFacing(current => (current === 'back' ? 'front' : 'back')); };
 
   const renderRecordButton = () => {
     return (
@@ -328,7 +307,7 @@ export default function SecondScreen({ route, navigation }) {
 
   const renderSwitchCamButton = () => {
     return (
-      <View style={styles.SwitchButton} onTouchEnd={handleSwitchCameraType}>
+      <View style={styles.SwitchButton} onTouchEnd={switchCameraFacing}>
         <Fontisto name="arrow-swap" size={24} color="white" />
       </View>
     );
@@ -350,51 +329,48 @@ export default function SecondScreen({ route, navigation }) {
     );
   };
 
-  if (!tfReady) {
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
     return (
-      <View style={styles.container}>
-        <View style={styles.top}>
-          {renderExitButton()}
-          <View style={styles.timercontain}>{rendertimer()}</View>
-          <View style={{ flex: 1 }}></View>
-        </View>
-        <Camera ref={cameraRef} style={styles.camera} type={cameraType} />
-        <View style={styles.bottom}>
-          <View style={{ flex: 1 }}></View>
-          <View style={styles.recordcontain}>{renderRecordButton()}</View>
-          <View style={styles.switchcontain}>{renderSwitchCamButton()}</View>
-        </View>
-      </View>
-    );
-  } else {
-    return (
-      <View style={styles.container}>
-        <View style={styles.top}>
-          <View style={{ flex: 1 }}></View>
-          <View style={styles.timercontain}>{rendertimer()}</View>
-          <View style={{ flex: 1 }}></View>
-        </View>
-        <TensorCamera
-          ref={cameraRef}
-          style={styles.tcamera}
-          autorender={true}
-          type={cameraType}
-          // tensor related props
-          resizeWidth={OUTPUT_TENSOR_WIDTH}
-          resizeHeight={OUTPUT_TENSOR_HEIGHT}
-          resizeDepth={3}
-          onReady={handleCameraStream}
-        />
-        {/*renderPose()*/}
-        {renderFps()}
-        <View style={styles.bottom}>
-          <View style={{ flex: 1 }}></View>
-          <View style={styles.recordcontain}>{renderRecordButton()}</View>
-          <View style={styles.switchcontain}>{renderSwitchCamButton()}</View>
-        </View>
+      <View style={{...styles.container, marginTop: 30}}>
+        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
   }
+
+  return tfReady && (
+    <View style={styles.container}>
+      <View style={styles.top}>
+        <View style={{ flex: 1 }}></View>
+        <View style={styles.timercontain}>{rendertimer()}</View>
+        <View style={{ flex: 1 }}></View>
+      </View>
+      <TensorCamera
+        ref={cameraRef}
+        style={styles.tcamera}
+        autorender={true}
+        type={cameraFacing}
+        // tensor related props
+        resizeWidth={OUTPUT_TENSOR_WIDTH}
+        resizeHeight={OUTPUT_TENSOR_HEIGHT}
+        resizeDepth={3}
+        onReady={handleCameraStream}
+      />
+      {/*renderPose()*/}
+      {renderFps()}
+      <View style={styles.bottom}>
+        <View style={{ flex: 1 }}></View>
+        <View style={styles.recordcontain}>{renderRecordButton()}</View>
+        <View style={styles.switchcontain}>{renderSwitchCamButton()}</View>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
