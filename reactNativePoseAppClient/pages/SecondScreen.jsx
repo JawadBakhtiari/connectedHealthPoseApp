@@ -188,8 +188,8 @@ export default function SecondScreen({ route, navigation }) {
       // KeyPoint Calculation
       const newPoses = await model.estimatePoses(tensor, undefined, Date.now());
       if (newPoses.length != 0) {
-        poses.push([dateTime, newPoses]);
-        console.log(dateTime);
+        newPoses['timestamp'] = dateTime;
+        poses.push(newPoses);
         encodeJPG(tensor);
         // encodeRGB(tensor);
       }
