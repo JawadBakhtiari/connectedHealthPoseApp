@@ -38,6 +38,7 @@
   "name": "reactNativePoseAppClient",
   "version": "1.0.0",
   "scripts": {
+    "start:wsl": "REACT_NATIVE_PACKAGER_HOSTNAME=$(ipconfig.exe | grep -A 5 'Wireless LAN adapter WiFi:' | grep 'IPv4' | cut -d ':' -f2 | sed 's/^ *//') expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios"
   }
