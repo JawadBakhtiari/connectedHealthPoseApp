@@ -257,7 +257,6 @@ export default function SecondScreen({ route, navigation }) {
       console.log(err);
     }
   };
-  12;
 
   const encodeJPG = async (tensor) => {
     // JPEG conversion
