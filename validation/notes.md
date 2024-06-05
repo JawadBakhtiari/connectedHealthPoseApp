@@ -6,7 +6,7 @@
 ## A heuristic comparison between systems
 Data from a frame captured by each system for the left shoulder. Frames were captured 3 tenths of a millisecond apart.
 
-# Mobile data (at 17:31:24:343)
+### Mobile data (at 17:31:24:343)
 ```json
   {
     "x": 0.16928645068762274,
@@ -17,7 +17,7 @@ Data from a frame captured by each system for the left shoulder. Frames were cap
   },
 ```
 
-# Livability lab motion capture system data (at 17:31:24:37)
+### Livability lab motion capture system data (at 17:31:24:37)
 ```json
   {
     "x": 61.108246,
