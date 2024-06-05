@@ -31,4 +31,15 @@ def clean_data(filepath: str) -> None:
       print("Time when all unlabeled markers are null (and not all markers are null):", timestamp)
       break
 
-clean_data(filepath)
+def get_joint_at_time(filepath: str) -> None:
+  data = pd.read_csv(filepath, skiprows=3)
+  headers = [
+              'Name',
+              'Skeleton 001:LShoulder.4',
+              'Skeleton 001:LShoulder.5',
+              'Skeleton 001:LShoulder.6'
+            ]
+  data = data[headers]
+  print(data.loc[data['Name'] == 21.550000])
+
+get_joint_at_time(filepath)
