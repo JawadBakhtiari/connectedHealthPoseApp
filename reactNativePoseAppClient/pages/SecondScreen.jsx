@@ -11,6 +11,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Camera } from "expo-camera";
+import {
+  useCameraPermission,
+  useCameraDevice,
+  Camera2,
+} from "react-native-vision-camera";
 import { GLView } from "expo-gl";
 import * as tf from "@tensorflow/tfjs";
 import * as posedetection from "@tensorflow-models/pose-detection";
@@ -192,7 +197,7 @@ export default function SecondScreen({ route, navigation }) {
         // newPoses.push({ timestamp: dateTime });
         newPoses[0]["timestamp"] = dateTime;
         poses.push(newPoses[0]);
-        encodeJPG(tensor);
+        // encodeJPG(tensor);
         // encodeRGB(tensor);
       }
 

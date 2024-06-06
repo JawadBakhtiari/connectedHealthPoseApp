@@ -4,16 +4,20 @@
     "slug": "reactnativeposeappclient",
     "version": "1.0.0",
     "sdkVersion": "50.0.0",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "ios": {
       "bundleIdentifier": "com.jawadbakhtiari.reactnativeposeappclient"
     },
     "android": {
       "package": "com.jawadbakhtiari.reactnativeposeappclient"
-    }
+    },
+    "plugins": [
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera."
+        }
+      ]
+    ]
   }
 }
