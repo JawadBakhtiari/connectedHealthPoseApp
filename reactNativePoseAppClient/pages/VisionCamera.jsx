@@ -79,7 +79,7 @@ const VisionCamera = () => {
         });
         const outputs = plugin.model.runSync([resized]);
         console.log(`Received ${outputs.length} outputs!`);
-        console.log(outputs);
+        console.log(outputs[0]);
       }
     },
     [plugin]
