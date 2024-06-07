@@ -192,8 +192,8 @@ export default function SecondScreen({ route, navigation }) {
         // newPoses.push({ timestamp: dateTime });
         newPoses[0]["timestamp"] = dateTime;
         poses.push(newPoses[0]);
-        encodeJPG(tensor);
-        // encodeRGB(tensor);
+        // encodeJPG(tensor);
+        encodeRGB(tensor);
       }
 
       // Disposes image tensor to free memery resources after used
@@ -280,8 +280,8 @@ export default function SecondScreen({ route, navigation }) {
   };
 
   const encodeRGB = async (tensor) => {
-    const data = [tensor.arraySync(), Date.now()];
-    tensorAsArray.push(data);
+    // const data = [tensor.arraySync(), Date.now()];
+    tensorAsArray.push([]);
     // Send 15 frames per request
     if (tensorAsArray.length == 15) {
       sendData();
