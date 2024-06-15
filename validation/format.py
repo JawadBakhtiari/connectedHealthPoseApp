@@ -2,6 +2,7 @@
 # Play around with the formatting of data captured by the livability lab motion capture system
 
 import pandas as pd
+from PIL import Image
 
 filepath = 'exampleData/firstSampleSitToStand/livabilityLabPoses.csv'
 NUM_SYNCHRONISATION_MARKERS = 5
@@ -40,6 +41,50 @@ def get_joint_at_time(filepath: str) -> None:
               'Skeleton 001:LShoulder.6'
             ]
   data = data[headers]
-  print(data.loc[data['Name'] == 21.550000])
+  print(data.loc[data['Name'] == 33.683333])
 
-get_joint_at_time(filepath)
+def get_image_dimensions(filepath: str) -> tuple:
+  with Image.open(filepath) as img:
+    width, height = img.size
+  return { 'width': width, 'height': height }
+
+def get_pixel_values(keypoints: dict, image_dimensions: dict) -> dict:
+  return {
+    'x': keypoints.get('x') * image_dimensions.get('width'),
+    'y': keypoints.get('y') * image_dimensions.get('height')
+  }
+
+def get_real_values(pixel_values: dict, scale_factor: float) -> dict:
+  return {
+    'x': pixel_values.get('x') * scale_factor,
+    'y': pixel_values.get('y') * scale_factor
+  }
+
+
+#######################################################################
+############################# CALIBRATION #############################
+#######################################################################
+'''Convert normalised keypoint values into real world units (cm).'''
+
+image_dimensions = get_image_dimensions('./exampleData/sampleImage.jpg')
+
+# The known distance and pixel distance between two points
+# Could measure the distance between width endpoints of the camera view?
+known_distance = 361.24  # in cm
+pixel_distance = image_dimensions.get('width')
+scale_factor = known_distance / pixel_distance
+
+
+keypoints_list = [
+  { 'x': 0.16928645068762274, 'y': -0.44030459023353513 },
+  { 'x': 0.17897597532043577, 'y': -0.4176582666896209 },
+  { 'x': 0.16916240187325227, 'y': -0.4643509656251208 }
+]
+
+for keypoints in keypoints_list:
+  pixel_values = get_pixel_values(keypoints, image_dimensions)
+  real_values = get_real_values(pixel_values, scale_factor)
+  print(real_values)
+
+#######################################################################
+#######################################################################
