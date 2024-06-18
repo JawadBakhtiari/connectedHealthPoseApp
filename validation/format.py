@@ -41,7 +41,7 @@ def get_joint_at_time(filepath: str) -> None:
               'Skeleton 001:LShoulder.6'
             ]
   data = data[headers]
-  print(data.loc[data['Name'] == 33.683333])
+  print(data.loc[data['Name'] == 48.633333])
 
 def get_image_dimensions(filepath: str) -> tuple:
   with Image.open(filepath) as img:
@@ -84,7 +84,9 @@ keypoints_list = [
 for keypoints in keypoints_list:
   pixel_values = get_pixel_values(keypoints, image_dimensions)
   real_values = get_real_values(pixel_values, scale_factor)
-  print(real_values)
+  #print(real_values)
 
 #######################################################################
 #######################################################################
+
+get_joint_at_time(filepath)
