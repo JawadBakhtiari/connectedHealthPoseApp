@@ -22,9 +22,59 @@ class PoseStore:
 
 
     def set(self, poses: list):
-        if not isinstance(poses, list):
+        pose_data = json.loads(poses)
+
+        timestamp = pose_data[0]["timestamp"]
+
+        # Define a mapping from numeric indices to body part names (adjust as needed)
+        body_part_mapping = {
+            "0": "nose",
+            "1": "left_eye",
+            "2": "right_eye",
+            "3": "left_ear",
+            "4": "right_ear",
+            "5": "left_shoulder",
+            "6": "right_shoulder",
+            "7": "left_elbow",
+            "8": "right_elbow",
+            "9": "left_wrist",
+            "10": "right_wrist",
+            "11": "left_hip",
+            "12": "right_hip",
+            "13": "left_knee",
+            "14": "right_knee",
+            "15": "left_ankle",
+            "16": "right_ankle"
+        }
+
+        
+        all_poses = []
+
+        # Iterate over the body parts and their coordinates
+        for item in pose_data:
+            body_parts_list = []
+            for index in range(17):  # Adjust the range based on the number of keypoints
+                body_part = body_part_mapping.get(str(index))
+                if body_part:
+                    x_coordinate = item[str(index)]
+                    y_coordinate = item[str(index + 17)]  # Adjust index for y-coordinate
+                    confidence = item[str(index + 34)]   # Adjust index for confidence score
+                    # Create a dictionary for the body part
+                    body_part_dict = {
+                        "name": body_part,
+                        "x": x_coordinate,
+                        "y": y_coordinate,
+                        "score": confidence
+                    }
+            
+                    # Append the dictionary to the list
+                    body_parts_list.append(body_part_dict)
+            all_poses.append({"timestamp": timestamp, "keypoints": body_parts_list})
+            
+
+        if not isinstance(pose_data, list):
             raise TypeError('poses must be of type list')
-        self.poses = poses
+        self.poses = all_poses
 
 
     def get_name(self):

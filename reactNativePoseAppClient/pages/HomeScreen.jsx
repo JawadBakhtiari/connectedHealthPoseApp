@@ -224,7 +224,7 @@ const sendUserInit = async (values, navigation) => {
   // console.log(uid);
   console.log(sid);
 
-  navigation.navigate("Second", { code: code, sid: sid, uid: uid });
+  navigation.navigate("VisionCamera", { code: code, sid: sid, uid: uid });
 };
 
 const styles = StyleSheet.create({

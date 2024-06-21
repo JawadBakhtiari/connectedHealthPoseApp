@@ -14,14 +14,14 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
-          name="VisionCamera"
-          component={VisionCamera}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
           name="Home"
           component={HomeScreen}
           options={{ title: "SessionStart", headerShown: false }}
+        />
+        <Stack.Screen
+          name="VisionCamera"
+          component={VisionCamera}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Second"

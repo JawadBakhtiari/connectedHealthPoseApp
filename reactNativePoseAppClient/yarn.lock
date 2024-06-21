@@ -2348,6 +2348,11 @@
   dependencies:
     merge-options "^3.0.4"
 
+"@react-native-camera-roll/camera-roll@^7.8.1":
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/@react-native-camera-roll/camera-roll/-/camera-roll-7.8.1.tgz#3b37d498672f692d04daf8e56fa094cefdeadc30"
+  integrity sha512-voVmDlzBS1MVADFk/Vb9GzWzhpoF4ESSjU9qwDNxf/ZA9tirAzX/M0TKcz2V+iFHeRR68cHtZ9tHUhQVG7kJcA==
+
 "@react-native-community/art@^1.1.2":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@react-native-community/art/-/art-1.2.0.tgz#386d95393f6042d9006f9d4bc6063fb898794460"
@@ -4986,6 +4991,11 @@ expo-asset@~9.0.2:
     expo-file-system "~16.0.0"
     invariant "^2.2.4"
     md5-file "^3.2.3"
+
+expo-av@~13.10.6:
+  version "13.10.6"
+  resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-13.10.6.tgz#ca1b5d0c46a016069f653c1740a25516ffc730a2"
+  integrity sha512-h3c1fg5yhWnP0RIGO+fhgPx6cmh4B4lnKdXR2i69aC3vs5D5Cu+JlzBon1gLIu6eUo2IVfC0RjSLpfQbcJ4doQ==
 
 expo-camera@~14.0.6:
   version "14.0.6"

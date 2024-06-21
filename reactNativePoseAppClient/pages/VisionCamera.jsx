@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from "react";
+import Axios from "axios";
 import {
   View,
   Text,
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import {
   useCameraPermission,
@@ -12,15 +14,20 @@ import {
   Camera,
   useFrameProcessor,
   useCameraFormat,
+  enableFpsGraph,
 } from "react-native-vision-camera";
 import { Fontisto } from "@expo/vector-icons";
 import { date } from "yup";
-
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { useTensorflowModel } from "react-native-fast-tflite";
 import { useResizePlugin } from "vision-camera-resize-plugin";
+import { useSharedValue } from "react-native-worklets-core";
+import { VideoCodec } from "expo-camera";
+import { time } from "@tensorflow/tfjs";
+
 // import { resize } from "./resizePlugin";
 
-const VisionCamera = () => {
+export default function VisionCamera({ route, navigation }) {
   const { hasPermission, requestPermission } = useCameraPermission();
   const front = useCameraDevice("front");
   const back = useCameraDevice("back");
@@ -31,8 +38,17 @@ const VisionCamera = () => {
   ]);
   const rotation = Platform.OS === "ios" ? "0deg" : "270deg"; // hack to get android oriented properly
   const { resize } = useResizePlugin();
-  // const { resize } = resize();
-
+  const [picture, setPicture] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const isAlsoRecording = useSharedValue(0);
+  const [video, setVideo] = useState(null);
+  const poses = useSharedValue([]);
+  const timeStarted = useSharedValue(0);
+  const { uid } = route.params;
+  const { sid } = route.params;
+  const { code } = route.params;
+  const tensorAsArray = [];
+  const [poses2, setPoses2] = useState([]);
   const plugin = useTensorflowModel(
     require("./assets/lite-model_movenet_singlepose_lightning_tflite_int8_4.tflite")
   );
@@ -51,23 +67,68 @@ const VisionCamera = () => {
 
   console.log("Vision Camera has permission: ", hasPermission);
 
-  // const frameProcessor = useFrameProcessor((frame) => {
-  //   "worklet";
-  //   console.log(`Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`);
-  //   if (frame.pixelFormat === "rgb") {
-  //     const buffer = frame.toArrayBuffer();
-  //     const data = new Uint8Array(buffer);
-  //     console.log(`Pixel at 0,0: RGB(${data[0]}, ${data[1]}, ${data[2]})`);
-  //   }
-  // }, []);
+  const sendData = async () => {
+    "worklet";
+
+    console.log();
+
+    const poses3 = poses.value;
+
+    try {
+      const response = await Axios.post(
+        "http://" + code + "/data/frames/upload/",
+        {
+          // uid: "ahmad232",
+          sid,
+          // clipNum: "1",
+          clipFinished: false,
+          poses: JSON.stringify(poses3),
+          tensorAsArray,
+        }
+      );
+      // Empty Data
+      // console.log(response.data);
+      console.log("sending data:");
+      poses.value = [];
+      timeStarted.value = 0;
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const frameProcessor = useFrameProcessor(
     (frame) => {
       "worklet";
-      console.log(
-        `Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`
-      );
-      if (plugin.state === "loaded") {
+      // console.log(
+      //   `Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`
+      // );
+
+      // This marks the starting time of the image processing for measuring latency.
+      const startTs = Date.now();
+
+      // Get Time photo was taken
+      var today = new Date();
+      var date =
+        today.getFullYear() +
+        "-" +
+        (today.getMonth() + 1) +
+        "-" +
+        today.getDate();
+      var time =
+        today.getHours() +
+        ":" +
+        today.getMinutes() +
+        ":" +
+        today.getSeconds() +
+        ":" +
+        today.getMilliseconds();
+      var dateTime = date + " " + time;
+
+      if (timeStarted.value == 0) {
+        timeStarted.value = Date.now();
+      }
+
+      if (plugin.state === "loaded" && isAlsoRecording.value === 1) {
         const resized = resize(frame, {
           scale: {
             width: 192,
@@ -78,23 +139,74 @@ const VisionCamera = () => {
           rotation: rotation,
         });
         const outputs = plugin.model.runSync([resized]);
-        console.log(`Received ${outputs.length} outputs!`);
-        console.log(outputs[0]);
+        outputs[0]["timestamp"] = dateTime;
+        poses.value.push(outputs[0]);
+        // poses.value = [poses.value, outputs[0]];
+        // poses2.push(outputs[0]);
+
+        // if (Date.now() - timeStarted.value >= 1000) {
+        //   console.log("We have 15 frames");
+        //   // console.log(`Received ${dateTime} ${outputs.length} outputs!`);
+        //   console.log(poses.value.length);
+
+        //   poses.value = [];
+        //   timeStarted.value = 0;
+        // }
+        // console.log(`Received ${dateTime} ${outputs.length} outputs!`);
+        // console.log(outputs[0]);
+        console.log(poses.value.length);
       }
     },
     [plugin]
   );
 
   const takePhoto = async () => {
+    "worklet";
     const photo = await cameraRef.current?.takePhoto();
     console.log(photo);
+    setPicture(photo);
+    await CameraRoll.save(`file://${photo.path}`, {
+      type: "photo",
+    });
+  };
+
+  const onStartRecording = async () => {
+    if (!cameraRef.current) {
+      return;
+    }
+    if (isRecording) {
+      cameraRef.current.stopRecording();
+      return;
+    }
+    setIsRecording(true);
+    isAlsoRecording.value = 1;
+    console.log("Recording");
+    cameraRef.current.startRecording({
+      onRecordingFinished: async (video) => {
+        console.log(video);
+        setIsRecording(false);
+        isAlsoRecording.value = 0;
+        setVideo(video);
+        const path = video.path;
+        await CameraRoll.save(`file://${path}`, {
+          type: "video",
+        });
+
+        sendData();
+      },
+      onRecordingError: (error) => {
+        console.error(error);
+        isAlsoRecording.value = 0;
+        setIsRecording(false);
+      },
+    });
   };
 
   const renderRecordButton = () => {
     return (
       <View style={styles.recordButton}>
-        <TouchableOpacity style={styles.recordB} onPress={takePhoto}>
-          <View style={[styles.inner, styles.activeInner]}></View>
+        <TouchableOpacity style={styles.recordB} onPress={onStartRecording}>
+          <View style={isRecording ? styles.activeInner : styles.inner}></View>
         </TouchableOpacity>
       </View>
     );
@@ -118,24 +230,32 @@ const VisionCamera = () => {
 
   return (
     <View style={styles.container}>
-      <Camera
-        format={format}
-        ref={cameraRef}
-        style={styles.camera}
-        device={device}
-        isActive={true}
-        frameProcessor={frameProcessor}
-        photo={true}
-        pixelFormat="rgb"
-      />
-      <View style={styles.bottom}>
-        <View style={{ flex: 1 }}></View>
-        <View style={styles.recordcontain}>{renderRecordButton()}</View>
-        <View style={styles.switchcontain}>{renderSwitchCamButton()}</View>
-      </View>
+      {picture ? (
+        <Image source={{ uri: picture.path }} style={StyleSheet.absoluteFill} />
+      ) : (
+        <>
+          <Camera
+            format={format}
+            ref={cameraRef}
+            style={styles.camera}
+            device={device}
+            isActive={true && !picture}
+            frameProcessor={frameProcessor}
+            photo={true}
+            video={true}
+            pixelFormat="rgb"
+            enableFpsGraph={true}
+          />
+          <View style={styles.bottom}>
+            <View style={{ flex: 1 }}></View>
+            <View style={styles.recordcontain}>{renderRecordButton()}</View>
+            <View style={styles.switchcontain}>{renderSwitchCamButton()}</View>
+          </View>
+        </>
+      )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -263,5 +383,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
-export default VisionCamera;
