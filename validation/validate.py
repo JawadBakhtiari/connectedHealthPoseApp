@@ -18,6 +18,18 @@ mobile_ys = [
   97.39269258228084,
 ]
 
+inverted_mobile_ys = [
+  98.73078761334244,
+  132.5005960635149,
+  125.59132266386081,
+  99.68879911271623,
+  132.4634144642464,
+  98.84120333295141,
+  129.09917296643377,
+  123.93903830181965,
+  100.06888264440404,
+]
+
 lab_ys = [
   1006.177063,
   1393.190063,
@@ -31,9 +43,9 @@ lab_ys = [
 ]
 
 
-def scale_mobile_ys(mobile_ys: list) -> list:
+def scale_mobile_ys(mobile_ys: list, factor: float) -> list:
   '''Scale up mobile data y values so values are in a similar range to lab data.'''
-  return list(map(lambda y : y * FACTOR, mobile_ys))
+  return list(map(lambda y : y * factor, mobile_ys))
 
 
 def calc_percentage_diff(first: float, second: float) -> float:
@@ -58,7 +70,7 @@ def compare_percentage_change(mobile_percentage_changes: list, lab_percentage_ch
   return average_difference
 
 def compare_absolute_differences(mobile_ys: list, lab_ys: list) -> float:
-  mobile_ys = scale_mobile_ys(mobile_ys)
+  mobile_ys = scale_mobile_ys(mobile_ys, FACTOR)
   last = None
   diffs = []
   for my, ly in list(zip(mobile_ys, lab_ys)):
@@ -77,6 +89,38 @@ def huber_loss(y_true, y_pred, delta):
     return np.mean(loss)
 
 
+def find_median_scale_factor(mobile_ys: list, lab_ys: list) -> float:
+  factors = sorted([l / m for m, l in zip(mobile_ys, lab_ys)])
+  return factors[len(factors) // 2]
+
+def find_median_distance_scale_factor(mobile_distances: list, lab_distances: list) -> float:
+  distance_factors = sorted([l / m for m, l in zip(mobile_distances, lab_distances)])
+  return distance_factors[len(distance_factors) // 2]
+
+def compare_absolute_differences_v2(mobile_ys: list, lab_ys: list) -> float:
+  '''
+    This version uses the mobile data after inversion (this is easier to work with
+    as now it has the same shape as the lab data).
+    This version also calculates a median scale factor across the data set, to reduce
+    the risk of outliers skewing results.
+  '''
+  scale_factor = find_median_scale_factor(mobile_ys, lab_ys)
+  diffs = [abs(m * scale_factor - l) for m, l in zip(mobile_ys, lab_ys)]
+  return {
+    'median' : sorted(diffs)[len(diffs) // 2],
+    'average': sum(diffs) / len(diffs)
+  }
+
+def compare_differences_in_distance(mobile_ys: list, lab_ys: list) -> float:
+  mobile_distances = [abs(mobile_ys[i] - mobile_ys[i + 1]) for i in range(len(mobile_ys) - 1)]
+  lab_distances = [abs(lab_ys[i] - lab_ys[i + 1]) for i in range(len(lab_ys) - 1)]
+  scale_factor = find_median_distance_scale_factor(mobile_distances, lab_distances)
+  diffs = [abs(md * scale_factor - ld) for md, ld in zip(mobile_distances, lab_distances)]
+  return {
+    'median' : sorted(diffs)[len(diffs) // 2],
+    'average': sum(diffs) / len(diffs)
+  }
+
 
 #####################################################################################################
 ###########################################VALIDATION################################################
@@ -86,20 +130,17 @@ lab_percentage_changes = calc_percentage_changes(lab_ys)
 delta = 0.6 # for huber loss
 
 average_absolute_diff = compare_absolute_differences(mobile_ys, lab_ys)
+absolute_diff_v2 = compare_absolute_differences_v2(inverted_mobile_ys, lab_ys)
 average_percentage_diff = compare_percentage_change(mobile_percentage_changes, lab_percentage_changes)
 hl = huber_loss(np.array(lab_percentage_changes), np.array(mobile_percentage_changes), delta)
-
-print("========================================")
-print("===========PERCENTAGE CHANGES===========")
-print("========================================")
-print("mobile percentage changes:", mobile_percentage_changes)
-print("lab percentage changes:", lab_percentage_changes)
-print("========================================\n")
+median_scale_factor = find_median_scale_factor(inverted_mobile_ys, lab_ys)
 
 print("========================================")
 print("================RESULTS=================")
 print("========================================")
 print("average absolute diff:", f"\t\t{average_absolute_diff:.2f}cm")
+print("average absolute diff v2:", f"\t{absolute_diff_v2.get('average'):.2f}cm")
+print("median absolute diff v2:", f"\t{absolute_diff_v2.get('median'):.2f}cm")
 print("average percentage diff:", f"\t{average_percentage_diff:.2f}%")
 print("huber loss:", f"\t\t\t{hl:.2f}%")
 print("========================================")
