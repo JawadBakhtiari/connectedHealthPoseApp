@@ -44,11 +44,9 @@ export default function VisionCamera({ route, navigation }) {
   const [video, setVideo] = useState(null);
   const poses = useSharedValue([]);
   const timeStarted = useSharedValue(0);
-  const { uid } = route.params;
   const { sid } = route.params;
   const { code } = route.params;
   const tensorAsArray = [];
-  const [poses2, setPoses2] = useState([]);
   const plugin = useTensorflowModel(
     require("./assets/lite-model_movenet_singlepose_lightning_tflite_int8_4.tflite")
   );
@@ -175,23 +173,23 @@ export default function VisionCamera({ route, navigation }) {
       return;
     }
     if (isRecording) {
+      isAlsoRecording.value = 0;
       cameraRef.current.stopRecording();
       return;
     }
     setIsRecording(true);
     isAlsoRecording.value = 1;
+
     console.log("Recording");
     cameraRef.current.startRecording({
       onRecordingFinished: async (video) => {
         console.log(video);
         setIsRecording(false);
-        isAlsoRecording.value = 0;
         setVideo(video);
         const path = video.path;
         await CameraRoll.save(`file://${path}`, {
           type: "video",
         });
-
         sendData();
       },
       onRecordingError: (error) => {
