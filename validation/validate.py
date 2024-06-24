@@ -65,9 +65,11 @@ def compare_percentage_change(mobile_percentage_changes: list, lab_percentage_ch
     Find the difference in percentage change at each point between lab and mobile data.
     Return the average of these differences.
   '''
-  percentage_differences = [abs(m - l) for m, l in zip(mobile_percentage_changes, lab_percentage_changes)]
-  average_difference = reduce(lambda a, b: a + b, percentage_differences) / len(percentage_differences)
-  return average_difference
+  diffs = [abs(m - l) for m, l in zip(mobile_percentage_changes, lab_percentage_changes)]
+  return {
+      'median' : sorted(diffs)[len(diffs) // 2],
+      'average': sum(diffs) / len(diffs)
+    }
 
 def compare_absolute_differences(mobile_ys: list, lab_ys: list) -> float:
   mobile_ys = scale_mobile_ys(mobile_ys, FACTOR)
@@ -111,15 +113,23 @@ def compare_absolute_differences_v2(mobile_ys: list, lab_ys: list) -> float:
     'average': sum(diffs) / len(diffs)
   }
 
+def percentage_error(mobile_val: float, lab_val: float) -> float:
+  return abs(mobile_val - lab_val) / lab_val * 100
+
 def compare_differences_in_distance(mobile_ys: list, lab_ys: list) -> float:
+  '''
+    Calculate the median and average percentage error in distances between each keypoint
+    computed by the mobile app vs the lab motion capture.
+  '''
   mobile_distances = [abs(mobile_ys[i] - mobile_ys[i + 1]) for i in range(len(mobile_ys) - 1)]
   lab_distances = [abs(lab_ys[i] - lab_ys[i + 1]) for i in range(len(lab_ys) - 1)]
-  scale_factor = find_median_distance_scale_factor(mobile_distances, lab_distances)
-  diffs = [abs(md * scale_factor - ld) for md, ld in zip(mobile_distances, lab_distances)]
+  distance_scale_factor = find_median_distance_scale_factor(mobile_distances, lab_distances)
+  # point_scale_factor = find_median_scale_factor(mobile_ys, lab_ys)
+  diffs = [percentage_error(md * distance_scale_factor, ld) for md, ld in zip(mobile_distances, lab_distances)]
   return {
     'median' : sorted(diffs)[len(diffs) // 2],
     'average': sum(diffs) / len(diffs)
-  }
+  } 
 
 
 #####################################################################################################
@@ -127,22 +137,22 @@ def compare_differences_in_distance(mobile_ys: list, lab_ys: list) -> float:
 #####################################################################################################
 mobile_percentage_changes = calc_percentage_changes(mobile_ys) 
 lab_percentage_changes = calc_percentage_changes(lab_ys)
-delta = 0.6 # for huber loss
+# delta = 0.6 # for huber loss
 
-average_absolute_diff = compare_absolute_differences(mobile_ys, lab_ys)
 absolute_diff_v2 = compare_absolute_differences_v2(inverted_mobile_ys, lab_ys)
-average_percentage_diff = compare_percentage_change(mobile_percentage_changes, lab_percentage_changes)
-hl = huber_loss(np.array(lab_percentage_changes), np.array(mobile_percentage_changes), delta)
-median_scale_factor = find_median_scale_factor(inverted_mobile_ys, lab_ys)
+keypoint_percentage_diffs = compare_percentage_change(mobile_percentage_changes, lab_percentage_changes)
+# hl = huber_loss(np.array(lab_percentage_changes), np.array(mobile_percentage_changes), delta)
+distance_percentage_diffs = compare_differences_in_distance(inverted_mobile_ys, lab_ys)
 
 print("========================================")
 print("================RESULTS=================")
 print("========================================")
-print("average absolute diff:", f"\t\t{average_absolute_diff:.2f}cm")
-print("average absolute diff v2:", f"\t{absolute_diff_v2.get('average'):.2f}cm")
-print("median absolute diff v2:", f"\t{absolute_diff_v2.get('median'):.2f}cm")
-print("average percentage diff:", f"\t{average_percentage_diff:.2f}%")
-print("huber loss:", f"\t\t\t{hl:.2f}%")
+print("average absolute diff (keypoints) v2:", f"\t{absolute_diff_v2.get('average'):.2f}cm")
+print("median absolute diff (keypoints) v2:", f"\t{absolute_diff_v2.get('median'):.2f}cm")
+print("average percentage error (keypoints):", f"\t{keypoint_percentage_diffs.get('average'):.2f}%")
+print("median percentage error (keypoints):", f"\t{keypoint_percentage_diffs.get('median'):.2f}%")
+print("median percentage error (distance):", f"\t{distance_percentage_diffs.get('median'):.2f}%")
+print("average percentage error (distance):", f"\t{distance_percentage_diffs.get('average'):.2f}%")
 print("========================================")
 
 #####################################################################################################
