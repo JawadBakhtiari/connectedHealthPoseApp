@@ -49,7 +49,7 @@ def scale_mobile_ys(mobile_ys: list, factor: float) -> list:
 
 
 def calc_percentage_diff(first: float, second: float) -> float:
-  return abs(((first - second) / first) * 100)
+  return (abs(first - second) / first) * 100
 
 
 def calc_percentage_changes(data: list):
@@ -63,7 +63,7 @@ def calc_percentage_changes(data: list):
 def compare_percentage_change(mobile_percentage_changes: list, lab_percentage_changes: list) -> float:
   '''
     Find the difference in percentage change at each point between lab and mobile data.
-    Return the average of these differences.
+    Return the average and median of these differences.
   '''
   diffs = [abs(m - l) for m, l in zip(mobile_percentage_changes, lab_percentage_changes)]
   return {
