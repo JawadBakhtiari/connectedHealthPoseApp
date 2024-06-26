@@ -7,8 +7,8 @@ from . import const
 
 class LabDataFormatter:
   '''
-    Format motion capture lab data from a csv file to match the
-    formatting of motion capture data from our mobile app. 
+    Format motion capture lab data from a csv file to a common format
+    for comparison with mobile data. 
   '''
 
   def __init__(self, filepath: str) -> None:
@@ -72,6 +72,17 @@ class LabDataFormatter:
 
   @staticmethod
   def __create_formatted_keypoint(row: pd.Series, lab_keypoint: str) -> dict:
+    '''
+      Format the lab data for a keypoint.
+
+      Args:
+        row: the current row in the lab data.
+        lab_keypoint: the name of the keypoint in the lab data.
+
+      Returns:
+        A dictionary representing this keypoints data in the desired formatting
+        for comparison with mobile data.
+    '''
     x = row[lab_keypoint + const.X_SUFFIX]
     y = row[lab_keypoint + const.Y_SUFFIX]
     z = row[lab_keypoint + const.Z_SUFFIX]
@@ -88,11 +99,11 @@ class LabDataFormatter:
 
   def format(self) -> list:
     '''
-      Format lab data to match the formatting of our mobile app data.
+      Format lab data so that it is in a common formatting for comparison
+      with mobile data.
 
       Returns:
-        list of keypoints for this recording using the same data structure
-        as our mobile data. 
+        list of formatted keypoints.
     '''
     poses = []
     for _, row in self.data.iterrows():
