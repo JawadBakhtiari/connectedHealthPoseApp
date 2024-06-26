@@ -6,7 +6,7 @@ filepath = 'exampleData/firstSampleSitToStand/livabilityLabPoses.csv'
 
 def run():
   ldf = LabDataFormatter(filepath)
-  print(ldf.get_data())
+  ldf.format()
 
 if __name__ == "__main__":
   run()
