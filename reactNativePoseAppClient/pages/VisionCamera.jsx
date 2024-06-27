@@ -48,7 +48,7 @@ export default function VisionCamera({ route, navigation }) {
   const { code } = route.params;
   const tensorAsArray = [];
   const plugin = useTensorflowModel(
-    require("./assets/lite-model_movenet_singlepose_lightning_tflite_int8_4.tflite")
+    require("./assets/pose_landmark_lite.tflite")
   );
 
   // Request for permission
@@ -129,11 +129,11 @@ export default function VisionCamera({ route, navigation }) {
       if (plugin.state === "loaded" && isAlsoRecording.value === 1) {
         const resized = resize(frame, {
           scale: {
-            width: 192,
-            height: 192,
+            width: 256,
+            height: 256,
           },
           pixelFormat: "rgb",
-          dataType: "uint8",
+          dataType: "float32",
           rotation: rotation,
         });
         const outputs = plugin.model.runSync([resized]);
@@ -186,11 +186,32 @@ export default function VisionCamera({ route, navigation }) {
         console.log(video);
         setIsRecording(false);
         setVideo(video);
+
         const path = video.path;
+
+        // const data = new FormData();
+        // data.append("video", {
+        //   name: "mobile-video-upload",
+        //   type: "video/quicktime",
+        //   uri: path,
+        // });
+
+        // try {
+        //   await fetch("http://" + code + "/data/frames/upload/", {
+        //     method: "post",
+        //     body: data,
+        //   });
+        // } catch (e) {
+        //   console.error(e);
+        // }
+
+        // const response = await uploadImage({ formData });
+
+        sendData();
+
         await CameraRoll.save(`file://${path}`, {
           type: "video",
         });
-        sendData();
       },
       onRecordingError: (error) => {
         console.error(error);
