@@ -3,7 +3,9 @@ import math
 import pandas as pd
 from datetime import datetime
 from typing import Union
+from collections import defaultdict
 from . import const
+from .util import get_x_y_z_suffixes
 
 class LabDataFormatter:
   '''
@@ -13,9 +15,10 @@ class LabDataFormatter:
 
   def __init__(self, filepath: str) -> None:
     if not os.path.exists(filepath):
-      raise FileNotFoundError(f"file {filepath} does not exist")
+      raise FileNotFoundError(f"file '{filepath}' does not exist")
     self.data = LabDataFormatter.__preprocess(filepath)
     self.start_time = LabDataFormatter.__get_start_time(filepath)
+    self.nan_keypoints = defaultdict(int)
 
   @staticmethod
   def __get_start_time(filepath: str) -> float:
@@ -82,13 +85,17 @@ class LabDataFormatter:
       Returns:
         A dictionary representing this keypoints data in the desired formatting
         for comparison with mobile data.
-    '''
-    x = row[lab_keypoint + const.X_SUFFIX]
-    y = row[lab_keypoint + const.Y_SUFFIX]
-    z = row[lab_keypoint + const.Z_SUFFIX]
 
-    if not x or not y or not z:
-      raise ValueError('x, y or z value is not a number')
+      Raises:
+        Value error if x, y or z for given keypoint in given row are nan.
+    '''
+    x_suffix, y_suffix, z_suffix = get_x_y_z_suffixes(lab_keypoint)
+    x = float(row[lab_keypoint + x_suffix])
+    y = float(row[lab_keypoint + y_suffix])
+    z = float(row[lab_keypoint + z_suffix])
+
+    if math.isnan(x) or math.isnan(y) or math.isnan(z):
+      raise ValueError(f'x: {x}, y: {y} or z: {z} value is not a number for keypoint {lab_keypoint}')
 
     return {
       'x': x,
@@ -96,6 +103,32 @@ class LabDataFormatter:
       'z': z,
       'name': const.KEYPOINT_MAPPINGS.get(lab_keypoint)
     }
+
+  def add_nan_keypoint(self, lab_keypoint: str) -> None:
+    '''
+      Increment the count for the number of times that a given keypoint has
+      been nan for a frame.
+
+      Args:
+        lab_keypoint: the name of the keypoint that was nan in a frame.
+    '''
+    self.nan_keypoints[lab_keypoint] += 1
+
+  def print_nan_keypoints(self) -> None:
+    '''Print the number of frames in which each keypoint was nan.'''
+    if self.nan_keypoints == {}:
+      print('no keypoints were nan in any frames :)')
+      return
+
+    for kp, time_nan in self.nan_keypoints.items():
+      print(f'{kp} ({const.KEYPOINT_MAPPINGS.get(kp)}) was nan {time_nan} times.')
+
+  def log(self) -> None:
+    '''Print logging information collected during formatting process.'''
+    print('\nLAB DATA FORMATTING LOG')
+    print('=======================')
+    self.print_nan_keypoints()
+    print('=======================\n')
 
   def format(self) -> list:
     '''
@@ -120,12 +153,13 @@ class LabDataFormatter:
       for kp in const.LAB_KEYPOINTS:
         try:
           new_formatted_kp = LabDataFormatter.__create_formatted_keypoint(row, kp)
-        except:
+        except ValueError:
           # If any keypoints cannot be formatted, skip this pose.
+          self.add_nan_keypoint(kp)
           break
         pose['keypoints'].append(new_formatted_kp)
       else:
         poses.append(pose)
-
+    self.log()
     return poses
  
