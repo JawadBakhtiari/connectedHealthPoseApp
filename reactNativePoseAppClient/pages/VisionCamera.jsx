@@ -101,29 +101,10 @@ export default function VisionCamera({ route, navigation }) {
       //   `Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`
       // );
 
-      // This marks the starting time of the image processing for measuring latency.
-      const startTs = Date.now();
-
-      // Get Time photo was taken
-      var today = new Date();
-      var date =
-        today.getFullYear() +
-        "-" +
-        (today.getMonth() + 1) +
-        "-" +
-        today.getDate();
-      var time =
-        today.getHours() +
-        ":" +
-        today.getMinutes() +
-        ":" +
-        today.getSeconds() +
-        ":" +
-        today.getMilliseconds();
-      var dateTime = date + " " + time;
+      const timestamp = Date.now();
 
       if (timeStarted.value == 0) {
-        timeStarted.value = Date.now();
+        timeStarted.value = timestamp; 
       }
 
       if (plugin.state === "loaded" && isAlsoRecording.value === 1) {
@@ -137,7 +118,7 @@ export default function VisionCamera({ route, navigation }) {
           rotation: rotation,
         });
         const outputs = plugin.model.runSync([resized]);
-        outputs[0]["timestamp"] = dateTime;
+        outputs[0]["timestamp"] = timestamp;
         poses.value.push(outputs[0]);
         // poses.value = [poses.value, outputs[0]];
         // poses2.push(outputs[0]);
