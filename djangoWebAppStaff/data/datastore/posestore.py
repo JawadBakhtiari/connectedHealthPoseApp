@@ -42,7 +42,7 @@ class PoseStore:
         presence = pose.get(presi)
 
         return {
-            'name': const.KEYPOINT_MAPPINGS.get(keypoint_index),
+            'name': const.KEYPOINT_MAPPINGS.get(keypoint_index/5),
             'x': x,
             'y': y,
             'z': z,
@@ -58,6 +58,9 @@ class PoseStore:
             Args:
                 poses: a list of poses as received from the pose estimation model.
         '''
+        pose_data = json.loads(poses)
+        poses = pose_data
+        
         if not isinstance(poses, list):
             raise TypeError('poses must be of type list')
 
@@ -65,8 +68,9 @@ class PoseStore:
         for pose in poses:
             timestamp = pose.get('timestamp')
             keypoints = []
-            for i in range(0, const.NUM_KEYPOINTS, const.VALS_PER_KEYPOINT):
-                new_keypoint = PoseStore.__create_formatted_keypoint(pose, i)
+            for i in range(39):
+                index = i * 5
+                new_keypoint = PoseStore.__create_formatted_keypoint(pose, index)
                 keypoints.append(new_keypoint)
             reformatted_poses.append({'timestamp': timestamp, 'keypoints': keypoints})
         self.poses = reformatted_poses

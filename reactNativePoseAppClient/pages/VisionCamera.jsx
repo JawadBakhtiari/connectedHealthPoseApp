@@ -104,7 +104,7 @@ export default function VisionCamera({ route, navigation }) {
       const timestamp = Date.now();
 
       if (timeStarted.value == 0) {
-        timeStarted.value = timestamp; 
+        timeStarted.value = timestamp;
       }
 
       if (plugin.state === "loaded" && isAlsoRecording.value === 1) {
@@ -170,21 +170,22 @@ export default function VisionCamera({ route, navigation }) {
 
         const path = video.path;
 
-        // const data = new FormData();
-        // data.append("video", {
-        //   name: "mobile-video-upload",
-        //   type: "video/quicktime",
-        //   uri: path,
-        // });
+        const data = new FormData();
 
-        // try {
-        //   await fetch("http://" + code + "/data/frames/upload/", {
-        //     method: "post",
-        //     body: data,
-        //   });
-        // } catch (e) {
-        //   console.error(e);
-        // }
+        data.append("video", {
+          name: "mobile-video-upload",
+          // type: "video/quicktime",
+          uri: path,
+        });
+
+        try {
+          const res = await fetch("http://" + code + "/data/frames/upload/", {
+            method: "post",
+            body: data,
+          });
+        } catch (e) {
+          console.error(e);
+        }
 
         // const response = await uploadImage({ formData });
 
