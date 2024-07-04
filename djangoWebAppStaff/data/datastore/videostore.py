@@ -1,5 +1,7 @@
 import data.datastore.const as const
 from data.datastore.cloud import get_blob_client
+import tempfile
+import os
 
 class VideoStore:
     '''
@@ -22,12 +24,19 @@ class VideoStore:
         Raises:
             ValueError: if video data for this clip is not found.
         '''
-        blob_client = get_blob_client(const.AZ_CLIPS_CONTAINER_NAME, self.get_name())
+        blob_client = get_blob_client(const.AZ_VIDEOS_CONTAINER_NAME, self.get_name())
         if blob_client.exists():
-            return blob_client.download_blob().readall()
+            video_path = os.path.join(
+                tempfile.gettempdir(), self.get_name())
+            with open(video_path, "wb") as f:
+                video_data = blob_client.download_blob()
+                video_data.readinto(f)
+            return video_path
         raise ValueError(
             f"video from clip with sid '{self.sid}' and clip number '{self.clip_num}' not found"
         )
+    
+
 
 
     def write(self, video: bytes) -> None:
@@ -44,7 +53,7 @@ class VideoStore:
         '''
         Delete the video file for a this clip from cloud storage.
         '''
-        blob_client = get_blob_client(const.AZ_CLIPS_CONTAINER_NAME, self.get_name())
+        blob_client = get_blob_client(const.AZ_VIDEOS_CONTAINER_NAME, self.get_name())
         if blob_client.exists():
             blob_client.delete_blob()
 

@@ -62,7 +62,7 @@ class PoseStore:
                 pose_data_bytes = json.dumps(pose_data).encode('utf-8')
                 blob_client.upload_blob(pose_data_bytes)
 
-        os.remove(file_path)
+        # os.remove(file_path)
 
 
     def write_locally(self, poses: list) -> None:

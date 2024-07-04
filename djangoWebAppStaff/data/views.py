@@ -12,6 +12,7 @@ from .models import User, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse as response, JsonResponse
 from data.visualise import create_2D_visualisation 
+import numpy as np
 
 matplotlib.use('Agg')
 
@@ -116,6 +117,7 @@ def video_upload(request):
     pose_store.write_to_cloud()
 
     sm.increment_clip_num(sid)
+    print(f"\nUpload Finished\nSid: {sid}\nClipNum: {clip_num}\n")
     return response(status=status.HTTP_200_OK)
 
 
@@ -134,7 +136,8 @@ def visualise_2D(request):
     video_store = VideoStore(sid, clip_num)
     try:
         poses = pose_store.get()
-        cap = cv2.VideoCapture(video_store.get())
+        video_path = video_store.get()
+        cap = cv2.VideoCapture(video_path)
     except ValueError as e:
         print(e)
         return render(request, 'visualise2D.html', {'frames': None})

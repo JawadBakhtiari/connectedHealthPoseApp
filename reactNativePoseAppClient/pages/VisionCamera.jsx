@@ -65,21 +65,15 @@ export default function VisionCamera({ route, navigation }) {
 
   console.log("Vision Camera has permission: ", hasPermission);
 
-  const sendData = async (clipFinished = false) => {
+  const sendData = async () => {
     "worklet";
-
-    console.log();
-
     const poses3 = poses.value;
-
     try {
       const response = await Axios.post(
-        "http://" + code + "/data/frames/upload/",
+        "http://" + code + "/data/poses/upload/",
         {
           // uid: "ahmad232",
           sid,
-          // clipNum: "1",
-          clipFinished,
           poses: JSON.stringify(poses3),
           tensorAsArray,
         }
@@ -88,10 +82,22 @@ export default function VisionCamera({ route, navigation }) {
       // console.log(response.data);
       console.log("sending data:");
       poses.value = [];
-      timeStarted.value = 0;
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const startSendingData = () => {
+    intervalId = setInterval(() => {
+      if (poses.value.length > 0) {
+        sendData();
+      }
+    }, 1000); // Run every 1 second
+  };
+
+  const stopSendingData = async () => {
+    clearInterval(intervalId);
+    poses.value = [];
   };
 
   const frameProcessor = useFrameProcessor(
@@ -120,22 +126,6 @@ export default function VisionCamera({ route, navigation }) {
         const outputs = plugin.model.runSync([resized]);
         outputs[0]["timestamp"] = timestamp;
         poses.value.push(outputs[0]);
-        // console.log(outputs[0]);
-        // console.log(outputs[0]);
-
-        // poses.value = [poses.value, outputs[0]];
-        // poses2.push(outputs[0]);
-
-        // if (Date.now() - timeStarted.value >= 1000) {
-        //   console.log("We have 15 frames");
-        //   // console.log(`Received ${dateTime} ${outputs.length} outputs!`);
-        //   console.log(poses.value.length);
-
-        //   poses.value = [];
-        //   timeStarted.value = 0;
-        // }
-        // console.log(`Received ${dateTime} ${outputs.length} outputs!`);
-        // console.log(outputs[0]);
         console.log(poses.value.length);
       }
     },
@@ -157,12 +147,14 @@ export default function VisionCamera({ route, navigation }) {
       return;
     }
     if (isRecording) {
+      await stopSendingData();
       isAlsoRecording.value = 0;
       cameraRef.current.stopRecording();
       return;
     }
     setIsRecording(true);
     isAlsoRecording.value = 1;
+    startSendingData(); // Start sending data when recording starts
 
     console.log("Recording");
     cameraRef.current.startRecording({
@@ -192,10 +184,6 @@ export default function VisionCamera({ route, navigation }) {
           console.error(e);
         }
 
-        // const response = await uploadImage({ formData });
-
-        sendData(true);
-
         await CameraRoll.save(`file://${path}`, {
           type: "video",
         });
@@ -204,6 +192,7 @@ export default function VisionCamera({ route, navigation }) {
         console.error(error);
         isAlsoRecording.value = 0;
         setIsRecording(false);
+        stopSendingData();
       },
     });
   };

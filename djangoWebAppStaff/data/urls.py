@@ -4,7 +4,6 @@ from . import views
 app_name = 'data'
 
 urlpatterns = [
-     path('visualise3D/', views.visualise_3D, name='visualise_3D'),
      path('visualise2D/', views.visualise_2D, name='visualise_2D'),
      path('poses/upload/', views.poses_upload, name='frames_upload'),
      path('video/upload/', views.video_upload, name='video_upload'),

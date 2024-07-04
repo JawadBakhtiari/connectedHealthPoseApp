@@ -20,13 +20,10 @@ from django.conf.urls.static import static
 from django.urls import include
 from data.views import visualise_2D
 
-from data.views import dashboard
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('data/', include('data.urls')),
     path('chart/', include('chart.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('dashboard/', dashboard, name='dashboard'),
     path('', visualise_2D, name='visualise_2D'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
