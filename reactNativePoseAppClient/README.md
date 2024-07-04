@@ -45,5 +45,5 @@ npx expo run:ios --device
 # Run server
 
 ```
-
+npx expo start --dev-client
 ```
