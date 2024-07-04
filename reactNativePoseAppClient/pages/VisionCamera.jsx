@@ -65,7 +65,7 @@ export default function VisionCamera({ route, navigation }) {
 
   console.log("Vision Camera has permission: ", hasPermission);
 
-  const sendData = async () => {
+  const sendData = async (clipFinished = false) => {
     "worklet";
 
     console.log();
@@ -79,7 +79,7 @@ export default function VisionCamera({ route, navigation }) {
           // uid: "ahmad232",
           sid,
           // clipNum: "1",
-          clipFinished: false,
+          clipFinished,
           poses: JSON.stringify(poses3),
           tensorAsArray,
         }
@@ -194,7 +194,7 @@ export default function VisionCamera({ route, navigation }) {
 
         // const response = await uploadImage({ formData });
 
-        sendData();
+        sendData(true);
 
         await CameraRoll.save(`file://${path}`, {
           type: "video",

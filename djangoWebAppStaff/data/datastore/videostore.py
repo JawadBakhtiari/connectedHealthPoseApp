@@ -32,11 +32,12 @@ class VideoStore:
 
     def write(self, video: bytes) -> None:
         '''
-        Store the video data for this clip. If there is already some video data,
-        it is overwritten.
+        Store the video data for this clip.
+        If there is already some video data, it is overwritten.
         '''
         blob_client = get_blob_client(const.AZ_VIDEOS_CONTAINER_NAME, self.get_name())
         blob_client.upload_blob(video, overwrite=True)
+
 
 
     def delete(self) -> None:

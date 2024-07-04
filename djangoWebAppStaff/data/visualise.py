@@ -4,16 +4,14 @@ import cv2
 import base64
 import mediapipe as mp
 import data.const as const
-import matplotlib.pyplot as plt
-from io import BytesIO
 
-mp_pose = mp.solutions.pose
-
-def create_2D_visualisation(poses, cap):
-    '''Return a list of strings (base64 encoded images) that represent video frames
-    overlayed with corresponding keypoints.'''
+def create_2D_visualisation(poses: list, cap) -> list:
+    '''
+    Return a list of strings (base64 encoded images) that represent video frames
+    overlayed with corresponding keypoints.
+    '''
+    mp_pose = mp.solutions.pose
     frames = []
-    # Create a Pose model for static images
     with mp_pose.Pose(
         static_image_mode=True,
         model_complexity=0,
@@ -52,95 +50,3 @@ def create_2D_visualisation(poses, cap):
             frames.append(img_base64)
     cv2.destroyAllWindows()
     return frames
-
-def create_3D_visualisation(poses):
-    '''Return a list of strings (base64 encoded images) that represent a 3D display of
-    keypoints'''
-    frames = []
-    for p in poses:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-
-        keypoints = []
-        for kp in p.get("keypoints3D"):
-            x, y, z = kp['x'], kp['y'], kp['z']
-             
-            # Swap Y and Z axes, and adjust X, Y, Z as needed
-            x_new = x  # X remains the same
-            y_new = z  # Y in Matplotlib is -Z in BlazePose
-            z_new = -y  # Z in Matplotlib is Y in BlazePose
-
-            ax.scatter(x_new, y_new, z_new, c='g', marker='o')
-            keypoints.append((x_new, y_new, z_new))
-
-        for joint1, joint2 in const.KP_CONNS:
-            x1, y1, z1 = keypoints[joint1]
-            x2, y2, z2 = keypoints[joint2]
-            ax.plot([x1, x2], [y1, y2], [z1, z2], c='b')
-        # Set the view angle of the plot here
-        ax.view_init(elev=10, azim=-50) 
-
-        buf = BytesIO()
-        plt.savefig(buf, format='png')
-        plt.close(fig)
-        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
-        frames.append(img_base64)
-    return frames
-
-# WORK IN PROGRESS 3D VISUALISATION
-#def create_3D_visualisation_alt(poses):
-#     frames = []
-#     for frame_num, session_frame in enumerate(poses):
-#         keypoints3D_arrays = []
-#         for kp in session_frame.get("keypoints3D"):
-#             keypoints3D_arrays.append(np.array([kp.get('x', 0), kp.get('y', 0), kp.get('z', 0)]))
-#         xdata = np.array([kp[0] for kp in keypoints3D_arrays])
-#         ydata = np.array([kp[1] for kp in keypoints3D_arrays])
-#         zdata = np.array([kp[2] for kp in keypoints3D_arrays])
-#         trace = go.Scatter3d(
-#             x=xdata,
-#             y=ydata,
-#             z=zdata,
-#             mode='markers',
-#             marker=dict(size=2, color='red')
-#         )
-#         lines = [
-#             go.Scatter3d(
-#                 x=[xdata[joint1], xdata[joint2]],
-#                 y=[ydata[joint1], ydata[joint2]],
-#                 z=[zdata[joint1], zdata[joint2]],
-#                 mode='lines',
-#                 line=dict(width=2, color='blue')
-#             )
-#             for joint1, joint2 in const.KP_CONNS
-#         ]
-#         frames.append(go.Frame(data=[trace] + lines, name=str(frame_num)))
-#     layout = go.Layout(
-#         scene=dict(
-#             aspectmode="data",
-#             aspectratio=dict(x=2, y=2, z=1),
-#             xaxis=dict(range=[-2, 2], visible=False),
-#             yaxis=dict(range=[-2, 2], visible=False),
-#             zaxis=dict(range=[-2, 2]),
-#         ),
-#         showlegend=False,
-#         height=800,
-#         margin=dict(l=0, r=0, b=0, t=0),
-#         plot_bgcolor='rgba(0,0,0,0)',
-#         paper_bgcolor='rgba(0,0,0,0)',
-#         updatemenus=[
-#             dict(
-#                 type="buttons",
-#                 showactive=False,
-#                 buttons=[dict(label="Play",
-#                             method="animate",
-#                             args=[None, {"frame": {"duration": 100, "redraw": True}}])])  # Adjust duration for speed
-#         ]
-#     )
-#     fig = go.Figure(
-#         data=[trace] + lines,
-#         layout=layout,
-#         frames=frames
-#     )
-#     
-#     return frames
