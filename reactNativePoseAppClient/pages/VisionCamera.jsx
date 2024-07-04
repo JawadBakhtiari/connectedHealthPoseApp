@@ -173,22 +173,24 @@ export default function VisionCamera({ route, navigation }) {
 
         const path = video.path;
 
-        // const data = new FormData();
+        const data = new FormData();
 
-        // data.append("video", {
-        //   name: "mobile-video-upload",
-        //   // type: "video/quicktime",
-        //   uri: path,
-        // });
+        data.append("video", {
+          name: "mobile-video-upload",
+          type: "video/quicktime",
+          uri: path,
+        });
 
-        // try {
-        //   const res = await fetch("http://" + code + "/data/frames/upload/", {
-        //     method: "post",
-        //     body: data,
-        //   });
-        // } catch (e) {
-        //   console.error(e);
-        // }
+        data.append("sid", sid);
+
+        try {
+          const res = await fetch("http://" + code + "/data/video/upload/", {
+            method: "post",
+            body: data,
+          });
+        } catch (e) {
+          console.error(e);
+        }
 
         // const response = await uploadImage({ formData });
 

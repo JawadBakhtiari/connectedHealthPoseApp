@@ -1,4 +1,5 @@
 import cv2
+import os
 import json
 import uuid
 import matplotlib
@@ -12,9 +13,10 @@ from .models import User, InvolvedIn, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse as response, JsonResponse
 from data.visualise import create_2D_visualisation, create_3D_visualisation
+from data.datastore.cloud import get_blob_client
+import data.datastore.const as const
 
 matplotlib.use('Agg')
-
 
 def dashboard(request):
     user = request.user
@@ -119,6 +121,15 @@ def frames_upload(request):
 
     return response(status=status.HTTP_200_OK)
 
+@csrf_exempt
+def video_upload(request):
+    video = request.FILES['video']
+    sid = request.POST.get('sid', '')
+    video_name = f"{sid}_{sm.get_clip_num(sid)}.MOV"
+    blob_client = get_blob_client(
+            const.AZ_VIDEOS_CONTAINER_NAME, video_name)
+    blob_client.upload_blob(video, overwrite=True)
+    return response(status=status.HTTP_200_OK)
 
 @csrf_exempt
 def visualise_2D(request):
@@ -126,14 +137,8 @@ def visualise_2D(request):
     which this data was extracted.'''
     # NOTE ->   skip error checking involving users
     #           don't expect user id in request currently
-
-    # use sample data if request is empty (happens when page is first loaded by url)
-    sid = "215eaafc-41ba-40a2-9a8a-57b73e61b2c0"
-    clip_num = "2"
-    if request.GET:
-        # if request non-empty, use this data
-        sid = request.GET.get('sid')
-        clip_num = request.GET.get('clipNum')
+    sid = request.GET.get('sid')
+    clip_num = request.GET.get('clipNum')
 
     store = DataStore(sid, clip_num)
     if not store.populate():
