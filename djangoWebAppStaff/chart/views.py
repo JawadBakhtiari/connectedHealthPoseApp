@@ -2,7 +2,8 @@ import cv2
 import json
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from data.datastore.datastore import DataStore
+from data.datastore.posestore import PoseStore
+from data.datastore.videostore import VideoStore
 from data.visualise import create_2D_visualisation
 from chart.Visualise import calculate_angles
 
@@ -28,16 +29,19 @@ def result(request):
         joint = 'shoulder'
         dimension = '2d'
 
-    store = DataStore(sid, clip_num)
-    if not store.populate():
-        print("Error: data (poses or video or both) not found")
+    pose_store = PoseStore(sid, clip_num)
+    video_store = VideoStore(sid, clip_num)
+    try:
+        poses = pose_store.get()
+        cap = cv2.VideoCapture(video_store.get())
+    except ValueError as e:
+        print(e)
         return render(request, 'result.html', {'frames': None})
 
-    cap = cv2.VideoCapture(store.get_video_path())
     if not cap.isOpened():
         print("Error: Could not open the video file.")
         return render(request, 'result.html', {'frames': None})
-    
+
     if joint.lower() not in ['elbow', 'shoulder', 'hip', 'knee']:
         print("Error: invalid joint.")
         return render(request, 'result.html', {'frames': None})
@@ -49,13 +53,11 @@ def result(request):
     # Format parameters
     joint = joint.lower().capitalize()
     dimension = dimension.lower()
-
-    poseData = store.get_poses()
-    angleData = calculate_angles(joint, dimension, poseData)
+    angleData = calculate_angles(joint, dimension, poses)
 
     joints = json.dumps(joint)
     dimensions = json.dumps(dimension)
     angles = json.dumps(angleData)
-    frames = json.dumps(create_2D_visualisation(poseData, cap))
+    frames = json.dumps(create_2D_visualisation(poses, cap))
 
     return render(request, 'result.html', {'frames': frames, 'angles': angles, 'joint': joints, 'dimension': dimensions}, content_type='text/html')

@@ -1,5 +1,3 @@
-'''Class for storing and retreiving pose data (keypoints) '''
-
 import os
 import json
 import data.datastore.const as const
@@ -62,6 +60,7 @@ class PoseStore:
                 pose_data_bytes = json.dumps(pose_data).encode('utf-8')
                 blob_client.upload_blob(pose_data_bytes)
 
+        # NOTE -> commented out for validation
         # os.remove(file_path)
 
 
