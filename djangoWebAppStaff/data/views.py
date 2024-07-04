@@ -1,5 +1,4 @@
 import cv2
-import os
 import json
 import uuid
 import matplotlib
@@ -9,12 +8,11 @@ from rest_framework import status
 from django.shortcuts import render
 from data.datastore.datastore import DataStore
 from data.datastore.posestore import PoseStore
+from data.datastore.videostore import VideoStore
 from .models import User, InvolvedIn, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse as response, JsonResponse
 from data.visualise import create_2D_visualisation, create_3D_visualisation
-from data.datastore.cloud import get_blob_client
-import data.datastore.const as const
 
 matplotlib.use('Agg')
 
@@ -112,7 +110,7 @@ def frames_upload(request):
 
     clip_num = sm.get_clip_num(sid)
     store = DataStore(sid, clip_num)
-    store.set(poses, images)
+    store.set(json.loads(poses), images)
     store.write_locally()
 
     if clipFinished:
@@ -125,10 +123,8 @@ def frames_upload(request):
 def video_upload(request):
     video = request.FILES['video']
     sid = request.POST.get('sid', '')
-    video_name = f"{sid}_{sm.get_clip_num(sid)}.MOV"
-    blob_client = get_blob_client(
-            const.AZ_VIDEOS_CONTAINER_NAME, video_name)
-    blob_client.upload_blob(video, overwrite=True)
+    video_store = VideoStore(sid, sm.get_clip_num(sid))
+    video_store.write(video)
     return response(status=status.HTTP_200_OK)
 
 @csrf_exempt

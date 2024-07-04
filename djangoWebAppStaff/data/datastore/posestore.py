@@ -15,24 +15,19 @@ class PoseStore:
         '''
         self.sid = sid
         self.clip_num = clip_num
-        self.poses = []
-
-
-    def get(self):
-        return self.poses
 
 
     @staticmethod
     def __create_formatted_keypoint(pose: dict, keypoint_index: int) -> dict:
         '''
-            Format keypoint data in a more readable way.
+        Format keypoint data in a more readable way.
 
-            Args:
-                pose: dictionary representing a single pose, from pose estimation model
-                keypoint_index: index of this keypoint in the pose dictionary
+        Args:
+            pose: dictionary representing a single pose, from pose estimation model
+            keypoint_index: index of this keypoint in the pose dictionary
 
-            Returns:
-                Dictionary with newly formatted keypoint data.
+        Returns:
+            Dictionary with newly formatted keypoint data.
         '''
         xi, yi, zi, visi, presi = get_keypoint_value_keys(keypoint_index)
         x = pose.get(xi)
@@ -42,7 +37,7 @@ class PoseStore:
         presence = pose.get(presi)
 
         return {
-            'name': const.KEYPOINT_MAPPINGS.get(keypoint_index/5),
+            'name': const.KEYPOINT_MAPPINGS.get(keypoint_index / const.VALS_PER_KEYPOINT),
             'x': x,
             'y': y,
             'z': z,
@@ -51,104 +46,116 @@ class PoseStore:
         }
 
 
-    def set(self, poses: list) -> None:
+    @staticmethod
+    def format_poses(poses: list) -> list:
         '''
-            Reformat pose data structure and store.
+        Reformat pose data structure and return it.
 
-            Args:
-                poses: a list of poses as received from the pose estimation model.
+        Args:
+            poses: a list of poses as received from the pose estimation model.
         '''
-        pose_data = json.loads(poses)
-        poses = pose_data
-        
-        if not isinstance(poses, list):
-            raise TypeError('poses must be of type list')
-
-        reformatted_poses = []
+        formatted_poses = []
         for pose in poses:
             timestamp = pose.get('timestamp')
             keypoints = []
-            for i in range(39):
-                index = i * 5
-                new_keypoint = PoseStore.__create_formatted_keypoint(pose, index)
+            for i in range(const.NUM_KEYPOINTS):
+                keypoint_index = i * const.VALS_PER_KEYPOINT
+                new_keypoint = PoseStore.__create_formatted_keypoint(pose, keypoint_index)
                 keypoints.append(new_keypoint)
-            reformatted_poses.append({'timestamp': timestamp, 'keypoints': keypoints})
-        self.poses = reformatted_poses
+            formatted_poses.append({'timestamp': timestamp, 'keypoints': keypoints})
+        return formatted_poses
 
 
     def get_name(self) -> str:
-        '''Return the name that should be used to identify the file containing poses for this clip.
         '''
-        return f"poses_{self.sid}_{self.clip_num}"
+        Return the name that should be used to identify the file containing poses for this clip.
+        '''
+        return f"{self.sid}_{self.clip_num}"
     
 
     def get_path(self) -> str:
-        '''Return the path to the file containing pose data for this clip in local storage.'''
+        '''
+        Return the path to the file containing pose data for this clip in local storage.
+        '''
         path = os.path.dirname(__file__)
-        filename = PoseStore.get_name(self) + ".json"
+        filename = self.get_name() + ".json"
         return os.path.join(path, "sessions", "poses", filename)
 
 
-    def populate(self) -> bool:
-        '''Populate clip dict with the contents of a specific clip from a session from cloud storage.
-        Return true if clip file already exists, false otherwise.'''
+    def get(self) -> list:
+        '''
+        Return the pose data for this clip.
+
+        Raises:
+            ValueError: if pose data for this clip is not found.
+        '''
         blob_client = get_blob_client(const.AZ_POSES_CONTAINER_NAME, self.get_name())
-
         if blob_client.exists():
-            # Download the blob from that clip as a string and convert to json
             pose_data_string = blob_client.download_blob().content_as_text()
-            self.poses = json.loads(pose_data_string)
-            return True
-        else:
-            return False
+            return json.loads(pose_data_string)
+        raise ValueError(
+            f"poses from clip with sid '{self.sid}' and clip number '{self.clip_num}' not found"
+        )
 
 
-    def write_locally(self) -> None:
-        '''Write poses to file stored on file system.'''
+    def write_locally(self, poses: list) -> None:
+        '''
+        Write poses to locally (to file in file system).
+
+        Args:
+            poses: a list of poses as received from the pose estimation model.
+
+        Raises:
+            TypeError: if poses are not of type list.
+        '''
+        if not isinstance(poses, list):
+            raise TypeError('poses must be of type list')
+
+        poses = PoseStore.format_poses(poses)
         file_path = self.get_path()
 
-        # Check if the file already exists
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
-                existing_data = json.load(f)  # Load existing data from the file
+                existing_data = json.load(f)
         else:
-            existing_data = []  # Create a new dictionary if the file doesn't exist
-
-        # Update the existing data with the new pose data
-        existing_data += self.poses
+            existing_data = []
+        existing_data += poses
 
         with open(file_path, "w") as f:
             json.dump(existing_data, f, indent=4)
 
 
     def write_to_cloud(self) -> None:
-        '''Write pose data for a given clip to cloud storage, delete local copy of pose data.'''
+        '''
+        Write pose data for a this clip to cloud storage and delete local copy.
+        '''
         file_path = self.get_path()
+        if not os.path.exists(file_path):
+            print(f"can't write poses to cloud for clip with sid '{self.sid}' and clip number '{self.clip_num}', no local poses")
+            return
 
-        try: 
-            with open(file_path, "r") as f:
-                pose_data = json.load(f)
-                blob_client = get_blob_client(const.AZ_POSES_CONTAINER_NAME, self.get_name())
-                if blob_client.exists():
-                    # Shouldn't be reached, but handle this case just to be safe
-                    downloaded_bytes = blob_client.download_blob().readall()
-                    existing_data = json.loads(downloaded_bytes)
-                    existing_data.update(pose_data)
-                    updated_clip_data_bytes = json.dumps(existing_data).encode('utf-8')
+        with open(file_path, "r") as f:
+            pose_data = json.load(f)
+            blob_client = get_blob_client(const.AZ_POSES_CONTAINER_NAME, self.get_name())
+            if blob_client.exists():
+                # Shouldn't be reached, but handle this case just to be safe
+                downloaded_bytes = blob_client.download_blob().readall()
+                existing_data = json.loads(downloaded_bytes)
+                existing_data.update(pose_data)
+                updated_clip_data_bytes = json.dumps(existing_data).encode('utf-8')
 
-                    # Upload the updated clip data (overwrite with updated information)
-                    blob_client.upload_blob(updated_clip_data_bytes, overwrite=True)
-                else:
-                    # Upload the clip data as a new blob
-                    pose_data_bytes = json.dumps(pose_data).encode('utf-8')
-                    blob_client.upload_blob(pose_data_bytes)
-        except:
-            print(f"Failed to upload clip sid: {self.sid} clip_num: {self.clip_num} to cloud storage.")
-        
+                # Upload the updated clip data (overwrite with updated information)
+                blob_client.upload_blob(updated_clip_data_bytes, overwrite=True)
+            else:
+                # Upload the clip data as a new blob
+                pose_data_bytes = json.dumps(pose_data).encode('utf-8')
+                blob_client.upload_blob(pose_data_bytes)
+
+        os.remove(file_path)
+
 
     def delete(self) -> None:
         '''Delete the pose data for a given clip from cloud storage.'''
         blob_client = get_blob_client(const.AZ_POSES_CONTAINER_NAME, self.get_name())
-
         if blob_client.exists():
             blob_client.delete_blob()
