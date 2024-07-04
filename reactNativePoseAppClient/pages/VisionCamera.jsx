@@ -48,7 +48,7 @@ export default function VisionCamera({ route, navigation }) {
   const { code } = route.params;
   const tensorAsArray = [];
   const plugin = useTensorflowModel(
-    require("./assets/pose_landmark_lite.tflite")
+    require("./assets/pose_landmark_heavy.tflite")
   );
 
   // Request for permission
