@@ -120,6 +120,9 @@ export default function VisionCamera({ route, navigation }) {
         const outputs = plugin.model.runSync([resized]);
         outputs[0]["timestamp"] = timestamp;
         poses.value.push(outputs[0]);
+        // console.log(outputs[0]);
+        // console.log(outputs[0]);
+
         // poses.value = [poses.value, outputs[0]];
         // poses2.push(outputs[0]);
 
@@ -170,22 +173,22 @@ export default function VisionCamera({ route, navigation }) {
 
         const path = video.path;
 
-        const data = new FormData();
+        // const data = new FormData();
 
-        data.append("video", {
-          name: "mobile-video-upload",
-          // type: "video/quicktime",
-          uri: path,
-        });
+        // data.append("video", {
+        //   name: "mobile-video-upload",
+        //   // type: "video/quicktime",
+        //   uri: path,
+        // });
 
-        try {
-          const res = await fetch("http://" + code + "/data/frames/upload/", {
-            method: "post",
-            body: data,
-          });
-        } catch (e) {
-          console.error(e);
-        }
+        // try {
+        //   const res = await fetch("http://" + code + "/data/frames/upload/", {
+        //     method: "post",
+        //     body: data,
+        //   });
+        // } catch (e) {
+        //   console.error(e);
+        // }
 
         // const response = await uploadImage({ formData });
 
