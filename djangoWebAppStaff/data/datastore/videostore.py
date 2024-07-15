@@ -1,7 +1,7 @@
+import os
+import tempfile
 import data.datastore.const as const
 from data.datastore.cloud import get_blob_client
-import tempfile
-import os
 
 class VideoStore:
     '''
@@ -17,27 +17,23 @@ class VideoStore:
         self.clip_num = clip_num
 
 
-    def get(self) -> bytes:
+    def get(self) -> str:
         '''
-        Return the video data (as bytes) for this clip.
+        Load the video data for this clip into a file and return the path to this file.
 
         Raises:
             ValueError: if video data for this clip is not found.
         '''
         blob_client = get_blob_client(const.AZ_VIDEOS_CONTAINER_NAME, self.get_name())
         if blob_client.exists():
-            video_path = os.path.join(
-                tempfile.gettempdir(), self.get_name())
+            video_path = os.path.join(tempfile.gettempdir(), self.get_name())
             with open(video_path, "wb") as f:
-                video_data = blob_client.download_blob()
-                video_data.readinto(f)
+                blob_client.download_blob().readinto(f)
             return video_path
         raise ValueError(
             f"video from clip with sid '{self.sid}' and clip number '{self.clip_num}' not found"
         )
     
-
-
 
     def write(self, video: bytes) -> None:
         '''
@@ -46,7 +42,6 @@ class VideoStore:
         '''
         blob_client = get_blob_client(const.AZ_VIDEOS_CONTAINER_NAME, self.get_name())
         blob_client.upload_blob(video, overwrite=True)
-
 
 
     def delete(self) -> None:

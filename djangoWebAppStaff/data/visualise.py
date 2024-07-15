@@ -1,14 +1,19 @@
-'''Code for creating visualisations of videos and keypoints.'''
-
 import cv2
 import base64
 import mediapipe as mp
 import data.const as const
 
-def create_2D_visualisation(poses: list, cap) -> list:
+def create_2D_visualisation(poses: list, cap: cv2.VideoCapture) -> list:
     '''
-    Return a list of strings (base64 encoded images) that represent video frames
-    overlayed with corresponding keypoints.
+    Return a list of frames that represent the video data for a clip overlayed with
+    the pose data from that clip.
+
+    Args:
+        poses: a list representing the pose data from a clip.
+        cap: the video capture for this clip.
+
+    Returns:
+        list representing pose data overlayed on video data for this clip.
     '''
     mp_pose = mp.solutions.pose
     frames = []

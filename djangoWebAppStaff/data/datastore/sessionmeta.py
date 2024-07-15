@@ -1,4 +1,4 @@
-'''Functionality related to retrieving and update session metadata.'''
+'''Functionality related to retrieving and updating session metadata.'''
 
 from ..models import Session
 

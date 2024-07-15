@@ -1,21 +1,16 @@
 import cv2
 import json
 import uuid
-import matplotlib
-import data.datastore.sessionmeta as sm
 from datetime import datetime
 from rest_framework import status
 from django.shortcuts import render
-from data.datastore.posestore import PoseStore
-from data.datastore.videostore import VideoStore
-from .models import User, Session
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse as response, JsonResponse
+from .models import User, Session
+import data.datastore.sessionmeta as sm
+from data.datastore.posestore import PoseStore
+from data.datastore.videostore import VideoStore
 from data.visualise import create_2D_visualisation 
-import numpy as np
-
-matplotlib.use('Agg')
-
 
 @csrf_exempt
 def user_init(request):
@@ -73,7 +68,7 @@ def session_init(request):
 @csrf_exempt
 def poses_upload(request):
     '''
-    Receive pose data, process it and store it. 
+    Receive pose data, process it and store it locally. 
     '''
     data = json.loads(request.body)
 
@@ -117,7 +112,7 @@ def video_upload(request):
     pose_store.write_to_cloud()
 
     sm.increment_clip_num(sid)
-    print(f"\nUpload Finished\nSid: {sid}\nClipNum: {clip_num}\n")
+    print(f"\nUpload Finished\nsid: {sid}\nclip num: {clip_num}\n")
     return response(status=status.HTTP_200_OK)
 
 
@@ -136,8 +131,7 @@ def visualise_2D(request):
     video_store = VideoStore(sid, clip_num)
     try:
         poses = pose_store.get()
-        video_path = video_store.get()
-        cap = cv2.VideoCapture(video_path)
+        cap = cv2.VideoCapture(video_store.get())
     except ValueError as e:
         print(e)
         return render(request, 'visualise2D.html', {'frames': None})

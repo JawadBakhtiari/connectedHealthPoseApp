@@ -1,4 +1,4 @@
-# Azure blob storage constants
+# Azure blob storage constants.
 AZ_ACCOUNT_NAME = "connectedhealth"
 AZ_ACCOUNT_KEY = "wq4q+wFN99NgDz0kkYdbTAArr5zrJH0x2yG9EFKgO13QYFlqrlX/9JvQRrKCEFAMQ77koN+oEP28+ASty7DtRA=="
 AZ_CON_STR = f"DefaultEndpointsProtocol=https;AccountName={AZ_ACCOUNT_NAME};AccountKey={AZ_ACCOUNT_KEY};EndpointSuffix=core.windows.net"
@@ -8,6 +8,7 @@ AZ_VIDEOS_CONTAINER_NAME = "videos"
 # The number of keypoints captured by the pose estimation model.
 NUM_KEYPOINTS = 39
 
+# The number of values associated with each keypoint (x, y, z, presence, visibility).
 VALS_PER_KEYPOINT = 5
 
 # Mappings from indexes in data returned from pose estimation model to joint names.
