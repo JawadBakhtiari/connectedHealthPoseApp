@@ -1,8 +1,9 @@
 import os
+import re
 import math
 import pandas as pd
 from datetime import datetime
-from typing import Union
+from typing import Union, Tuple
 from collections import defaultdict
 from . import const
 from .util import get_x_y_z_suffixes
@@ -16,12 +17,22 @@ class LabDataFormatter:
   def __init__(self, filepath: str) -> None:
     if not os.path.exists(filepath):
       raise FileNotFoundError(f"file '{filepath}' does not exist")
-    self.data = LabDataFormatter.__preprocess(filepath)
-    self.start_time = LabDataFormatter.__get_start_time(filepath)
+    data = pd.read_csv(filepath, skiprows=3, low_memory=False)
+    self.recording_start = LabDataFormatter.__recording_start(filepath)
+    self.data = self.__preprocess(data)
     self.nan_keypoints = defaultdict(int)
 
+  def get_exercise_start_end(self) -> Tuple[float, float]:
+    '''
+    Return the start and end time of exercise capture.
+
+    Returns:
+      (start: float, end: float)
+    '''
+    return (self.exercise_start, self.exercise_end)
+
   @staticmethod
-  def __get_start_time(filepath: str) -> float:
+  def __recording_start(filepath: str) -> float:
     '''
       Args:
         filepath: path to csv file containing motion capture lab data.
@@ -33,12 +44,27 @@ class LabDataFormatter:
     start_time_str = headers.columns.tolist()[const.LAB_START_TIME_INDEX]
     start_time_dt = datetime.strptime(start_time_str, const.LAB_START_TIME_FORMAT)
     return start_time_dt.timestamp()
- 
+
   @staticmethod
-  def __preprocess(filepath: str) -> pd.DataFrame:
+  def __exercise_start_end(data: pd.DataFrame) -> Tuple[float, float]:
+    '''
+    Return the start and end times of exercise capture.
+
+    Returns:
+      (start: float, end: float)
+    '''
+    sync_cols = ['Name'] + [c for c in data.columns.tolist() if re.match(const.SYNC_MARKER_NAME, c)]
+    sync_data = data[sync_cols]
+    exercise_capture_rows = sync_data.iloc[:, 1:].isna().all(axis=1)
+    start = sync_data[exercise_capture_rows].iloc[0]['Name']
+    end = sync_data[exercise_capture_rows].iloc[-1]['Name']
+    return (float(start), float(end))
+
+  def __preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
     '''
       Remove rotation columns and any all-null rows.
-      
+      Return only rows within exercise capture.
+
       Args:
         filepath: path to csv file containing motion capture lab data.
 
@@ -46,17 +72,20 @@ class LabDataFormatter:
         pandas dataframe representing the motion capture data from the
         given csv file after preprocessing.
     '''
-    data = pd.read_csv(filepath, skiprows=3, low_memory=False)
+    # 'Name' column contains the timestamps, and must be added back in.
+    position_cols = ['Name'] + data.columns[data.iloc[1] == 'Position'].tolist()
     rows_with_data = ~data.iloc[:, 2:].isna().all(axis=1)
-    data = data[rows_with_data]
-    position_cols = data.columns[data.iloc[1] == 'Position']
+    data = data[rows_with_data][position_cols].iloc[3:]
 
-    # 'Name' column contains the timestamps, and must be added back in
-    final_cols = list(position_cols) + ['Name']
-    return data[final_cols] 
+    # Set start and end of exercise capture + filter out rows not in this range
+    self.exercise_start, self.exercise_end = LabDataFormatter.__exercise_start_end(data)
+    timestamps = pd.to_numeric(data['Name'])
+    exercise_mask = (timestamps > self.exercise_start) & (timestamps < self.exercise_end)
+
+    return data[exercise_mask] 
 
   @staticmethod
-  def __convert_elapsed_time(elapsed_time: str) -> Union[float, None]:
+  def __convert_elapsed_time(elapsed_time_str: str) -> Union[float, None]:
     '''
       Convert elapsed_time string to float.
 
@@ -68,7 +97,7 @@ class LabDataFormatter:
         is successful and the result is a number, None otherwise.
     '''
     try:
-      elapsed_time = float(elapsed_time)
+      elapsed_time = float(elapsed_time_str)
       return elapsed_time if not math.isnan(elapsed_time) else None
     except:
       return None
@@ -145,7 +174,7 @@ class LabDataFormatter:
         continue
 
       pose = {
-        'timestamp': self.start_time + timestamp, 
+        'timestamp': self.recording_start + timestamp, 
         'keypoints': []
       }
 

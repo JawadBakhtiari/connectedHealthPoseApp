@@ -3,6 +3,8 @@
 LAB_START_TIME_FORMAT = "%Y-%m-%d %I.%M.%S.%f %p"
 LAB_START_TIME_INDEX = 11
 
+SYNC_MARKER_NAME = r'Sync 001:Marker.*[.][345]\b'
+
 # Painfully, shoulder joints have different suffixes
 # to all other joints.
 X_SUFFIX = '.3'
