@@ -10,8 +10,8 @@ from .util import get_x_y_z_suffixes
 
 class LabDataFormatter:
   '''
-    Format motion capture lab data from a csv file to a common format
-    for comparison with mobile data. 
+  Format motion capture lab data from a csv file to a common format
+  for comparison with mobile data. 
   '''
 
   def __init__(self, filepath: str) -> None:
@@ -37,11 +37,11 @@ class LabDataFormatter:
   @staticmethod
   def __recording_start(filepath: str) -> float:
     '''
-      Args:
-        filepath: path to csv file containing motion capture lab data.
+    Args:
+      filepath: path to csv file containing motion capture lab data.
 
-      Returns:
-        Start time of the recording as a POSIX timestamp
+    Returns:
+      Start time of the recording as a POSIX timestamp
     '''
     headers = pd.read_csv(filepath, nrows=1)
     start_time_str = headers.columns.tolist()[const.LAB_START_TIME_INDEX]
@@ -66,15 +66,15 @@ class LabDataFormatter:
 
   def __preprocess(self, filepath: str) -> pd.DataFrame:
     '''
-      Remove rotation columns and any all-null rows.
-      Return only rows within exercise capture.
+    Remove rotation columns and any all-null rows.
+    Return only rows within exercise capture.
 
-      Args:
-        filepath: path to csv file containing motion capture lab data.
+    Args:
+      filepath: path to csv file containing motion capture lab data.
 
-      Returns:
-        pandas dataframe representing the motion capture data from the
-        given csv file after preprocessing.
+    Returns:
+      pandas dataframe representing the motion capture data from the
+      given csv file after preprocessing.
     '''
     data = pd.read_csv(filepath, skiprows=3, low_memory=False)
 
@@ -93,14 +93,14 @@ class LabDataFormatter:
   @staticmethod
   def __convert_elapsed_time(elapsed_time_str: str) -> Union[float, None]:
     '''
-      Convert elapsed_time string to float.
+    Convert elapsed_time string to float.
 
-      Args:
-        elapsed_time: time since recording started.
+    Args:
+      elapsed_time: time since recording started.
 
-      Returns:
-        float representing time since recording started if conversion
-        is successful and the result is a number, None otherwise.
+    Returns:
+      float representing time since recording started if conversion
+      is successful and the result is a number, None otherwise.
     '''
     try:
       elapsed_time = float(elapsed_time_str)
@@ -111,18 +111,18 @@ class LabDataFormatter:
   @staticmethod
   def __create_formatted_keypoint(row: pd.Series, lab_keypoint: str) -> dict:
     '''
-      Format the lab data for a keypoint.
+    Format the lab data for a keypoint.
 
-      Args:
-        row: the current row in the lab data.
-        lab_keypoint: the name of the keypoint in the lab data.
+    Args:
+      row: the current row in the lab data.
+      lab_keypoint: the name of the keypoint in the lab data.
 
-      Returns:
-        A dictionary representing this keypoints data in the desired formatting
-        for comparison with mobile data.
+    Returns:
+      A dictionary representing this keypoints data in the desired formatting
+      for comparison with mobile data.
 
-      Raises:
-        Value error if x, y or z for given keypoint in given row are nan.
+    Raises:
+      Value error if x, y or z for given keypoint in given row are nan.
     '''
     x_suffix, y_suffix, z_suffix = get_x_y_z_suffixes(lab_keypoint)
     x = float(row[lab_keypoint + x_suffix])
@@ -141,11 +141,11 @@ class LabDataFormatter:
 
   def add_nan_keypoint(self, lab_keypoint: str) -> None:
     '''
-      Increment the count for the number of times that a given keypoint has
-      been nan for a frame.
+    Increment the count for the number of times that a given keypoint has
+    been nan for a frame.
 
-      Args:
-        lab_keypoint: the name of the keypoint that was nan in a frame.
+    Args:
+      lab_keypoint: the name of the keypoint that was nan in a frame.
     '''
     self.nan_keypoints[lab_keypoint] += 1
 
@@ -167,11 +167,11 @@ class LabDataFormatter:
 
   def format(self) -> list:
     '''
-      Format lab data so that it is in a common formatting for comparison
-      with mobile data.
+    Format lab data so that it is in a common formatting for comparison
+    with mobile data.
 
-      Returns:
-        list of formatted keypoints.
+    Returns:
+      list of formatted keypoints.
     '''
     poses = []
     for _, row in self.data.iterrows():

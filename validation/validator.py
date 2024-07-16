@@ -4,6 +4,11 @@ from typing import List, Tuple
 import const
 
 class Validator():
+  '''
+  Validate mobile data against data captured from optitrack lab motion
+  capture system.
+  '''
+
   def __init__(self, filepath: str, lab_data: list, exercise_start: float, exercise_end: float):
     if not os.path.exists(filepath):
       raise FileNotFoundError(f"file '{filepath}' does not exist")
@@ -17,20 +22,27 @@ class Validator():
     ))
 
   def zip(self) -> List[Tuple[dict, dict]]:
+    '''
+    Zip poses from lab and mobile data together with their closest match
+    (temporally) within a set threshold.
+
+    Returns:
+      A list of matches in the form [(lab_pose), (mobile_pose)].
+    '''
     j = 0
     zipped = []
     for mpose in self.mobile_data:
       best_pair = None
       best_time_diff = None
       while j < len(self.lab_data):
-        kpose = self.lab_data[j]
-        time_diff = abs(mpose.get('timestamp') - kpose.get('timestamp'))
+        lpose = self.lab_data[j]
+        time_diff = abs(mpose.get('timestamp') - lpose.get('timestamp'))
         if time_diff < const.THRESHOLD:
           if not best_time_diff or time_diff < best_time_diff:
             # best match for this mkp so far.
             best_time_diff = time_diff
-            best_pair = (kpose, mpose)
-          if kpose.get('timestamp') > mpose.get('timestamp'):
+            best_pair = (lpose, mpose)
+          if lpose.get('timestamp') > mpose.get('timestamp'):
             # no better matches to be found after this point
             if best_pair:
               zipped.append(best_pair)
@@ -38,7 +50,7 @@ class Validator():
               # move to next lab pose if this one was used
               j += 1
             break
-        elif kpose.get('timestamp') > mpose.get('timestamp'):
+        elif lpose.get('timestamp') > mpose.get('timestamp'):
           break
         j += 1
 
