@@ -2,7 +2,7 @@ import os
 import re
 import math
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Union, Tuple
 from collections import defaultdict
 from . import const
@@ -17,19 +17,22 @@ class LabDataFormatter:
   def __init__(self, filepath: str) -> None:
     if not os.path.exists(filepath):
       raise FileNotFoundError(f"file '{filepath}' does not exist")
-    data = pd.read_csv(filepath, skiprows=3, low_memory=False)
     self.recording_start = LabDataFormatter.__recording_start(filepath)
-    self.data = self.__preprocess(data)
+    self.data = self.__preprocess(filepath)
     self.nan_keypoints = defaultdict(int)
 
   def get_exercise_start_end(self) -> Tuple[float, float]:
     '''
-    Return the start and end time of exercise capture.
+    Return the start and end time of exercise capture as 13 digit posix
+    timestamps (to match formatting of mobile data timestamps).
 
     Returns:
       (start: float, end: float)
     '''
-    return (self.exercise_start, self.exercise_end)
+    return (
+      int((self.recording_start + self.exercise_start) * 1000),
+      int((self.recording_start + self.exercise_end) * 1000)
+    )
 
   @staticmethod
   def __recording_start(filepath: str) -> float:
@@ -48,7 +51,8 @@ class LabDataFormatter:
   @staticmethod
   def __exercise_start_end(data: pd.DataFrame) -> Tuple[float, float]:
     '''
-    Return the start and end times of exercise capture.
+    Return the start and end time of exercise capture, in terms of the number
+    of seconds elapsed since the recording started.
 
     Returns:
       (start: float, end: float)
@@ -60,7 +64,7 @@ class LabDataFormatter:
     end = sync_data[exercise_capture_rows].iloc[-1]['Name']
     return (float(start), float(end))
 
-  def __preprocess(self, data: pd.DataFrame) -> pd.DataFrame:
+  def __preprocess(self, filepath: str) -> pd.DataFrame:
     '''
       Remove rotation columns and any all-null rows.
       Return only rows within exercise capture.
@@ -72,6 +76,8 @@ class LabDataFormatter:
         pandas dataframe representing the motion capture data from the
         given csv file after preprocessing.
     '''
+    data = pd.read_csv(filepath, skiprows=3, low_memory=False)
+
     # 'Name' column contains the timestamps, and must be added back in.
     position_cols = ['Name'] + data.columns[data.iloc[1] == 'Position'].tolist()
     rows_with_data = ~data.iloc[:, 2:].isna().all(axis=1)
@@ -174,7 +180,7 @@ class LabDataFormatter:
         continue
 
       pose = {
-        'timestamp': self.recording_start + timestamp, 
+        'timestamp': int((self.recording_start + timestamp) * 1000), 
         'keypoints': []
       }
 
