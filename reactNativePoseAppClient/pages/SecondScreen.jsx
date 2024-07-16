@@ -1,29 +1,17 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
   View,
   Platform,
   Image,
-  Dimensions,
-  Modal,
-  Button,
   TouchableOpacity,
 } from "react-native";
 import { Camera } from "expo-camera";
-import {
-  useCameraPermission,
-  useCameraDevice,
-  Camera2,
-} from "react-native-vision-camera";
-import { GLView } from "expo-gl";
 import * as tf from "@tensorflow/tfjs";
 import * as posedetection from "@tensorflow-models/pose-detection";
 import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
-import * as FileSystem from "expo-file-system";
 import * as jpeg from "jpeg-js";
-import * as MediaLibrary from "expo-media-library";
-import { encode, decode } from "base64-arraybuffer";
 import Axios from "axios";
 import { Fontisto } from "@expo/vector-icons";
 

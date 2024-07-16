@@ -17,15 +17,10 @@ import {
   enableFpsGraph,
 } from "react-native-vision-camera";
 import { Fontisto } from "@expo/vector-icons";
-import { date } from "yup";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { useTensorflowModel } from "react-native-fast-tflite";
 import { useResizePlugin } from "vision-camera-resize-plugin";
 import { useSharedValue } from "react-native-worklets-core";
-import { VideoCodec } from "expo-camera";
-import { time } from "@tensorflow/tfjs";
-
-// import { resize } from "./resizePlugin";
 
 export default function VisionCamera({ route, navigation }) {
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -47,8 +42,10 @@ export default function VisionCamera({ route, navigation }) {
   const { sid } = route.params;
   const { code } = route.params;
   const tensorAsArray = [];
+
+  // Select tflite model
   const plugin = useTensorflowModel(
-    require("./assets/pose_landmark_heavy.tflite")
+    require("./assets/pose_landmark_lite.tflite")
   );
 
   // Request for permission
@@ -57,62 +54,52 @@ export default function VisionCamera({ route, navigation }) {
       requestPermission();
     }
   }, [hasPermission]);
-
-  // Render spinner while it doesent have permission
-  if (!hasPermission) {
-    return <ActivityIndicator />;
-  }
-
   console.log("Vision Camera has permission: ", hasPermission);
 
+  // Asynchronously sends pose data to the backend server and then clears the pose data array.
   const sendData = async () => {
     "worklet";
-    const poses3 = poses.value;
     try {
       const response = await Axios.post(
         "http://" + code + "/data/poses/upload/",
         {
-          // uid: "ahmad232",
           sid,
-          poses: JSON.stringify(poses3),
+          poses: JSON.stringify(poses.value),
           tensorAsArray,
         }
       );
       // Empty Data
-      // console.log(response.data);
-      console.log("sending data:");
+      console.log("sending pose data:");
       poses.value = [];
     } catch (err) {
       console.log(err);
     }
   };
 
+  // Starts an interval that sends existing pose data to the backend server every 1 second.
   const startSendingData = () => {
     intervalId = setInterval(() => {
       if (poses.value.length > 0) {
         sendData();
       }
-    }, 1000); // Run every 1 second
+    }, 1000);
   };
 
+  // Stops the interval that sends pose data to the backend server and clears the pose data array for next clip.
   const stopSendingData = async () => {
     clearInterval(intervalId);
     poses.value = [];
   };
 
+  /**
+   * Frame processor function runs only while recording, resizes each frame from the camera,
+   * runs the pose model on the resized frame, attaches a timestamp to each output,
+   * and pushes all outputs into the poses array.
+   **/
   const frameProcessor = useFrameProcessor(
     (frame) => {
       "worklet";
-      // console.log(
-      //   `Frame: ${frame.width}x${frame.height} (${frame.pixelFormat})`
-      // );
-
       const timestamp = Date.now();
-
-      if (timeStarted.value == 0) {
-        timeStarted.value = timestamp;
-      }
-
       if (plugin.state === "loaded" && isAlsoRecording.value === 1) {
         const resized = resize(frame, {
           scale: {
@@ -132,49 +119,39 @@ export default function VisionCamera({ route, navigation }) {
     [plugin]
   );
 
-  const takePhoto = async () => {
-    "worklet";
-    const photo = await cameraRef.current?.takePhoto();
-    console.log(photo);
-    setPicture(photo);
-    await CameraRoll.save(`file://${photo.path}`, {
-      type: "photo",
-    });
-  };
-
+  // Runs each time record button is pressed, handles the start and stop recording logic.
   const onStartRecording = async () => {
     if (!cameraRef.current) {
       return;
     }
+    // If camera was already recording, then stop recording
     if (isRecording) {
       await stopSendingData();
       isAlsoRecording.value = 0;
       cameraRef.current.stopRecording();
       return;
     }
+    // Otherwise start recording, processing frames, sending data to backend
     setIsRecording(true);
     isAlsoRecording.value = 1;
-    startSendingData(); // Start sending data when recording starts
-
+    startSendingData();
     console.log("Recording");
     cameraRef.current.startRecording({
+      // Handle when recording is finished
       onRecordingFinished: async (video) => {
         console.log(video);
         setIsRecording(false);
         setVideo(video);
-
         const path = video.path;
 
+        // Send Video data to backend
         const data = new FormData();
-
         data.append("video", {
           name: "mobile-video-upload",
           type: "video/quicktime",
           uri: path,
         });
-
         data.append("sid", sid);
-
         try {
           const res = await fetch("http://" + code + "/data/video/upload/", {
             method: "post",
@@ -183,10 +160,10 @@ export default function VisionCamera({ route, navigation }) {
         } catch (e) {
           console.error(e);
         }
-
-        await CameraRoll.save(`file://${path}`, {
-          type: "video",
-        });
+        // Save video to cameraRoll
+        // await CameraRoll.save(`file://${path}`, {
+        //   type: "video",
+        // });
       },
       onRecordingError: (error) => {
         console.error(error);
@@ -197,6 +174,7 @@ export default function VisionCamera({ route, navigation }) {
     });
   };
 
+  // Renders the record button. Changes appearance based on recording state.
   const renderRecordButton = () => {
     return (
       <View style={styles.recordButton}>
@@ -207,6 +185,7 @@ export default function VisionCamera({ route, navigation }) {
     );
   };
 
+  // Toggles between between front and back camera
   const handleSwitchCameraType = () => {
     if (device === front) {
       setDevice(back);
@@ -215,6 +194,7 @@ export default function VisionCamera({ route, navigation }) {
     }
   };
 
+  // Renders the switch camera button.
   const renderSwitchCamButton = () => {
     return (
       <View style={styles.SwitchButton} onTouchEnd={handleSwitchCameraType}>
@@ -225,29 +205,25 @@ export default function VisionCamera({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {picture ? (
-        <Image source={{ uri: picture.path }} style={StyleSheet.absoluteFill} />
-      ) : (
-        <>
-          <Camera
-            format={format}
-            ref={cameraRef}
-            style={styles.camera}
-            device={device}
-            isActive={true && !picture}
-            frameProcessor={frameProcessor}
-            photo={true}
-            video={true}
-            pixelFormat="rgb"
-            enableFpsGraph={true}
-          />
-          <View style={styles.bottom}>
-            <View style={{ flex: 1 }}></View>
-            <View style={styles.recordcontain}>{renderRecordButton()}</View>
-            <View style={styles.switchcontain}>{renderSwitchCamButton()}</View>
-          </View>
-        </>
-      )}
+      <>
+        <Camera
+          format={format}
+          ref={cameraRef}
+          style={styles.camera}
+          device={device}
+          isActive={true && !picture}
+          frameProcessor={frameProcessor}
+          photo={true}
+          video={true}
+          pixelFormat="rgb"
+          enableFpsGraph={true}
+        />
+        <View style={styles.bottom}>
+          <View style={{ flex: 1 }}></View>
+          <View style={styles.recordcontain}>{renderRecordButton()}</View>
+          <View style={styles.switchcontain}>{renderSwitchCamButton()}</View>
+        </View>
+      </>
     </View>
   );
 }

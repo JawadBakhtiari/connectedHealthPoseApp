@@ -35,7 +35,7 @@ export const doVisualisation = (frameData) => {
     }
   }
 
-  setInterval(updateFrame, 59); // Adjust the interval (in milliseconds) to control the animation speed
+  setInterval(updateFrame, 55); // Adjust the interval (in milliseconds) to control the animation speed
 };
 
 document.addEventListener("DOMContentLoaded", function () {
