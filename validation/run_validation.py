@@ -4,8 +4,8 @@ import json
 from format.labdataformatter import LabDataFormatter
 from validator import Validator
 
-lab_filepath = 'exampleData/secondSampleSitToStand/sit_to_stand_1.csv'
-mobile_filepath = 'exampleData/secondSampleSitToStand/sit_to_stand_1.json'
+lab_filepath = 'example_data/second_sample_sit_to_stand/sit_to_stand_1.csv'
+mobile_filepath = 'example_data/second_sample_sit_to_stand/sit_to_stand_1.json'
 
 def run():
   ldf = LabDataFormatter(lab_filepath)
@@ -14,11 +14,13 @@ def run():
   with open('test.json', 'w') as f:
     json.dump(lab_data, f, indent=4)
 
-  # NOTE -> bug in method on next line
   start, end = ldf.get_exercise_start_end()
-  print(start, end)
-
   validator = Validator(mobile_filepath, lab_data, start, end)
+  zipped_data = validator.zip()
+  validator.validate()
+
+  with open('test_zip.json', 'w') as f:
+    json.dump(zipped_data, f, indent=4)
 
 if __name__ == "__main__":
   run()

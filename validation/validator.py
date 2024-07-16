@@ -1,6 +1,7 @@
 import os
 import json
 from typing import List, Tuple
+import const
 
 class Validator():
   def __init__(self, filepath: str, lab_data: list, exercise_start: float, exercise_end: float):
@@ -18,13 +19,40 @@ class Validator():
   def zip(self) -> List[Tuple[dict, dict]]:
     j = 0
     zipped = []
-    for i, mkp in enumerate(self.mobile_data):
+    for mpose in self.mobile_data:
+      best_pair = None
+      best_time_diff = None
       while j < len(self.lab_data):
-        lkp = self.lab_data[j]
-        if abs(mkp.get('timestamp') - lkp.get('timestamp')) < const.THRESHOLD:
-          zipped.append((lkp, mkp))
-        elif lkp.get('timestamp') > mkp.get('timestamp'):
+        kpose = self.lab_data[j]
+        time_diff = abs(mpose.get('timestamp') - kpose.get('timestamp'))
+        if time_diff < const.THRESHOLD:
+          if not best_time_diff or time_diff < best_time_diff:
+            # best match for this mkp so far.
+            best_time_diff = time_diff
+            best_pair = (kpose, mpose)
+          if kpose.get('timestamp') > mpose.get('timestamp'):
+            # no better matches to be found after this point
+            if best_pair:
+              zipped.append(best_pair)
+            if best_time_diff == time_diff:
+              # move to next lab pose if this one was used
+              j += 1
+            break
+        elif kpose.get('timestamp') > mpose.get('timestamp'):
           break
         j += 1
+
+    # record length for logging + return zipped list
+    self.zipped_length = len(zipped)
     return zipped
+
+  def log(self) -> None:
+    '''Print logging information collected during validation process'''
+    print('\nVALIDATION LOG')
+    print('==============')
+    print(f'{self.zipped_length} mobile data poses matched from a potential {len(self.mobile_data)} ({int(self.zipped_length / len(self.mobile_data) * 100)}%)')
+    print('==============\n')
+
+  def validate(self) -> None:
+    self.log()
 
