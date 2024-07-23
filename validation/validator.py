@@ -20,15 +20,36 @@ class Validator():
     self.mobile_data = Validator.__preprocess(mobile_data, exercise_start, exercise_end)
 
   @staticmethod
-  def __sigmoid(x):
+  def __sigmoid(x) -> float:
+    '''
+    Apply the sigmoid function to x (used for converting presence and
+    visibility values from mobile data to percentages).
+
+    Returns:
+      Result of applying sigmoid function to x (float between 0 and 1).
+    '''
     return 1 / (1 + math.exp(-x))
 
   @staticmethod
   def __preprocess(raw_mobile_data: list, exercise_start: float, exercise_end:float) -> list:
+    '''
+    Filter out undesired values from mobile data.
+
+    Returns:
+      A list representing the filtered mobile data.
+    '''
+    # Only retain poses between the start and end of exercise recording.
     in_exercise = lambda p: p['timestamp'] > exercise_start and p['timestamp'] < exercise_end
     exercise_mobile_data = list(filter(in_exercise, raw_mobile_data))
 
     def filter_keypoints(pose: dict) -> dict:
+      '''
+      Only keep keypoints for each pose that meet a threshold for
+      visibility and presence values.
+
+      Note that this means for any given pose in the mobile data,
+      any keypoint may not have a value.
+      '''
       pose['keypoints'] = [
         kp for kp in pose['keypoints']
         if (Validator.__sigmoid(kp['visibility']) >= const.VIS_THRESHOLD and
