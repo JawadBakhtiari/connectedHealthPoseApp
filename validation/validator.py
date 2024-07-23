@@ -1,12 +1,13 @@
 import os
 import json
+import math
 from typing import List, Tuple
 import const
 
 class Validator():
   '''
-  Validate mobile data against data captured from optitrack lab motion
-  capture system.
+  Process mobile data and validate it against data captured from optitrack
+  lab motion capture system.
   '''
 
   def __init__(self, filepath: str, lab_data: list, exercise_start: float, exercise_end: float):
@@ -16,10 +17,26 @@ class Validator():
 
     with open(filepath) as f:
       mobile_data = json.load(f)
-    self.mobile_data = list(filter(
-      lambda kp: kp.get('timestamp') > exercise_start and kp.get('timestamp') < exercise_end,
-      mobile_data
-    ))
+    self.mobile_data = Validator.__preprocess(mobile_data, exercise_start, exercise_end)
+
+  @staticmethod
+  def __sigmoid(x):
+    return 1 / (1 + math.exp(-x))
+
+  @staticmethod
+  def __preprocess(raw_mobile_data: list, exercise_start: float, exercise_end:float) -> list:
+    in_exercise = lambda p: p['timestamp'] > exercise_start and p['timestamp'] < exercise_end
+    exercise_mobile_data = list(filter(in_exercise, raw_mobile_data))
+
+    def filter_keypoints(pose: dict) -> dict:
+      pose['keypoints'] = [
+        kp for kp in pose['keypoints']
+        if (Validator.__sigmoid(kp['visibility']) >= const.VIS_THRESHOLD and
+            Validator.__sigmoid(kp['presence']) >= const.PRES_THRESHOLD)
+      ]
+      return pose
+
+    return list(map(filter_keypoints, exercise_mobile_data))
 
   def zip(self) -> List[Tuple[dict, dict]]:
     '''
@@ -37,7 +54,7 @@ class Validator():
       while j < len(self.lab_data):
         lpose = self.lab_data[j]
         time_diff = abs(mpose.get('timestamp') - lpose.get('timestamp'))
-        if time_diff < const.THRESHOLD:
+        if time_diff < const.TIME_DIFF_THRESHOLD:
           if not best_time_diff or time_diff < best_time_diff:
             # best match for this mkp so far.
             best_time_diff = time_diff
