@@ -21,6 +21,7 @@ class LabDataFormatter:
     self.data = self.__preprocess(filepath)
     self.nan_keypoints = defaultdict(int)
 
+
   def get_exercise_start_end(self) -> Tuple[float, float]:
     '''
     Return the start and end time of exercise capture as 13 digit posix
@@ -33,6 +34,7 @@ class LabDataFormatter:
       int((self.recording_start + self.exercise_start) * 1000),
       int((self.recording_start + self.exercise_end) * 1000)
     )
+
 
   @staticmethod
   def __recording_start(filepath: str) -> float:
@@ -47,6 +49,7 @@ class LabDataFormatter:
     start_time_str = headers.columns.tolist()[const.LAB_START_TIME_INDEX]
     start_time_dt = datetime.strptime(start_time_str, const.LAB_START_TIME_FORMAT)
     return start_time_dt.timestamp()
+
 
   @staticmethod
   def __exercise_start_end(data: pd.DataFrame) -> Tuple[float, float]:
@@ -63,6 +66,7 @@ class LabDataFormatter:
     start = sync_data[exercise_capture_rows].iloc[0]['Name']
     end = sync_data[exercise_capture_rows].iloc[-1]['Name']
     return (float(start), float(end))
+
 
   def __preprocess(self, filepath: str) -> pd.DataFrame:
     '''
@@ -90,6 +94,7 @@ class LabDataFormatter:
 
     return data[exercise_mask] 
 
+
   @staticmethod
   def __convert_elapsed_time(elapsed_time_str: str) -> Union[float, None]:
     '''
@@ -107,6 +112,7 @@ class LabDataFormatter:
       return elapsed_time if not math.isnan(elapsed_time) else None
     except:
       return None
+
 
   @staticmethod
   def __create_formatted_keypoint(row: pd.Series, lab_keypoint: str) -> dict:
@@ -139,6 +145,7 @@ class LabDataFormatter:
       'name': const.KEYPOINT_MAPPINGS.get(lab_keypoint)
     }
 
+
   def add_nan_keypoint(self, lab_keypoint: str) -> None:
     '''
     Increment the count for the number of times that a given keypoint has
@@ -149,14 +156,25 @@ class LabDataFormatter:
     '''
     self.nan_keypoints[lab_keypoint] += 1
 
+
   def print_nan_keypoints(self) -> None:
     '''Print the number of frames in which each keypoint was nan.'''
     if self.nan_keypoints == {}:
       print('no keypoints were nan in any frames :)')
       return
 
-    for kp, time_nan in self.nan_keypoints.items():
-      print(f'{kp} ({const.KEYPOINT_MAPPINGS.get(kp)}) was nan {time_nan} times.')
+    sorted_nan_keypoints = dict(
+        sorted(
+          self.nan_keypoints.items(),
+          key=lambda i: i[1],
+          reverse=True
+        )
+    )
+    for kp, times_nan in sorted_nan_keypoints.items():
+      translated_name = const.KEYPOINT_MAPPINGS.get(kp)
+      percent_nan = int((times_nan / len(self.data)) * 100)
+      print(f'{kp} ({translated_name})\t-> nan {times_nan} times ({percent_nan}%)')
+
 
   def log(self) -> None:
     '''Print logging information collected during formatting process.'''
@@ -164,6 +182,7 @@ class LabDataFormatter:
     print('=======================')
     self.print_nan_keypoints()
     print('=======================\n')
+
 
   def format(self) -> list:
     '''
@@ -197,4 +216,4 @@ class LabDataFormatter:
         poses.append(pose)
     self.log()
     return poses
- 
+

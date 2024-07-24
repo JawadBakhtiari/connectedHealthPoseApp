@@ -2,6 +2,7 @@ import os
 import json
 import math
 from typing import List, Tuple
+from collections import defaultdict
 import const
 
 class Validator():
@@ -10,14 +11,26 @@ class Validator():
   lab motion capture system.
   '''
 
-  def __init__(self, filepath: str, lab_data: list, exercise_start: float, exercise_end: float):
+  def __init__(
+    self,
+    filepath: str,
+    lab_data: list,
+    exercise_start: float,
+    exercise_end: float
+  ) -> None:
     if not os.path.exists(filepath):
       raise FileNotFoundError(f"file '{filepath}' does not exist")
     self.lab_data = lab_data
+    self.filtered_out_keypoints = defaultdict(int)
 
     with open(filepath) as f:
       mobile_data = json.load(f)
-    self.mobile_data = Validator.__preprocess(mobile_data, exercise_start, exercise_end)
+    self.mobile_data = self.__preprocess(
+      mobile_data,
+      exercise_start,
+      exercise_end
+    )
+
 
   @staticmethod
   def __sigmoid(x) -> float:
@@ -30,8 +43,38 @@ class Validator():
     '''
     return 1 / (1 + math.exp(-x))
 
-  @staticmethod
-  def __preprocess(raw_mobile_data: list, exercise_start: float, exercise_end:float) -> list:
+
+  def filter_keypoints(self, pose: dict) -> dict:
+    '''
+    Only keep keypoints for each pose that meet a threshold for
+    visibility and presence values.
+
+    Note that this means for any given pose in the mobile data,
+    any keypoint may not have a value.
+
+    Returns:
+      A dict representing the passed in pose containing only
+      keypoints with visibility and presence above a defined
+      threshold.
+    '''
+    filtered_keypoints = []
+    for kp in pose['keypoints']:
+      if (Validator.__sigmoid(kp['visibility']) >= const.VIS_THRESHOLD and
+          Validator.__sigmoid(kp['presence']) >= const.PRES_THRESHOLD):
+        filtered_keypoints.append(kp)
+      else:
+        # Add filtered out keypoints to collection for logging.
+        self.filtered_out_keypoints[kp['name']] += 1
+    pose['keypoints'] = filtered_keypoints
+    return pose
+
+
+  def __preprocess(
+    self,
+    raw_mobile_data: list,
+    exercise_start: float,
+    exercise_end:float
+  ) -> list:
     '''
     Filter out undesired values from mobile data.
 
@@ -39,25 +82,14 @@ class Validator():
       A list representing the filtered mobile data.
     '''
     # Only retain poses between the start and end of exercise recording.
-    in_exercise = lambda p: p['timestamp'] > exercise_start and p['timestamp'] < exercise_end
+    in_exercise = (lambda p:
+      p['timestamp'] > exercise_start and
+      p['timestamp'] < exercise_end
+    )
     exercise_mobile_data = list(filter(in_exercise, raw_mobile_data))
 
-    def filter_keypoints(pose: dict) -> dict:
-      '''
-      Only keep keypoints for each pose that meet a threshold for
-      visibility and presence values.
+    return list(map(self.filter_keypoints, exercise_mobile_data))
 
-      Note that this means for any given pose in the mobile data,
-      any keypoint may not have a value.
-      '''
-      pose['keypoints'] = [
-        kp for kp in pose['keypoints']
-        if (Validator.__sigmoid(kp['visibility']) >= const.VIS_THRESHOLD and
-            Validator.__sigmoid(kp['presence']) >= const.PRES_THRESHOLD)
-      ]
-      return pose
-
-    return list(map(filter_keypoints, exercise_mobile_data))
 
   def zip(self) -> List[Tuple[dict, dict]]:
     '''
@@ -96,12 +128,33 @@ class Validator():
     self.zipped_length = len(zipped)
     return zipped
 
+
   def log(self) -> None:
     '''Print logging information collected during validation process'''
+    percent_poses_matched = int(self.zipped_length / len(self.mobile_data) * 100)
     print('\nVALIDATION LOG')
     print('==============')
-    print(f'{self.zipped_length} mobile data poses matched from a potential {len(self.mobile_data)} ({int(self.zipped_length / len(self.mobile_data) * 100)}%)')
+    print(
+      f'{self.zipped_length} mobile data poses matched to lab poses ' \
+      f'from a potential {len(self.mobile_data)} ({percent_poses_matched}%)'
+    )
+    print('\n------------------------------------')
+    print('-- mobile data keypoint filtering --')
+    print('--    on presence & visibility    --')
+    print('------------------------------------')
+    sorted_keypoints = dict(
+      sorted(
+        self.filtered_out_keypoints.items(),
+        key=lambda i: i[1],
+        reverse=True
+      )
+    )
+    for kp, num_filtered in sorted_keypoints.items():
+      percent_filtered = int((num_filtered / len(self.mobile_data)) * 100)
+      print(f'{kp} \t -> filtered out {num_filtered:>3} times ({percent_filtered}%)')
+    print('----------------------------------')
     print('==============\n')
+
 
   def validate(self) -> None:
     self.log()
