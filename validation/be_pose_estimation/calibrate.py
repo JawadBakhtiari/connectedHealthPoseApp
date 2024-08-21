@@ -1,9 +1,13 @@
+'''
+    Use cv2 library and chessboard images to calculate camera matrix and distortion coefficients
+    required to undistort images taken by the camera. Save these to values to a file for access later.
+'''
+
 #!/usr/bin/env python3
 
 import numpy as np
 import cv2
 import glob
-import json
 
 CORNER_ROWS = 7
 CORNER_COLS = 5
@@ -11,7 +15,7 @@ IMAGES_PATH = 'images/bigsquare_far/'
 IMAGES = IMAGES_PATH + '*.jpg'
 TEST_IMAGE_NAME = 'img1.jpg'
 IMAGE_DISPLAY_TIME = 5000
-OUT_FILE_PATH = 'calibration_coefficients.json'
+OUT_FILE_PATH = 'data/camera_parameters.npz'
 
 # Termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -47,10 +51,10 @@ h, w = test_img.shape[:2]
 newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dst, (w,h), 1, (w,h))
 undst = cv2.undistort(test_img, mtx, dst, None, newcameramtx)
 
-# Save calibration coefficients
-with open(OUT_FILE_PATH, 'w') as f:
-    json.dump({'mtx': mtx.tolist(), 'dst': dst.tolist()}, f, indent=4)
+# Save camera parameters
+np.savez_compressed(OUT_FILE_PATH, mtx=mtx, dst=dst)
 
+# Output an example image distorted and undistorted (and save these images)
 cv2.namedWindow('distorted', cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty('distorted', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 cv2.imshow('distorted', test_img)
