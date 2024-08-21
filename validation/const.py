@@ -4,6 +4,7 @@
 # data and mobile data to be paired together.
 TIME_DIFF_THRESHOLD = 1.5
 
-VIS_THRESHOLD = 0.99
-PRES_THRESHOLD = 0.99
+# The thresholds (percentages) for visibility and presence values for lab data
+VIS_THRESHOLD = 0.75
+PRES_THRESHOLD = 0.75
 

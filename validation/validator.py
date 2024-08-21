@@ -109,7 +109,7 @@ class Validator():
         time_diff = abs(mpose.get('timestamp') - lpose.get('timestamp'))
         if time_diff < const.TIME_DIFF_THRESHOLD:
           if not best_time_diff or time_diff < best_time_diff:
-            # best match for this mkp so far.
+            # best match for this mpose so far.
             best_time_diff = time_diff
             best_pair = (lpose, mpose)
           if lpose.get('timestamp') > mpose.get('timestamp'):
