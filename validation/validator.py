@@ -4,6 +4,7 @@ import math
 from typing import List, Tuple
 from collections import defaultdict
 import const
+from format.labdataformatter import LabDataFormatter
 
 class Validator():
   '''
@@ -13,23 +14,24 @@ class Validator():
 
   def __init__(
     self,
-    filepath: str,
-    lab_data: list,
-    exercise_start: float,
-    exercise_end: float
+    mobile_data_filepath: str,
+    lab_data_filepath: str,
   ) -> None:
-    if not os.path.exists(filepath):
-      raise FileNotFoundError(f"file '{filepath}' does not exist")
-    self.lab_data = lab_data
+    if not os.path.exists(mobile_data_filepath):
+      raise FileNotFoundError(f"file '{mobile_data_filepath}' does not exist")
+    if not os.path.exists(lab_data_filepath):
+      raise FileNotFoundError(f"file '{lab_data_filepath}' does not exist")
+
     self.filtered_out_keypoints = defaultdict(int)
 
-    with open(filepath) as f:
+    # Format lab data
+    ldf = LabDataFormatter(lab_data_filepath)
+    self.lab_data = ldf.format()
+    start, end = ldf.get_exercise_start_end()
+
+    with open(mobile_data_filepath) as f:
       mobile_data = json.load(f)
-    self.mobile_data = self.__preprocess(
-      mobile_data,
-      exercise_start,
-      exercise_end
-    )
+    self.mobile_data = self.__preprocess(mobile_data, start, end)
 
 
   @staticmethod
@@ -157,5 +159,12 @@ class Validator():
 
 
   def validate(self) -> None:
+    matches = self.zip()
+    for lpose, mpose in matches:
+      # NOTE -> this is hacky and inefficient, should keypoint data structure be changed??
+      #      -> (making this change could affect visualisation etc.)
+      lpose_kps = {kp['name']: kp for kp in lpose['keypoints']}
+      mpose_kps = {kp['name']: kp for kp in mpose['keypoints']}
+      print(mpose_kps)
     self.log()
 
