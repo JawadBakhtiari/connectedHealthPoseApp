@@ -159,6 +159,7 @@ class Validator():
 
 
   def validate(self) -> None:
+    # todo -> finish this function
     matches = self.zip()
     for lpose, mpose in matches:
       # NOTE -> this is hacky and inefficient, should keypoint data structure be changed??
