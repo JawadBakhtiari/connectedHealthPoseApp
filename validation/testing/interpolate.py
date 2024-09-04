@@ -6,8 +6,9 @@ import pandas as pd
 import numpy as np
 from io import StringIO
 
-IN = 'data/sample_lab_data.trc'
-OUT = 'data/cleaned_lab_data.trc'
+FILENAME = 'test_20240904_stsstruggle.trc'
+IN = f'data/{FILENAME}'
+OUT = f'data/cleaned_{FILENAME}'
 
 # Read the file and preserve header rows
 with open(IN, 'r') as file:
