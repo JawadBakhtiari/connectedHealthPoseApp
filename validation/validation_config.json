@@ -1,0 +1,19 @@
+{
+  "lab_data_filepath": "example_data/second_sample_sit_to_stand/sit_to_stand_1.csv",
+  "mobile_data_filepath": "example_data/second_sample_sit_to_stand/sit_to_stand_1.json",
+  "angles": [
+    {
+      "initial_side": "right_hip",
+      "vertex": "right_knee",
+      "terminal_side": "right_ankle",
+      "name": "knee_flexion"
+    },
+    {
+      "initial_side": "right_wrist",
+      "vertex": "right_shoulder",
+      "terminal_side": "right_hip",
+      "name": "shoulder abduction"
+    }
+
+  ]
+}

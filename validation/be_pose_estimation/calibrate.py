@@ -1,9 +1,9 @@
+#!/usr/bin/env python3
+
 '''
     Use cv2 library and chessboard images to calculate camera matrix and distortion coefficients
     required to undistort images taken by the camera. Save these to values to a file for access later.
 '''
-
-#!/usr/bin/env python3
 
 import numpy as np
 import cv2
@@ -11,11 +11,11 @@ import glob
 
 CORNER_ROWS = 7
 CORNER_COLS = 5
-IMAGES_PATH = 'images/bigsquare_far/'
+IMAGES_PATH = 'data/calibration_images/20240904/side_cam/'
 IMAGES = IMAGES_PATH + '*.jpg'
 TEST_IMAGE_NAME = 'img1.jpg'
 IMAGE_DISPLAY_TIME = 5000
-OUT_FILE_PATH = 'data/camera_parameters.npz'
+OUT_FILE_PATH = 'data/camera_parameters/20240904/side_cam.npz'
 
 # Termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -58,13 +58,11 @@ np.savez_compressed(OUT_FILE_PATH, mtx=mtx, dst=dst)
 cv2.namedWindow('distorted', cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty('distorted', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 cv2.imshow('distorted', test_img)
-cv2.imwrite(IMAGES_PATH + 'distorted.jpg', test_img)
 cv2.waitKey(IMAGE_DISPLAY_TIME)
 cv2.destroyAllWindows()
 cv2.namedWindow('undistorted', cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty('undistorted', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 cv2.imshow('undistorted', undst)
-cv2.imwrite(IMAGES_PATH + 'undistorted.jpg', undst)
 cv2.waitKey(IMAGE_DISPLAY_TIME)
 cv2.destroyAllWindows()
 

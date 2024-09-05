@@ -3,6 +3,7 @@ import json
 import math
 from typing import List, Tuple
 from collections import defaultdict
+from statistics import mean, median
 import const
 from format.labdataformatter import LabDataFormatter
 
@@ -23,6 +24,7 @@ class Validator():
       raise FileNotFoundError(f"file '{lab_data_filepath}' does not exist")
 
     self.filtered_out_keypoints = defaultdict(int)
+    self.joint_angles = defaultdict(lambda: {'lab': [], 'mobile': []})
 
     # Format lab data
     ldf = LabDataFormatter(lab_data_filepath)
@@ -131,6 +133,49 @@ class Validator():
     return zipped
 
 
+  @staticmethod
+  def calc_joint_angle(initial_side: dict, vertex: dict, terminal_side: dict):
+    v1 = (vertex['x'] - initial_side['x'], vertex['y'] - initial_side['y'])
+    v2 = (vertex['x'] - terminal_side['x'], vertex['y'] - terminal_side['y'])
+
+    dot_product = v1[0] * v2[0] + v1[1] * v2[1]
+    magnitude_v1 = math.sqrt(v1[0] ** 2 + v1[1] ** 2)
+    magnitude_v2 = math.sqrt(v2[0] ** 2 + v2[1] ** 2)
+
+    cos_angle = dot_product / (magnitude_v1 * magnitude_v2)
+    angle_radians = math.acos(cos_angle)
+    angle_degrees = math.degrees(angle_radians)
+    return angle_degrees
+
+
+  def validate(self, angles: list) -> None:
+    # todo -> finish this function
+    matches = self.zip()
+    for lpose, mpose in matches:
+      # NOTE -> this is hacky and inefficient, should keypoint data structure be changed??
+      #      -> (making this change could affect visualisation etc.)
+      lkps = {kp['name']: kp for kp in lpose['keypoints']}
+      mkps = {kp['name']: kp for kp in mpose['keypoints']}
+      for angle in angles:
+        try:
+          # could fail if keypoint not in this pose, skip if this happens
+          lab_angle = Validator.calc_joint_angle(
+            lkps[angle['initial_side']],
+            lkps[angle['vertex']],
+            lkps[angle['terminal_side']]
+          )
+          mobile_angle = Validator.calc_joint_angle(
+            mkps[angle['initial_side']],
+            mkps[angle['vertex']],
+            mkps[angle['terminal_side']]
+          )
+          self.joint_angles[angle['name']]['lab'].append(lab_angle)
+          self.joint_angles[angle['name']]['mobile'].append(mobile_angle)
+        except KeyError:
+          continue
+    self.log()
+
+
   def log(self) -> None:
     '''Print logging information collected during validation process'''
     percent_poses_matched = int(self.zipped_length / len(self.mobile_data) * 100)
@@ -155,17 +200,15 @@ class Validator():
       percent_filtered = int((num_filtered / len(self.mobile_data)) * 100)
       print(f'{kp} \t -> filtered out {num_filtered:>3} times ({percent_filtered}%)')
     print('----------------------------------')
+    print('\n------------------------------------')
+    print('------- joint angle results -------')
+    print('------------------------------------')
+    for joint, angles in self.joint_angles.items():
+      diffs = [abs(lab - mobile) for lab, mobile in zip(angles['lab'], angles['mobile'])]
+      print(f' + {joint}:')
+      print(f'\taverage difference (degrees) -> {mean(diffs):.2f}')
+      print(f'\tmedian difference  (degrees) -> {median(diffs):.2f}')
+    print('----------------------------------')
     print('==============\n')
 
-
-  def validate(self) -> None:
-    # todo -> finish this function
-    matches = self.zip()
-    for lpose, mpose in matches:
-      # NOTE -> this is hacky and inefficient, should keypoint data structure be changed??
-      #      -> (making this change could affect visualisation etc.)
-      lpose_kps = {kp['name']: kp for kp in lpose['keypoints']}
-      mpose_kps = {kp['name']: kp for kp in mpose['keypoints']}
-      print(mpose_kps)
-    self.log()
 

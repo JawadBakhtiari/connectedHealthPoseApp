@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 
+import json
+import sys
 from validator import Validator
 
-lab_data_filepath = 'example_data/second_sample_sit_to_stand/sit_to_stand_1.csv'
-mobile_data_filepath = 'example_data/second_sample_sit_to_stand/sit_to_stand_1.json'
+try:
+    config_filepath = sys.argv[1]
+except:
+    print(f'usage: {sys.argv[0]} <path/to/validation/config/file>')
+    exit(1)
 
-def run():
-  validator = Validator(mobile_data_filepath, lab_data_filepath)
-  validator.validate()
+with open(config_filepath) as f:
+    config = json.load(f)
 
-if __name__ == "__main__":
-  run()
+validator = Validator(config.get('mobile_data_filepath'), config.get('lab_data_filepath'))
+validator.validate(config.get('angles'))
+
