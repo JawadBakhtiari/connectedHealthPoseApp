@@ -74,7 +74,6 @@ while cap.isOpened():
 
     # Undistort image and run pose estimation model
     undst_img = cv2.undistort(dst_img, CAM_PARAMS['mtx'], CAM_PARAMS['dst'], None, undstcammtx)
-    image = preprocess_image(undst_img)
 
     uncalibrated_image_pose = run_model(interpreter, preprocess_image(dst_img))
     calibrated_image_pose = run_model(interpreter, preprocess_image(undst_img))
