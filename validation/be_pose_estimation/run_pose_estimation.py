@@ -17,10 +17,9 @@ from pose_model import format_pose
 ############################# CONSTANTS ##############################
 ######################### change as needed ############################
 ######################################################################
-VIDEO_PATH = 'data/videos/20240904/side_cam_stsstruggle.avi'
+VIDEO_PATH = 'data/videos/20240904/side_cam_stsstruggle_trimmed.avi'
 MODEL_PATH = 'data/pose_estimation_model.tflite'
 OUT_FILE_PATH = 'data/results/20240904/side_cam_stsstruggle.json'
-RECORDING_START_TIME = 78593275
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
 ######################################################################
 ######################################################################
@@ -65,10 +64,7 @@ while cap.isOpened():
 
     print(f'processing {dst_img} ...')
 
-    # Get the timestamp of the current frame
     time_since_start = cap.get(cv2.CAP_PROP_POS_MSEC)
-    timestamp = RECORDING_START_TIME + time_since_start
-
     h, w = dst_img.shape[:2]
     undstcammtx, _ = cv2.getOptimalNewCameraMatrix(CAM_PARAMS['mtx'], CAM_PARAMS['dst'], (w,h), 1, (w,h))
 
@@ -78,7 +74,7 @@ while cap.isOpened():
 
     pose = run_model(interpreter, image)
     poses.append({
-        'timestamp': timestamp,
+        'time_since_start': time_since_start,
         'keypoints': format_pose(pose.tolist()[0])
     })
 
