@@ -32,15 +32,15 @@ def sigmoid(x: float) -> float:
     '''
     return 1 / (1 + math.exp(-x))
 
-PRES = 0.1
-VIS = 0.1
+PRES = 0.95
+VIS = 0.90
 
 filepath = 'data/opensim_ik_results/20240904/stsstruggle_result.mot'
 
 ik = pd.read_csv(filepath, delim_whitespace=True, skiprows=10)
 lab_knee_angles = ik['knee_angle_r']
 
-with open('data/opensim_ik_results/20240904/stsstruggle_result.json') as f:
+with open('data/opensim_ik_results/20240904/uncalibrated_side_cam_stsstruggle.json') as f:
     poses = json.load(f)
 
 mobile_knee_angles = []
@@ -48,29 +48,29 @@ for pose in poses:
     pose = {kp['name']: kp for kp in pose['keypoints']}
 
     try:
-        hip = pose['right_hip']
-        knee = pose['right_knee']
-        ankle = pose['right_ankle']
+        hip = pose['left_hip']
+        knee = pose['left_knee']
+        ankle = pose['left_ankle']
         print(sigmoid(hip['visibility']), sigmoid(hip['presence']), sigmoid(knee['visibility']), sigmoid(knee['presence']), sigmoid(ankle['visibility']), sigmoid(ankle['presence']))
         if (sigmoid(hip['visibility']) < VIS or sigmoid(hip['presence']) < PRES
             or sigmoid(knee['visibility']) < VIS or sigmoid(knee['presence']) < PRES
             or sigmoid(ankle['visibility']) < VIS or sigmoid(ankle['presence']) < PRES):
             continue
-        mobile_knee_angles.append(calc_joint_angle(hip, knee, ankle))
+        mobile_knee_angles.append(calc_joint_angle(ankle, knee, hip))
     except:
         continue
 
 time_lab = np.linspace(0, 1, len(lab_knee_angles))
 time_mobile = np.linspace(0, 1, len(mobile_knee_angles))
 
-# interpolator = PchipInterpolator(time_lab, lab_knee_angles)
-# resampled_lab_data = interpolator(time_mobile)
+interpolator = PchipInterpolator(time_mobile, mobile_knee_angles)
+interpolated_mobile_knee_angles = interpolator(time_lab)
 
 plt.plot(time_lab, lab_knee_angles, label='opensim')
-plt.plot(time_mobile, mobile_knee_angles, label='pose_estimation')
+plt.plot(time_lab, interpolated_mobile_knee_angles, label='pose_estimation')
 plt.xlabel('Relative Time')
 plt.ylabel('Knee Flexion Angle')
-plt.title('opensim vs pose estimation')
+plt.title('opensim vs pose estimation (uncalibrated)')
 plt.legend()
 plt.show()
 
