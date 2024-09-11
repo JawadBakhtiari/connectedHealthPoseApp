@@ -4,11 +4,7 @@
     "slug": "reactnativeposeappclient",
     "version": "1.0.0",
     "sdkVersion": "50.0.0",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android"],
     "ios": {
       "bundleIdentifier": "com.jawadbakhtiari.reactnativeposeappclient",
       "infoPlist": {
@@ -17,9 +13,7 @@
     },
     "android": {
       "package": "com.jawadbakhtiari.reactnativeposeappclient",
-      "permissions": [
-        "android.permission.CAMERA"
-      ]
+      "permissions": ["android.permission.CAMERA"]
     },
     "plugins": [
       [

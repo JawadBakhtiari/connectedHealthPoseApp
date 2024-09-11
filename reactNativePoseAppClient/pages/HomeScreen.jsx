@@ -42,7 +42,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <Formik
       initialValues={{
-        code: "192.168.0.150:8000", // Enter IP Address and port of back-end i.e 192.168.0.137:8000
+        code: "3.104.215.22:8000", // Enter IP Address and port of back-end i.e 192.168.0.137:8000
         first_name: "Ahmad",
         last_name: "Bakhtiari",
         session_name: "Elbow Physio",

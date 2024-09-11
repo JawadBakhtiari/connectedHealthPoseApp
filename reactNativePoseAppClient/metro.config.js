@@ -17,6 +17,15 @@ const config = {
     sourceExts: [...sourceExts, "js", "json", "ts", "tsx"],
     resolverMainFields: ["sbmodern", "react-native", "browser", "main"],
   },
+  transformer: {
+    assetPlugins: ["expo-asset/tools/hashAssetFiles"],
+    getTransformOptions: async () => ({
+      transform: {
+        experimentalImportSupport: false,
+        inlineRequires: false,
+      },
+    }),
+  },
 };
 
 module.exports = mergeConfig(defaultConfig, config);
