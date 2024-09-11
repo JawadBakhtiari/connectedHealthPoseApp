@@ -144,21 +144,40 @@ export default function VisionCamera({ route, navigation }) {
         setVideo(video);
         const path = video.path;
 
+        console.log(path);
+
         // Send Video data to backend
         const data = new FormData();
         data.append("video", {
-          name: "mobile-video-upload",
+          name: "mobile-video-upload.mov",
           type: "video/quicktime",
           uri: path,
         });
         data.append("sid", sid);
+
+        // try {
+        //   const res = await fetch("http://" + code + "/data/video/upload/", {
+        //     method: "post",
+        //     body: data,
+        //   });
+        // } catch (e) {
+        //   console.error(e);
+        // }
+
         try {
-          const res = await fetch("http://" + code + "/data/video/upload/", {
-            method: "post",
-            body: data,
-          });
-        } catch (e) {
-          console.error(e);
+          const response = await Axios.post(
+            "http://" + code + "/data/video/upload/",
+            data,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data", // Specify the correct content type
+              },
+            }
+          );
+
+          console.log("Response:", response.data);
+        } catch (error) {
+          console.error("Error:", error);
         }
         // Save video to cameraRoll
         // await CameraRoll.save(`file://${path}`, {
@@ -215,7 +234,7 @@ export default function VisionCamera({ route, navigation }) {
           frameProcessor={frameProcessor}
           photo={true}
           video={true}
-          pixelFormat="rgb"
+          pixelFormat="yuv"
           enableFpsGraph={true}
         />
         <View style={styles.bottom}>
@@ -285,14 +304,12 @@ const styles = StyleSheet.create({
     top: 20,
     backgroundColor: "red",
     alignItems: "center",
-    borderRadius: 5,
     width: 100,
     height: 35,
   },
   notactiveTimer: {
     top: 20,
     alignItems: "center",
-    borderRadius: 5,
     width: 120,
     height: 50,
   },
@@ -309,13 +326,11 @@ const styles = StyleSheet.create({
     height: 60,
     borderColor: "white",
     borderWidth: 5,
-    borderRadius: 50,
   },
   inner: {
     backgroundColor: "#9e1919",
     width: "100%",
     height: "100%",
-    borderRadius: 50,
     transitionProperty: "all",
     transitionDuration: 200,
     transitionTimingFunction: "ease",
@@ -326,7 +341,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     transform: [{ scale: 0.5 }],
-    borderRadius: "12%",
   },
   fpsContainer: {
     position: "absolute",
@@ -335,7 +349,6 @@ const styles = StyleSheet.create({
     width: 80,
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, .7)",
-    borderRadius: 2,
     padding: 8,
     zIndex: 20,
   },
@@ -347,7 +360,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     right: 25,
     backgroundColor: "#796A6A",
-    borderRadius: 30,
     width: 50,
     height: 50,
     justifyContent: "center",
