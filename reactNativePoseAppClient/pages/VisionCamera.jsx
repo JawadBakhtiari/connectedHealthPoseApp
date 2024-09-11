@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Platform,
 } from "react-native";
 import {
   useCameraPermission,
@@ -148,21 +149,20 @@ export default function VisionCamera({ route, navigation }) {
 
         // Send Video data to backend
         const data = new FormData();
-        data.append("video", {
-          name: "mobile-video-upload.mov",
-          type: "video/quicktime",
-          uri: path,
-        });
+        if (Platform.OS === "ios") {
+          data.append("video", {
+            name: "mobile-video-upload",
+            type: "video/quicktime",
+            uri: path,
+          });
+        } else {
+          data.append("video", {
+            name: "mobile-video-upload",
+            type: "video/quicktime",
+            uri: "file://" + path,
+          });
+        }
         data.append("sid", sid);
-
-        // try {
-        //   const res = await fetch("http://" + code + "/data/video/upload/", {
-        //     method: "post",
-        //     body: data,
-        //   });
-        // } catch (e) {
-        //   console.error(e);
-        // }
 
         try {
           const response = await Axios.post(
@@ -179,6 +179,7 @@ export default function VisionCamera({ route, navigation }) {
         } catch (error) {
           console.error("Error:", error);
         }
+
         // Save video to cameraRoll
         // await CameraRoll.save(`file://${path}`, {
         //   type: "video",
