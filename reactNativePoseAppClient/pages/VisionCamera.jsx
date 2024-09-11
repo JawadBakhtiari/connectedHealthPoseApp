@@ -2,12 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
 import {
   View,
-  Text,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Platform,
+  Image,
 } from "react-native";
 import {
   useCameraPermission,
@@ -17,7 +15,6 @@ import {
   useCameraFormat,
   enableFpsGraph,
 } from "react-native-vision-camera";
-import { Fontisto } from "@expo/vector-icons";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { useTensorflowModel } from "react-native-fast-tflite";
 import { useResizePlugin } from "vision-camera-resize-plugin";
@@ -218,7 +215,10 @@ export default function VisionCamera({ route, navigation }) {
   const renderSwitchCamButton = () => {
     return (
       <View style={styles.SwitchButton} onTouchEnd={handleSwitchCameraType}>
-        <Fontisto name="arrow-swap" size={24} color="white" />
+        <Image
+          source={require("./assets/swap-arrow.png")}
+          style={{ width: 30, height: 30 }}
+        />
       </View>
     );
   };
@@ -327,11 +327,13 @@ const styles = StyleSheet.create({
     height: 60,
     borderColor: "white",
     borderWidth: 5,
+    borderRadius: 50,
   },
   inner: {
     backgroundColor: "#9e1919",
     width: "100%",
     height: "100%",
+    borderRadius: 50,
     transitionProperty: "all",
     transitionDuration: 200,
     transitionTimingFunction: "ease",
@@ -361,6 +363,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     right: 25,
     backgroundColor: "#796A6A",
+    borderRadius: 30,
     width: 50,
     height: 50,
     justifyContent: "center",
