@@ -4,12 +4,16 @@
     "slug": "reactnativeposeappclient",
     "version": "1.0.0",
     "sdkVersion": "50.0.0",
-    "platforms": ["ios", "android", "web"],
+    "platforms": ["ios", "android"],
     "ios": {
-      "bundleIdentifier": "com.jawadbakhtiari.reactnativeposeappclient"
+      "bundleIdentifier": "com.jawadbakhtiari.reactnativeposeappclient",
+      "infoPlist": {
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera."
+      }
     },
     "android": {
-      "package": "com.jawadbakhtiari.reactnativeposeappclient"
+      "package": "com.jawadbakhtiari.reactnativeposeappclient",
+      "permissions": ["android.permission.CAMERA"]
     },
     "plugins": [
       [
@@ -18,6 +22,11 @@
           "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3d40fb40-15d9-46e7-a8a4-8fae9bcc18c0"
+      }
+    }
   }
 }

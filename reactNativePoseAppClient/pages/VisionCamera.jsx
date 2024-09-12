@@ -2,10 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import Axios from "axios";
 import {
   View,
-  Text,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
+  Platform,
   Image,
 } from "react-native";
 import {
@@ -16,7 +15,6 @@ import {
   useCameraFormat,
   enableFpsGraph,
 } from "react-native-vision-camera";
-import { Fontisto } from "@expo/vector-icons";
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { useTensorflowModel } from "react-native-fast-tflite";
 import { useResizePlugin } from "vision-camera-resize-plugin";
@@ -144,22 +142,41 @@ export default function VisionCamera({ route, navigation }) {
         setVideo(video);
         const path = video.path;
 
+        console.log(path);
+
         // Send Video data to backend
         const data = new FormData();
-        data.append("video", {
-          name: "mobile-video-upload",
-          type: "video/quicktime",
-          uri: path,
-        });
-        data.append("sid", sid);
-        try {
-          const res = await fetch("http://" + code + "/data/video/upload/", {
-            method: "post",
-            body: data,
+        if (Platform.OS === "ios") {
+          data.append("video", {
+            name: "mobile-video-upload",
+            type: "video/quicktime",
+            uri: path,
           });
-        } catch (e) {
-          console.error(e);
+        } else {
+          data.append("video", {
+            name: "mobile-video-upload",
+            type: "video/quicktime",
+            uri: "file://" + path,
+          });
         }
+        data.append("sid", sid);
+
+        try {
+          const response = await Axios.post(
+            "http://" + code + "/data/video/upload/",
+            data,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data", // Specify the correct content type
+              },
+            }
+          );
+
+          console.log("Response:", response.data);
+        } catch (error) {
+          console.error("Error:", error);
+        }
+
         // Save video to cameraRoll
         // await CameraRoll.save(`file://${path}`, {
         //   type: "video",
@@ -198,7 +215,10 @@ export default function VisionCamera({ route, navigation }) {
   const renderSwitchCamButton = () => {
     return (
       <View style={styles.SwitchButton} onTouchEnd={handleSwitchCameraType}>
-        <Fontisto name="arrow-swap" size={24} color="white" />
+        <Image
+          source={require("./assets/swap-arrow.png")}
+          style={{ width: 30, height: 30 }}
+        />
       </View>
     );
   };
@@ -215,7 +235,7 @@ export default function VisionCamera({ route, navigation }) {
           frameProcessor={frameProcessor}
           photo={true}
           video={true}
-          pixelFormat="rgb"
+          pixelFormat="yuv"
           enableFpsGraph={true}
         />
         <View style={styles.bottom}>
@@ -285,14 +305,12 @@ const styles = StyleSheet.create({
     top: 20,
     backgroundColor: "red",
     alignItems: "center",
-    borderRadius: 5,
     width: 100,
     height: 35,
   },
   notactiveTimer: {
     top: 20,
     alignItems: "center",
-    borderRadius: 5,
     width: 120,
     height: 50,
   },
@@ -326,7 +344,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     transform: [{ scale: 0.5 }],
-    borderRadius: "12%",
   },
   fpsContainer: {
     position: "absolute",
@@ -335,7 +352,6 @@ const styles = StyleSheet.create({
     width: 80,
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, .7)",
-    borderRadius: 2,
     padding: 8,
     zIndex: 20,
   },
