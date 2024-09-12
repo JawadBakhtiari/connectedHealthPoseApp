@@ -64,7 +64,7 @@ def session_init(request):
     # Write session details to log file
     log_file_path = os.path.join(settings.BASE_DIR, 'upload_log.txt')
     with open(log_file_path, 'a') as f:
-        f.write(f"Session Name: {new_session.name}\nSession Description: {new_session.description}\nsid: {new_sid}")
+        f.write(f"Session Name: {new_session.name}\nSession Description: {new_session.description}\nsid: {new_sid}\n")
 
     new_session.save()
 
@@ -128,14 +128,12 @@ def video_upload(request):
 
     sm.increment_clip_num(sid)
 
-    message = f"\n===== Uploaded Clip: {clip_num} ======"
-
-    print(message)
+    print(f"\nUpload Finished\nsid: {sid}\nclip num: {clip_num}\n")
 
     # Write message to a file
     log_file_path = os.path.join(settings.BASE_DIR, 'upload_log.txt')
     with open(log_file_path, 'a') as f:
-        f.write(message)
+        f.write(f"===== Uploaded Clip: {clip_num} ======")
 
     return response(status=status.HTTP_200_OK)
 
@@ -147,10 +145,37 @@ def show_log(request):
     # Read the contents of the log file
     try:
         with open(log_file_path, 'r') as f:
-            log_content = f.read()
+            log_lines = f.readlines()
     except FileNotFoundError:
-        log_content = "No logs available."
+        log_lines = []
+    
+    # Process log lines to create entries
+    log_entries = []
+    current_entry = []
 
+    for line in log_lines:
+        line = line.rstrip()  # Remove trailing whitespace
+        if line.startswith('Patient:'):
+            if current_entry:  # Add the previous entry
+                log_entries.append('\n'.join(current_entry).strip())
+            current_entry = [line]  # Start a new entry
+        else:
+            current_entry.append(line)
+    
+    # Append the last entry if there is one
+    if current_entry:
+        log_entries.append('\n'.join(current_entry).strip())
+    
+    # Keep only the latest 5 logs
+    latest_logs = log_entries[-5:]
+    
+    # Write the latest logs back to the file
+    with open(log_file_path, 'w') as f:
+        f.write('\n\n'.join(latest_logs) + '\n')
+    
+    # Prepare the content for rendering
+    log_content = '\n\n'.join(latest_logs)
+    
     # Pass the log content to the template
     return render(request, 'show_log.html', {'log_content': log_content})
 
