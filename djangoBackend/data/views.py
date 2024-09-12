@@ -27,6 +27,13 @@ def user_init(request):
     new_user = User(uid, first_name, last_name)
     new_user.save()
 
+    # Write user details to log file
+    log_file_path = os.path.join(settings.BASE_DIR, 'upload_log.txt')
+    with open(log_file_path, 'a') as f:
+        f.write('\n')
+        f.write('\n')
+        f.write(f"\nPatient: {first_name} {last_name}\nuid: {uid}\n")
+
     return JsonResponse({'uid': uid}, status=201)
 
 
@@ -53,6 +60,12 @@ def session_init(request):
         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         session.get('description')
     )
+
+    # Write session details to log file
+    log_file_path = os.path.join(settings.BASE_DIR, 'upload_log.txt')
+    with open(log_file_path, 'a') as f:
+        f.write(f"Session Name: {new_session.name}\nSession Description: {new_session.description}\nsid: {new_sid}")
+
     new_session.save()
 
     # NOTE -> skip for now
@@ -115,14 +128,14 @@ def video_upload(request):
 
     sm.increment_clip_num(sid)
 
-    message = f"\nUpload Finished\nsid: {sid}\nclip num: {clip_num}\n"
+    message = f"\n===== Uploaded Clip: {clip_num} ======"
 
     print(message)
 
     # Write message to a file
     log_file_path = os.path.join(settings.BASE_DIR, 'upload_log.txt')
     with open(log_file_path, 'a') as f:
-        f.write(message + '\n')
+        f.write(message)
 
     return response(status=status.HTTP_200_OK)
 
