@@ -1,0 +1,79 @@
+/* Generic css styling that is used in various places throughout the frontend. */
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500');
+body {
+    background-color: #e6f7fd;
+    font-family: 'Roboto', sans-serif;
+}
+
+.centered-vertical-container {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    align-items: center;
+    width: 0%;
+    left: 50%;
+    margin-top: 0%;
+    transform: translate(-50%, 0);
+}
+
+.input-box {
+    width: 240px;
+    height: 40px;
+    text-align: center;
+    font-size: 16px;
+    color: hwb(208 23% 65%); /* Dark blue-grey text */
+    font-weight: 400;
+    border: 1px solid rgb(184, 196, 204); /* Light blue border */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 0 10px;
+}
+
+.input-box::placeholder {
+    color: #b8c4cc; /* Light blue placeholder text */
+}
+
+.input-box:focus {
+    outline: none;
+    border-color: #6c8cbf; /* Medium blue border for focus */
+}
+
+.title-box {
+    width: 450px;
+    height: 50px;
+    background-color: white;
+    color: rgb(11, 42, 110);
+    font-weight: 500;
+       border: 1px solid rgb(184, 196, 204); /* Light blue border */
+    font-size: 20pt;
+    text-align: center;
+    box-shadow: 5px 5px 2px rgba(238, 243, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;  /* Adjust as needed */
+}
+
+.start-button {
+    width: 120px;
+    height: 40px;
+    background-color: rgb(11, 42, 110); /* Medium blue background */
+    color: #ffffff; /* White text */
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 20px;
+    transition: background-color 0.3s, transform 0.1s;
+    cursor: pointer;
+}
+
+.start-button:hover {
+    background-color: #5a7aa9; /* Darker blue on hover */
+}
+
+.start-button:active {
+    transform: translateY(2px); /* Slight push down on click */
+}
+
+
+

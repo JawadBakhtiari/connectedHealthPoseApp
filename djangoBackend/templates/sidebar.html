@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<!-- Created By CodingNepal -->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Sider Menu Bar CSS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}"/>
+    <script type="module" src="{% static 'js/sidebar.js' %}"></script>
+  </head>
+  <body>
+    <input type="checkbox" id="check">
+    <label for="check">
+      <i class="fas fa-bars" id="btn"></i>
+      <i class="fas fa-times" id="cancel"></i>
+    </label>
+    <div class="sidebar">
+    <header>Connected Health</header>
+    <ul>
+     <li><a href="#"><i class="fas fa-stream"></i>My Sessions</a></li>
+     <li id="2D-visualisation-tab"><a href="#"><i class="fas fa-running"></i>Visualisation Demo</a></li>
+     <li id="graph-tab"><a href="#"><i class="fas fa-chart-line"></i>Graph Demo</a></li>
+     <li id="source-code-tab"><a href="#"><i class="fab fa-github"></i>Source Code</a></li>
+    </ul>
+   </div>
+   <section></section>
+  </body>
+</html>

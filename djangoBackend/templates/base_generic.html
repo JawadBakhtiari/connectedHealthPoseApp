@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}3D Coordinates{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    {% block styles %}
+        <link rel="stylesheet" href="{% static 'css/general.css' %}">
+    {% endblock %}
+    {% block scripts %}
+    {% endblock %}
+</head>
+<body>
+    {% include "sidebar.html" %}
+    <header>
+        
+        <nav>
+            <!-- Add your navigation links here -->
+        </nav>
+    </header>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer>
+        <!-- Add your footer content here -->
+    </footer>
+</body>
+</html>
