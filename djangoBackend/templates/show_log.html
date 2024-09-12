@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Logs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .refresh-button, .back-button {
+            background-color: #007BFF; /* Primary blue */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        .refresh-button:hover, .back-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .back-button {
+            background-color: #28a745; /* Green */
+        }
+
+        .back-button:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Logs</h1>
+    <pre>{{ log_content }}</pre> <!-- Display the log content here -->
+    <!-- Refresh button -->
+    <button class="refresh-button" onclick="window.location.reload();">Refresh</button>
+    <!-- Back to Visualization button -->
+    <button class="back-button" onclick="window.location.href='/';">Visualize 2D</button>
+</body>
+</html>

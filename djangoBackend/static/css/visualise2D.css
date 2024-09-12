@@ -1,59 +1,59 @@
 #animation-holder {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 #animation-holder #animation {
-    width: 450px;
-    height: 620px;
-    border-radius: 15px;
+  width: 450px;
+  height: 620px;
+  border-radius: 15px;
 }
 
 #animation-title {
-    margin-bottom: 30px;
-    margin-top: -10px;
+  margin-bottom: 30px;
+  margin-top: -10px;
 }
 
 .inputs-holder {
-    display: flex;
-    position: absolute;
-    flex-direction: column;
-    align-items: center;
-    left: 85%;
-    margin-top: 15%;
-    transform: translate(-65%, 0);
+  display: flex;
+  position: absolute;
+  flex-direction: column;
+  align-items: center;
+  left: 85%;
+  margin-top: 15%;
+  transform: translate(-65%, 0);
 }
 
 #session-id-input {
-    margin-bottom: 8%;
+  margin-bottom: 8%;
 }
 
 #clip-num-input {
-    margin-bottom: 20%;
+  margin-bottom: 20%;
 }
 
 img {
-    color: rgb(15, 134, 198);
-    font-weight: 600;
+  color: rgb(15, 134, 198);
+  font-weight: 600;
 }
 
 /* ... existing styles ... */
 
 .session-info {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
 }
 
 .info-box {
-    text-align: center;
+  text-align: center;
 }
 
 .info-label {
-    font-weight: bold;
-    margin-right: 5px;
+  font-weight: bold;
+  margin-right: 5px;
 }
 
 .info-value {
-    font-style: italic;
+  font-style: italic;
 }

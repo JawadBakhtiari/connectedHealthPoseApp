@@ -9,4 +9,5 @@ urlpatterns = [
      path('video/upload/', views.video_upload, name='video_upload'),
      path('session/init/', views.session_init, name='session_init'),
      path('api/init_user/', views.user_init, name='init_user'),
+     path('logs/', views.show_log, name='show_log')
 ]
