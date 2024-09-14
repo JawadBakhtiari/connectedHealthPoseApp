@@ -10,9 +10,6 @@ Link to andriod APK: https://drive.google.com/file/d/1D7pSLvnZvoN8es7lt0nZURYFqT
 ##### Web Application for clinicians
 Clinicians can then leverage a web application to access the stored data, enabling precise evaluation of posture, alignment, and range of motion. This functionality supports the creation of targeted treatment plans, ensuring personalized care for each client.
 
-Link to deployed Staff App: http://3.104.215.22:8000
-
-
 # Installation Instructions
 
 First clone and navigate into Github Repository
