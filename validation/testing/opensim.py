@@ -20,6 +20,7 @@ def calc_joint_angle(initial_side: dict, vertex: dict, terminal_side: dict):
     cos_angle = dot_product / (magnitude_v1 * magnitude_v2)
     angle_radians = math.acos(cos_angle)
     angle_degrees = math.degrees(angle_radians)
+    print(angle_degrees)
     return angle_degrees
 
 def sigmoid(x: float) -> float:
@@ -32,15 +33,15 @@ def sigmoid(x: float) -> float:
     '''
     return 1 / (1 + math.exp(-x))
 
-PRES = 0.95
-VIS = 0.90
+PRES = 0.40
+VIS = 0.40
 
 filepath = 'data/opensim_ik_results/20240904/stsstruggle_result.mot'
 
 ik = pd.read_csv(filepath, delim_whitespace=True, skiprows=10)
 lab_knee_angles = ik['knee_angle_r']
 
-with open('data/opensim_ik_results/20240904/uncalibrated_side_cam_stsstruggle.json') as f:
+with open('../be_pose_estimation/data/results/20240904/stsstruggletrimmed_1.json') as f:
     poses = json.load(f)
 
 mobile_knee_angles = []
@@ -48,15 +49,14 @@ for pose in poses:
     pose = {kp['name']: kp for kp in pose['keypoints']}
 
     try:
-        hip = pose['left_hip']
-        knee = pose['left_knee']
-        ankle = pose['left_ankle']
-        print(sigmoid(hip['visibility']), sigmoid(hip['presence']), sigmoid(knee['visibility']), sigmoid(knee['presence']), sigmoid(ankle['visibility']), sigmoid(ankle['presence']))
+        hip = pose['right_hip']
+        knee = pose['right_knee']
+        ankle = pose['right_ankle']
         if (sigmoid(hip['visibility']) < VIS or sigmoid(hip['presence']) < PRES
             or sigmoid(knee['visibility']) < VIS or sigmoid(knee['presence']) < PRES
             or sigmoid(ankle['visibility']) < VIS or sigmoid(ankle['presence']) < PRES):
             continue
-        mobile_knee_angles.append(calc_joint_angle(ankle, knee, hip))
+        mobile_knee_angles.append(calc_joint_angle(hip, knee, ankle))
     except:
         continue
 
