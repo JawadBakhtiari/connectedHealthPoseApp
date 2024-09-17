@@ -13,16 +13,16 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import json
-from pose_model import format_pose
+from movenet_model import MovenetModel as model
 
 ######################################################################
 ############################# CONSTANTS ##############################
 ######################### change as needed ############################
 ######################################################################
 VIDEO_PATH = 'data/videos/20240904/side_cam_stsstruggle_trimmed.avi'
-MODEL_PATH = 'data/pose_estimation_model.tflite'
-CALIBRATED_OUT_FILE_PATH = 'data/results/20240904/calibrated_side_cam_stsstruggle.json'
-UNCALIBRATED_OUT_FILE_PATH = 'data/results/20240904/uncalibrated_side_cam_stsstruggle.json'
+OUT_FILE_NAME = 'side_cam_stsstruggle_lightning.json'
+CALIBRATED_OUT_FILE_PATH = f'data/results/20240904/calibrated_{OUT_FILE_NAME}'
+UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240904/uncalibrated_{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
 ######################################################################
 ######################################################################
@@ -36,9 +36,9 @@ def load_model(model_path):
     interpreter.allocate_tensors()
     return interpreter
 
-def preprocess_image(image):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
-    image = cv2.resize(image, (256, 256))
+def preprocess_image(image, input_shape):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(model.image_type())
+    image = cv2.resize(image, (input_shape[1], input_shape[2]))
     return np.expand_dims(image, axis=0)
 
 def run_model(interpreter, image):
@@ -55,8 +55,9 @@ def run_model(interpreter, image):
 ############################ RUN SCRIPT ##############################
 ######################################################################
 cap = cv2.VideoCapture(VIDEO_PATH)
-interpreter = load_model(MODEL_PATH)
-print(interpreter.get_input_details())
+interpreter = load_model(model.path())
+input_details = interpreter.get_input_details()
+input_shape = input_details[0]['shape']
 undstcammtx = None
 calibrated_video_poses = []
 uncalibrated_video_poses = []
@@ -75,15 +76,15 @@ while cap.isOpened():
     # Undistort image and run pose estimation model
     undst_img = cv2.undistort(dst_img, CAM_PARAMS['mtx'], CAM_PARAMS['dst'], None, undstcammtx)
 
-    uncalibrated_image_pose = run_model(interpreter, preprocess_image(dst_img))
-    calibrated_image_pose = run_model(interpreter, preprocess_image(undst_img))
+    uncalibrated_image_pose = run_model(interpreter, preprocess_image(dst_img, input_shape))
+    calibrated_image_pose = run_model(interpreter, preprocess_image(undst_img, input_shape))
     calibrated_video_poses.append({
         'time_since_start': time_since_start,
-        'keypoints': format_pose(calibrated_image_pose.tolist()[0])
+        'keypoints': model.format_pose(calibrated_image_pose.tolist()[0])
     })
     uncalibrated_video_poses.append({
         'time_since_start': time_since_start,
-        'keypoints': format_pose(uncalibrated_image_pose.tolist()[0])
+        'keypoints': model.format_pose(uncalibrated_image_pose.tolist()[0])
     })
 cap.release()
 cv2.destroyAllWindows()
