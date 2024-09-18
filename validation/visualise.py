@@ -1,49 +1,46 @@
-#!/usr/bin/env python3
+'''Visualise a set of poses over a video capture'''
 
-'''Helper script to visualise a set of poses over a video capture'''
-
-import cv2
 import json
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import cv2
+from time import sleep
+from be_pose_estimation.blazepose_model import BlazeposeModel as model
 
-with open('example_data/random/poses1.json') as f:
-  POSES = json.load(f)
+with open('be_pose_estimation/data/results/20240904/side_cam_stsstruggle.json') as f:
+    POSES = json.load(f)
 
-VIDEO_PATH = 'example_data/random/vid1.MOV'
+CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240904/side_cam_stsstruggle_trimmed.avi')
 
-def read_video(video_path):
-    cap = cv2.VideoCapture(video_path)
-    frames = []
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    cap.release()
-    return frames
+# KP_CONNS = [
+#     (0, 4), (0, 1), (4, 5), (5, 6), (6, 8), (1, 2), (2, 3), (3, 7),
+#     (10, 9), (12, 11), (12, 14), (14, 16), (16, 22), (16, 20), (16, 18), (18, 20),
+#     (11, 13), (13, 15), (15, 21), (15, 19), (15, 17), (17, 19), (12, 24),
+#     (11, 23), (24, 23), (24, 26), (23, 25), (26, 28), (25, 27), (28, 32), 
+#     (28, 30), (30, 32), (27, 29), (27, 31), (29, 31)
+# ]
+KP_CONNS = []
 
-def create_animation(frames, keypoint_data):
-    fig, ax = plt.subplots(figsize=(10, 6))
+for pose in POSES:
+    ret, frame_image = CAP.read()
+    if not ret:
+        break
 
-    def animate(i):
-        ax.clear()
-        ax.imshow(frames[i])
+    frame_height, frame_width, _ = frame_image.shape
+    frame_dims = (frame_height, frame_width)
+    overlay_image = frame_image.copy()
 
-        # Plot keypoints
-        for keypoint in keypoint_data[i]:
-            x, y = keypoint['x'], keypoint['y']
-            ax.plot(x, y, 'ro', markersize=5)
-            ax.text(x, y, keypoint['name'], fontsize=8, color='white', backgroundcolor='black')
+    keypoints = [model.get_pixel_coordinate((kp['x'], kp['y']), frame_dims) for kp in pose['keypoints']]
 
-        ax.set_title(f'Frame {i}')
-        ax.axis('off')
+    # Visualize the keypoints and connections
+    for kp in keypoints:
+        cv2.circle(overlay_image, kp, radius=2, color=(0, 255, 0), thickness=-1)
 
-    anim = animation.FuncAnimation(fig, animate, frames=len(frames), interval=33, blit=False)
-    return anim
+    for joint1, joint2 in KP_CONNS:
+        pt1 = keypoints[joint1]
+        pt2 = keypoints[joint2]
+        cv2.line(overlay_image, pt1, pt2, (0, 255, 0), 1)
 
-frames = read_video(VIDEO_PATH)
-anim = create_animation(frames, POSES)
-anim.save('animation.mp4', writer='ffmpeg', fps=30)
-plt.close()
+    cv2.imshow('Pose Estimation', overlay_image)
+    sleep(0.05)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 

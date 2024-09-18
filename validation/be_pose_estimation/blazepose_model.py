@@ -1,8 +1,7 @@
-'''Api for formatting pose estimation data on backend side ('format' function)'''
-
-from model import Model
-from typing import Type
+from .model import Model
 import numpy as np
+from typing import Type
+from typing import Tuple
 
 # The number of keypoints captured by the pose estimation model.
 NUM_KEYPOINTS = 39
@@ -80,15 +79,6 @@ class BlazeposeModel(Model):
 
     @staticmethod
     def format_pose(pose: list) -> list:
-        '''
-        Reformat pose data structure and return it.
-
-        Args:
-            pose: a list of keypoints as received from the pose estimation model.
-
-        Returns:
-            List containing formatted pose data.
-        '''
         formatted_keypoints = []
         for i in range(NUM_KEYPOINTS):
             keypoint_index = i * VALS_PER_KEYPOINT
@@ -124,6 +114,11 @@ class BlazeposeModel(Model):
             'visibility': visibility,
             'presence': presence
         }
+
+
+    @staticmethod
+    def get_pixel_coordinate(keypoint: Tuple[float, float], _: Tuple[int, int]) -> Tuple[int, int]:
+        return (int(keypoint[0]), int(keypoint[1]))
 
 
     @staticmethod

@@ -1,8 +1,7 @@
-'''Api for formatting pose estimation data on backend side ('format' function)'''
-
-from model import Model
+from .model import Model
 from typing import Type
 import numpy as np
+from typing import Tuple
 
 # The number of keypoints captured by the pose estimation model.
 NUM_KEYPOINTS = 17
@@ -45,8 +44,13 @@ class MovenetModel(Model):
             'y': kp[1],
             'confidence': kp[2]
         }
-
         return [format_keypoint(i, kp) for i, kp in enumerate(pose[0])]
+
+
+    @staticmethod
+    def get_pixel_coordinate(keypoint: Tuple[float, float], frame_dimensions: Tuple[int, int]) -> Tuple[int, int]:
+        return (int(keypoint[0] * frame_dimensions[0]), int(keypoint[1] * frame_dimensions[1]))
+
 
     @staticmethod
     def path() -> str:
