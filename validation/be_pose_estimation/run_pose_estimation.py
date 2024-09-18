@@ -37,9 +37,9 @@ def load_model(model_path):
     return interpreter
 
 def preprocess_image(image, input_shape):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(model.image_type())
-    image = cv2.resize(image, (input_shape[1], input_shape[2]))
-    return np.expand_dims(image, axis=0)
+    image = np.expand_dims(image, axis=0)
+    image = tf.image.resize_with_pad(image, 192, 192)
+    return tf.cast(image, model.image_type())
 
 def run_model(interpreter, image):
     input_details = interpreter.get_input_details()

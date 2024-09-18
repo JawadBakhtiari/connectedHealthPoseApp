@@ -5,7 +5,7 @@ import cv2
 from time import sleep
 from be_pose_estimation.blazepose_model import BlazeposeModel as model
 
-with open('be_pose_estimation/data/results/20240904/side_cam_stsstruggle.json') as f:
+with open('be_pose_estimation/data/results/20240904/uncalibrated_side_cam_stsstruggle_lightning.json') as f:
     POSES = json.load(f)
 
 CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240904/side_cam_stsstruggle_trimmed.avi')

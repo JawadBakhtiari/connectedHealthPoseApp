@@ -1,4 +1,4 @@
-from .model import Model
+from model import Model
 from typing import Type
 import numpy as np
 from typing import Tuple
