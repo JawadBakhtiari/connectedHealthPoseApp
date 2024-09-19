@@ -20,7 +20,7 @@ from movenet_model import MovenetModel as model
 ######################### change as needed ############################
 ######################################################################
 VIDEO_PATH = 'data/videos/20240904/side_cam_stsstruggle_trimmed.avi'
-OUT_FILE_NAME = 'side_cam_stsstruggle_lightning.json'
+OUT_FILE_NAME = 'stsstruggle_thunder.json'
 CALIBRATED_OUT_FILE_PATH = f'data/results/20240904/calibrated_{OUT_FILE_NAME}'
 UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240904/uncalibrated_{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
@@ -37,9 +37,11 @@ def load_model(model_path):
     return interpreter
 
 def preprocess_image(image, input_shape):
-    image = np.expand_dims(image, axis=0)
-    image = tf.image.resize_with_pad(image, 192, 192)
-    return tf.cast(image, model.image_type())
+    image = image.astype(model.image_type())
+    image = cv2.resize(image, (input_shape[1], input_shape[2]))
+    # cv2.imshow('test', image)
+    # cv2.waitKey(25)
+    return np.expand_dims(image, axis=0)
 
 def run_model(interpreter, image):
     input_details = interpreter.get_input_details()

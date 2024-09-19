@@ -1,4 +1,4 @@
-from model import Model
+from .model import Model
 from typing import Type
 import numpy as np
 from typing import Tuple
@@ -40,8 +40,8 @@ class MovenetModel(Model):
     def format_pose(pose: list) -> list:
         format_keypoint = lambda i, kp: {
             'name': KEYPOINT_MAPPINGS.get(i),
-            'x': kp[0],
-            'y': kp[1],
+            'x': kp[1],
+            'y': kp[0],
             'confidence': kp[2]
         }
         return [format_keypoint(i, kp) for i, kp in enumerate(pose[0])]
@@ -54,5 +54,5 @@ class MovenetModel(Model):
 
     @staticmethod
     def path() -> str:
-        return 'data/models/movenet_lightning.tflite'
+        return 'data/models/movenet_thunder.tflite'
 

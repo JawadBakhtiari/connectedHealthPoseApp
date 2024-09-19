@@ -3,9 +3,9 @@
 import json
 import cv2
 from time import sleep
-from be_pose_estimation.blazepose_model import BlazeposeModel as model
+from be_pose_estimation.movenet_model import MovenetModel as model
 
-with open('be_pose_estimation/data/results/20240904/uncalibrated_side_cam_stsstruggle_lightning.json') as f:
+with open('be_pose_estimation/data/results/20240904/uncalibrated_stsstruggle_thunder.json') as f:
     POSES = json.load(f)
 
 CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240904/side_cam_stsstruggle_trimmed.avi')
@@ -25,7 +25,7 @@ for pose in POSES:
         break
 
     frame_height, frame_width, _ = frame_image.shape
-    frame_dims = (frame_height, frame_width)
+    frame_dims = (frame_width, frame_height)
     overlay_image = frame_image.copy()
 
     keypoints = [model.get_pixel_coordinate((kp['x'], kp['y']), frame_dims) for kp in pose['keypoints']]

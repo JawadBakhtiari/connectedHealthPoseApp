@@ -117,8 +117,8 @@ class BlazeposeModel(Model):
 
 
     @staticmethod
-    def get_pixel_coordinate(keypoint: Tuple[float, float], _: Tuple[int, int]) -> Tuple[int, int]:
-        return (int(keypoint[0]), int(keypoint[1]))
+    def get_pixel_coordinate(keypoint: Tuple[float, float], frame_dimensions: Tuple[int, int]) -> Tuple[int, int]:
+        return (int(keypoint[0]/255 * frame_dimensions[0]), int(keypoint[1]/255 * frame_dimensions[1]))
 
 
     @staticmethod
