@@ -12,25 +12,28 @@ VALS_PER_KEYPOINT = 3
 # Mappings from indexes in data returned from pose estimation model to joint names.
 KEYPOINT_MAPPINGS = {
     0: 'nose',
-    1: 'left eye',
-    2: 'right eye',
-    3: 'left ear',
-    4: 'right ear',
-    5: 'left shoulder',
-    6: 'right shoulder',
-    7: 'left elbow',
-    8: 'right elbow',
-    9: 'left wrist',
-    10: 'right wrist',
-    11: 'left hip',
-    12: 'right hip',
-    13: 'left knee',
-    14: 'right knee',
-    15: 'left ankle',
-    16: 'right ankle'
+    1: 'left_eye',
+    2: 'right_eye',
+    3: 'left_ear',
+    4: 'right_ear',
+    5: 'left_shoulder',
+    6: 'right_shoulder',
+    7: 'left_elbow',
+    8: 'right_elbow',
+    9: 'left_wrist',
+    10: 'right_wrist',
+    11: 'left_hip',
+    12: 'right_hip',
+    13: 'left_knee',
+    14: 'right_knee',
+    15: 'left_ankle',
+    16: 'right_ankle'
 }
 
-class MovenetModel(Model):
+class Movenet(Model):
+    '''
+    A parent class for the movenet models 'lightning' and 'thunder'.
+    '''
     @staticmethod
     def image_type() -> Type[np.generic]:
         return np.uint8
@@ -51,8 +54,24 @@ class MovenetModel(Model):
     def get_pixel_coordinate(keypoint: Tuple[float, float], frame_dimensions: Tuple[int, int]) -> Tuple[int, int]:
         return (int(keypoint[0] * frame_dimensions[0]), int(keypoint[1] * frame_dimensions[1]))
 
-
     @staticmethod
-    def path() -> str:
-        return 'data/models/movenet_thunder.tflite'
+    def joint_connections() -> list:
+        return [
+            (0, 1),
+            (0, 2),
+            (1, 3),
+            (2, 4),
+            (5, 6),
+            (5, 7),
+            (7, 9),
+            (6, 8),
+            (8, 10),
+            (11, 12),
+            (5, 11),
+            (6, 12),
+            (11, 13),
+            (13, 15),
+            (12, 14),
+            (14, 16),
+        ]
 

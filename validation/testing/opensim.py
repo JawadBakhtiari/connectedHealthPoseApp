@@ -41,7 +41,7 @@ filepath = 'data/opensim_ik_results/20240904/stsstruggle_result.mot'
 ik = pd.read_csv(filepath, delim_whitespace=True, skiprows=10)
 lab_knee_angles = ik['knee_angle_r']
 
-with open('../be_pose_estimation/data/results/20240904/stsstruggletrimmed_1.json') as f:
+with open('../be_pose_estimation/data/results/20240904/uncalibrated_stsstruggle_thunder.json') as f:
     poses = json.load(f)
 
 mobile_knee_angles = []
@@ -52,14 +52,14 @@ for pose in poses:
         hip = pose['right_hip']
         knee = pose['right_knee']
         ankle = pose['right_ankle']
-        if (sigmoid(hip['visibility']) < VIS or sigmoid(hip['presence']) < PRES
-            or sigmoid(knee['visibility']) < VIS or sigmoid(knee['presence']) < PRES
-            or sigmoid(ankle['visibility']) < VIS or sigmoid(ankle['presence']) < PRES):
-            continue
+        # if (sigmoid(hip['visibility']) < VIS or sigmoid(hip['presence']) < PRES
+        #     or sigmoid(knee['visibility']) < VIS or sigmoid(knee['presence']) < PRES
+        #     or sigmoid(ankle['visibility']) < VIS or sigmoid(ankle['presence']) < PRES):
+        #     continue
         mobile_knee_angles.append(calc_joint_angle(hip, knee, ankle))
     except:
         continue
-
+# print(mobile_knee_angles)
 time_lab = np.linspace(0, 1, len(lab_knee_angles))
 time_mobile = np.linspace(0, 1, len(mobile_knee_angles))
 

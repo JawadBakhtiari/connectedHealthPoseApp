@@ -13,14 +13,14 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import json
-from movenet_model import MovenetModel as model
+from models.movenet_thunder import MovenetThunder as model
 
 ######################################################################
 ############################# CONSTANTS ##############################
-######################### change as needed ############################
+######################### change as needed ###########################
 ######################################################################
-VIDEO_PATH = 'data/videos/20240904/side_cam_stsstruggle_trimmed.avi'
-OUT_FILE_NAME = 'stsstruggle_thunder.json'
+VIDEO_PATH = 'data/videos/20240904/front_cam_stsnorm.avi'
+OUT_FILE_NAME = 'stsnorm_thunder.json'
 CALIBRATED_OUT_FILE_PATH = f'data/results/20240904/calibrated_{OUT_FILE_NAME}'
 UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240904/uncalibrated_{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
@@ -39,8 +39,6 @@ def load_model(model_path):
 def preprocess_image(image, input_shape):
     image = image.astype(model.image_type())
     image = cv2.resize(image, (input_shape[1], input_shape[2]))
-    # cv2.imshow('test', image)
-    # cv2.waitKey(25)
     return np.expand_dims(image, axis=0)
 
 def run_model(interpreter, image):

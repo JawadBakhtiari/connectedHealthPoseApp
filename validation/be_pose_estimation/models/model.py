@@ -32,9 +32,10 @@ class Model(ABC):
 
     @staticmethod
     @abstractmethod
-    def keypoint_connections() -> list:
+    def joint_connections() -> list:
         '''
-        todo
+        Return a list of tuples indicating which joints should have a line drawn between them
+        for visualisation.
         '''
         pass
 
