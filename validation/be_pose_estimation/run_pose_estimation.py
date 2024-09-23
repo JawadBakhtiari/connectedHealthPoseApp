@@ -19,8 +19,8 @@ from models.movenet_thunder import MovenetThunder as model
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-VIDEO_PATH = 'data/videos/20240904/front_cam_stsnorm.avi'
-OUT_FILE_NAME = 'stsnorm_thunder.json'
+VIDEO_PATH = '../example_data/random/360_spin_test.mp4'
+OUT_FILE_NAME = '360_spin_test_thunder.json'
 CALIBRATED_OUT_FILE_PATH = f'data/results/20240904/calibrated_{OUT_FILE_NAME}'
 UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240904/uncalibrated_{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
@@ -69,7 +69,7 @@ while cap.isOpened():
 
     print(f'processing {dst_img} ...')
 
-    time_since_start = cap.get(cv2.CAP_PROP_POS_MSEC)
+    time_since_start = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
     h, w = dst_img.shape[:2]
     undstcammtx, _ = cv2.getOptimalNewCameraMatrix(CAM_PARAMS['mtx'], CAM_PARAMS['dst'], (w,h), 1, (w,h))
 

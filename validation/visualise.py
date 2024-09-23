@@ -5,10 +5,10 @@ import cv2
 from time import sleep
 from be_pose_estimation.models.movenet_thunder import MovenetThunder as model
 
-with open('be_pose_estimation/data/results/20240904/uncalibrated_stsnorm_thunder.json') as f:
+with open('be_pose_estimation/data/results/20240904/uncalibrated_360_spin_test_thunder.json') as f:
     POSES = json.load(f)
 
-CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240904/front_cam_stsnorm.avi')
+CAP = cv2.VideoCapture('example_data/random/360_spin_test.mp4')
 
 for pose in POSES:
     ret, frame_image = CAP.read()
