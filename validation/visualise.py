@@ -16,8 +16,8 @@ TEXT_SCALE = 3
 TEXT_COLOR = (255, 255, 255)
 TEXT_THICKNESS = 3
 TEXT_LINE_TYPE = cv2.LINE_AA
-CAP = cv2.VideoCapture('example_data/random/five_sts.mp4')
-with open('be_pose_estimation/data/results/20240904/uncalibrated_five_sts_thunder.json') as f:
+CAP = cv2.VideoCapture('example_data/random/five_sts_fail.mp4')
+with open('be_pose_estimation/data/results/20240904/uncalibrated_five_sts_fail_thunder.json') as f:
     POSES = json.load(f)
 
 exercise = Exercise(5)

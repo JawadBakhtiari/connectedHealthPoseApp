@@ -5,6 +5,8 @@ class SitToStand(Exercise):
     '''
     Determine when a target number of sit to stand repetitions have been completed.
     '''
+    MAX_KNEE_EXTENSION = 145
+    MAX_KNEE_FLEXION = 90
     def __init__(self, target_reps):
         super().__init__()
         self.target_reps = target_reps
@@ -39,9 +41,9 @@ class SitToStand(Exercise):
                 check_seated = True
             knee_flexion = SitToStand.calc_joint_angle(pose['left_ankle'], pose['left_knee'], pose['left_hip'])
             if check_seated:
-                if knee_flexion <= 90:
+                if knee_flexion <= SitToStand.MAX_KNEE_FLEXION:
                     check_seated = False
-            elif knee_flexion >= 145:
+            elif knee_flexion >= SitToStand.MAX_KNEE_EXTENSION:
                 check_seated = True
                 self.rep_times.append(time_since_start)
                 if len(self.rep_times) == self.target_reps:
