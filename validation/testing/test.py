@@ -93,3 +93,21 @@ def run_single_sts_check(poses) -> float:
 def run_five_sts_check(poses) -> float:
     return sts_check(poses, 5)
 
+def run_walk_check(poses) -> float:
+    end_x = 75 / 1080
+    frames_under = 0
+    required_frames_under = 3
+    for pose in poses:
+        time_since_start = pose['time_since_start']
+        pose = {kp['name']: kp for kp in pose['keypoints']}
+        left_hip_x = pose['left_hip']['x']
+        right_hip_x = pose['right_hip']['x']
+        print(left_hip_x, right_hip_x, end_x)
+        if left_hip_x < end_x and right_hip_x < end_x:
+            frames_under += 1
+        else:
+            frames_under = 0
+        if frames_under >= required_frames_under:
+            return time_since_start
+    return poses[-1]['time_since_start'] + 1
+

@@ -19,8 +19,8 @@ from models.movenet_thunder import MovenetThunder as model
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-VIDEO_PATH = '../example_data/random/sts_fail.MOV'
-OUT_FILE_NAME = 'sts_fail_thunder.json'
+VIDEO_PATH = '../example_data/random/tandem_stand.MOV'
+OUT_FILE_NAME = 'tandem_stand_thunder.json'
 CALIBRATED_OUT_FILE_PATH = f'data/results/20240904/calibrated_{OUT_FILE_NAME}'
 UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240904/uncalibrated_{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')

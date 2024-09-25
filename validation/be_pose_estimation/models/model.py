@@ -50,7 +50,7 @@ class Model(ABC):
                                 in the form (width, height).
 
         Returns:
-            An tuple of integers (x, y) representing the pixel coordinate for this keypoint.
+            A tuple of integers (x, y) representing the pixel coordinate for this keypoint.
         '''
         pass
 
@@ -62,6 +62,7 @@ class Model(ABC):
         Return the image type that this model requires.
         '''
         pass
+
 
     @staticmethod
     @abstractmethod

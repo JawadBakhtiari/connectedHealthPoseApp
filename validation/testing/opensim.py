@@ -20,7 +20,6 @@ def calc_joint_angle(initial_side: dict, vertex: dict, terminal_side: dict):
     cos_angle = dot_product / (magnitude_v1 * magnitude_v2)
     angle_radians = math.acos(cos_angle)
     angle_degrees = math.degrees(angle_radians)
-    print(angle_degrees)
     return angle_degrees
 
 def sigmoid(x: float) -> float:
@@ -59,7 +58,7 @@ for pose in poses:
         mobile_knee_angles.append(calc_joint_angle(hip, knee, ankle))
     except:
         continue
-# print(mobile_knee_angles)
+
 time_lab = np.linspace(0, 1, len(lab_knee_angles))
 time_mobile = np.linspace(0, 1, len(mobile_knee_angles))
 

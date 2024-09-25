@@ -4,21 +4,24 @@ import json
 import cv2
 from time import sleep
 from be_pose_estimation.models.movenet_thunder import MovenetThunder as model
-from testing.test import run_single_sts_check
+from exercises.sit_to_stand import SitToStand as Exercise
 
 POSE_COLOR = (0, 0, 255)
 SUCCESS_COLOR = (0, 255, 0)
-TIME_FONT = cv2.FONT_HERSHEY_SIMPLEX
+TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX
 TIME_POS = (20, 100)
+REPS_POS = (650, 100)
 TIME_AFTER_SUCCESS_POS = (20, 200)
-TIME_SCALE = 3
-TIME_COLOR = (255, 255, 255)
-TIME_THICKNESS = 3
-TIME_LINE_TYPE = cv2.LINE_AA
-CAP = cv2.VideoCapture('example_data/random/sts_fail.MOV')
-with open('be_pose_estimation/data/results/20240904/uncalibrated_sts_fail_thunder.json') as f:
+TEXT_SCALE = 3
+TEXT_COLOR = (255, 255, 255)
+TEXT_THICKNESS = 3
+TEXT_LINE_TYPE = cv2.LINE_AA
+CAP = cv2.VideoCapture('example_data/random/five_sts.mp4')
+with open('be_pose_estimation/data/results/20240904/uncalibrated_five_sts_thunder.json') as f:
     POSES = json.load(f)
-EXERCISE_COMPLETED_TIME = run_single_sts_check(POSES)
+
+exercise = Exercise(5)
+EXERCISE_COMPLETED_TIME = exercise.run_check(POSES)
 
 for pose in POSES:
     ret, frame_image = CAP.read()
@@ -30,20 +33,21 @@ for pose in POSES:
     overlay_image = frame_image.copy()
 
     time_since_start = CAP.get(cv2.CAP_PROP_POS_MSEC) / 1000
+    reps = exercise.num_reps_completed(time_since_start)
+    cv2.putText(overlay_image, f'REPS: {reps}', REPS_POS, TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS, TEXT_LINE_TYPE)
+
     if time_since_start >= EXERCISE_COMPLETED_TIME:
         POSE_COLOR = SUCCESS_COLOR
-        cv2.putText(overlay_image, f'{EXERCISE_COMPLETED_TIME:.2f}', TIME_POS, TIME_FONT, TIME_SCALE, SUCCESS_COLOR, TIME_THICKNESS, TIME_LINE_TYPE)
-        cv2.putText(overlay_image, f'{time_since_start:.2f}', TIME_AFTER_SUCCESS_POS, TIME_FONT, TIME_SCALE, TIME_COLOR, TIME_THICKNESS, TIME_LINE_TYPE)
+        cv2.putText(overlay_image, f'{EXERCISE_COMPLETED_TIME:.2f}', TIME_POS, TEXT_FONT, TEXT_SCALE, SUCCESS_COLOR, TEXT_THICKNESS, TEXT_LINE_TYPE)
+        cv2.putText(overlay_image, f'{time_since_start:.2f}', TIME_AFTER_SUCCESS_POS, TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS, TEXT_LINE_TYPE)
     else:
-        cv2.putText(overlay_image, f'{time_since_start:.2f}', TIME_POS, TIME_FONT, TIME_SCALE, TIME_COLOR, TIME_THICKNESS, TIME_LINE_TYPE)
+        cv2.putText(overlay_image, f'{time_since_start:.2f}', TIME_POS, TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS, TEXT_LINE_TYPE)
 
     keypoints = [model.get_pixel_coordinate((kp['x'], kp['y']), frame_dims) for kp in pose['keypoints']]
 
     # Visualize the keypoints and connections
     for kp in keypoints:
         cv2.circle(overlay_image, kp, radius=2, color=POSE_COLOR, thickness=7)
-
-    # Display time since start of video
 
     for joint1, joint2 in model.joint_connections():
         pt1 = keypoints[joint1]
