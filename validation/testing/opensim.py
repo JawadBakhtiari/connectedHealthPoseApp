@@ -35,12 +35,12 @@ def sigmoid(x: float) -> float:
 PRES = 0.40
 VIS = 0.40
 
-filepath = 'data/opensim_ik_results/20240904/stsstruggle_result.mot'
+filepath = 'data/opensim_ik_results/20240926/sts_result.mot'
 
 ik = pd.read_csv(filepath, delim_whitespace=True, skiprows=10)
-lab_knee_angles = ik['knee_angle_r']
+lab_knee_angles = [180 - a for a in ik['knee_angle_r']]
 
-with open('../be_pose_estimation/data/results/20240904/uncalibrated_stsstruggle_thunder.json') as f:
+with open('../be_pose_estimation/data/results/20240926/uncalibrated_sts_mobile_thunder.json') as f:
     poses = json.load(f)
 
 mobile_knee_angles = []

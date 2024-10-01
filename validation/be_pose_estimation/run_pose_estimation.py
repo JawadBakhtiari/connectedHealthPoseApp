@@ -19,10 +19,10 @@ from models.movenet_thunder import MovenetThunder as model
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-VIDEO_PATH = '../example_data/random/tandem_stand.MOV'
-OUT_FILE_NAME = 'tandem_stand_thunder.json'
-CALIBRATED_OUT_FILE_PATH = f'data/results/20240904/calibrated_{OUT_FILE_NAME}'
-UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240904/uncalibrated_{OUT_FILE_NAME}'
+VIDEO_PATH = 'data/videos/20240926/spin.mp4'
+OUT_FILE_NAME = 'spin_thunder.json'
+CALIBRATED_OUT_FILE_PATH = f'data/results/20240926/calibrated_{OUT_FILE_NAME}'
+UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240926/uncalibrated_{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
 ######################################################################
 ######################################################################
@@ -47,6 +47,24 @@ def run_model(interpreter, image):
     interpreter.set_tensor(input_details[0]['index'], image)
     interpreter.invoke()
     return interpreter.get_tensor(output_details[0]['index'])
+
+def crop_to_aspect_ratio(image, aspect_ratio):
+    ''' For use with webcam footage to crop it to same ratio as mobile.'''
+    height, width, _ = image.shape
+    current_aspect_ratio = width / height
+
+    if current_aspect_ratio > aspect_ratio:
+        # Image is wider than the target aspect ratio, crop width
+        new_width = int(height * aspect_ratio)
+        start_x = (width - new_width) // 2
+        cropped_image = image[:, start_x:start_x + new_width]
+    else:
+        # Image is taller than the target aspect ratio, crop height
+        new_height = int(width / aspect_ratio)
+        start_y = (height - new_height) // 2
+        cropped_image = image[start_y:start_y + new_height, :]
+
+    return cropped_image
 ######################################################################
 ######################################################################
 
@@ -66,6 +84,8 @@ while cap.isOpened():
     ret, dst_img = cap.read()
     if not ret:
         break
+
+    # dst_img = crop_to_aspect_ratio(dst_img, 16/9)
 
     print(f'processing {dst_img} ...')
 
@@ -90,8 +110,8 @@ cap.release()
 cv2.destroyAllWindows()
 
 # Save results of pose estimation
-with open(CALIBRATED_OUT_FILE_PATH, 'w') as json_file:
-    json.dump(calibrated_video_poses, json_file, indent=4)
+# with open(CALIBRATED_OUT_FILE_PATH, 'w') as json_file:
+#     json.dump(calibrated_video_poses, json_file, indent=4)
 with open(UNCALIBRATED_OUT_FILE_PATH, 'w') as json_file:
     json.dump(uncalibrated_video_poses, json_file, indent=4)
 ######################################################################
