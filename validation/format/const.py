@@ -14,14 +14,18 @@ SHOULDER_X_SUFFIX = '.4'
 SHOULDER_Y_SUFFIX = '.5'
 SHOULDER_Z_SUFFIX = '.6'
 
-LSHOULDER = 'Skeleton 001:LShoulder'
-RSHOULDER = 'Skeleton 001:RShoulder'
-LELBOW = 'Skeleton 001:LElbowOut'
-RELBOW = 'Skeleton 001:RElbowOut'
-LWRIST = 'Skeleton 001:LWristOut'
-RWRIST = 'Skeleton 001:RWristOut'
-LHIP = 'Skeleton 001:WaistLFront'
-RHIP = 'Skeleton 001:WaistRFront'
+LSHOULDER = 'Skeleton 001:LSHO'
+RSHOULDER = 'Skeleton 001:RSHO'
+LELBOW = 'Skeleton 001:LELB'
+RELBOW = 'Skeleton 001:RELB'
+LWRIST = 'Skeleton 001:LWRA'
+RWRIST = 'Skeleton 001:RWRA'
+LHIP = 'Skeleton 001:LPSI'
+RHIP = 'Skeleton 001:RPSI'
+LKNEE = 'Skeleton 001:LKNE'
+RKNEE = 'Skeleton 001:RKNE'
+LANKLE = 'Skeleton 001:LANK'
+RANKLE = 'Skeleton 001:RANK'
 
 LAB_KEYPOINTS = [
   LSHOULDER,
@@ -32,6 +36,10 @@ LAB_KEYPOINTS = [
   RWRIST,
   LHIP,
   RHIP,
+  LKNEE,
+  RKNEE,
+  LANKLE,
+  RANKLE,
 ]
 
 # Mappings from names of keypoints in lab data to their equivalents
@@ -45,4 +53,9 @@ KEYPOINT_MAPPINGS = {
   RWRIST: 'right_wrist', 
   LHIP: 'left_hip',
   RHIP: 'right_hip',
+  LKNEE: 'left_knee',
+  RKNEE: 'right_knee',
+  LANKLE: 'left_ankle',
+  RANKLE: 'right_ankle',
 }
+

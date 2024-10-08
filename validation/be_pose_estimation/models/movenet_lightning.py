@@ -1,6 +1,6 @@
-from .movenet_model import MovenetModel
+from .movenet import Movenet
 
-class MovenetLightning(MovenetModel):
+class MovenetLightning(Movenet):
     '''
     One of the two movenet models (faster but less accurate).
     '''

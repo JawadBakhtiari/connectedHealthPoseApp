@@ -16,13 +16,20 @@ class Model(ABC):
     '''
     @staticmethod
     @abstractmethod
-    def format_pose(pose: list) -> list:
+    def format_pose(pose: list, frame_dimensions: Tuple[int, int]) -> list:
         '''
         Reformat pose data structure as it is received from the model into a more
-        readable, generalised format.
+        readable format.
+
+        x and y coordinate values should always be formatted as pixel values,
+        not normalised values.
 
         Args:
-            pose: a list of keypoints as received from the pose estimation model.
+            pose:               a list of keypoints as received from the pose
+                                estimation model.
+            frame_dimensions:   a tuple representing the dimensions of the
+                                frame on on which this model was run, in the
+                                form (width, height).
 
         Returns:
             List containing formatted pose data.
@@ -36,21 +43,6 @@ class Model(ABC):
         '''
         Return a list of tuples indicating which joints should have a line drawn between them
         for visualisation.
-        '''
-        pass
-
-
-    @staticmethod
-    @abstractmethod
-    def get_pixel_coordinate(keypoint: Tuple[float, float], frame_dimensions: Tuple[int, int]) -> Tuple[int, int]:
-        '''
-        Args:
-            keypoints:          a tuple (x, y) of values for a particular keypoint.
-            frame_dimensions:   the dimensions of the frame that the pose estimation model was run on,
-                                in the form (width, height).
-
-        Returns:
-            A tuple of integers (x, y) representing the pixel coordinate for this keypoint.
         '''
         pass
 

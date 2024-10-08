@@ -19,8 +19,8 @@ from models.movenet_thunder import MovenetThunder as model
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-VIDEO_PATH = 'data/videos/20240926/spin.mp4'
-OUT_FILE_NAME = 'spin_thunder.json'
+VIDEO_PATH = 'data/videos/20240926/tuag.mp4'
+OUT_FILE_NAME = 'tuag_thunder.json'
 CALIBRATED_OUT_FILE_PATH = f'data/results/20240926/calibrated_{OUT_FILE_NAME}'
 UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240926/uncalibrated_{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
@@ -47,24 +47,6 @@ def run_model(interpreter, image):
     interpreter.set_tensor(input_details[0]['index'], image)
     interpreter.invoke()
     return interpreter.get_tensor(output_details[0]['index'])
-
-def crop_to_aspect_ratio(image, aspect_ratio):
-    ''' For use with webcam footage to crop it to same ratio as mobile.'''
-    height, width, _ = image.shape
-    current_aspect_ratio = width / height
-
-    if current_aspect_ratio > aspect_ratio:
-        # Image is wider than the target aspect ratio, crop width
-        new_width = int(height * aspect_ratio)
-        start_x = (width - new_width) // 2
-        cropped_image = image[:, start_x:start_x + new_width]
-    else:
-        # Image is taller than the target aspect ratio, crop height
-        new_height = int(width / aspect_ratio)
-        start_y = (height - new_height) // 2
-        cropped_image = image[start_y:start_y + new_height, :]
-
-    return cropped_image
 ######################################################################
 ######################################################################
 
@@ -85,8 +67,6 @@ while cap.isOpened():
     if not ret:
         break
 
-    # dst_img = crop_to_aspect_ratio(dst_img, 16/9)
-
     print(f'processing {dst_img} ...')
 
     time_since_start = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
@@ -100,11 +80,11 @@ while cap.isOpened():
     calibrated_image_pose = run_model(interpreter, preprocess_image(undst_img, input_shape))
     calibrated_video_poses.append({
         'time_since_start': time_since_start,
-        'keypoints': model.format_pose(calibrated_image_pose.tolist()[0])
+        'keypoints': model.format_pose(calibrated_image_pose.tolist()[0], (w,h))
     })
     uncalibrated_video_poses.append({
         'time_since_start': time_since_start,
-        'keypoints': model.format_pose(uncalibrated_image_pose.tolist()[0])
+        'keypoints': model.format_pose(uncalibrated_image_pose.tolist()[0], (w,h))
     })
 cap.release()
 cv2.destroyAllWindows()

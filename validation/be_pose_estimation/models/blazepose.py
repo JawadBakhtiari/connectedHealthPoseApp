@@ -78,17 +78,17 @@ class Blazepose(Model):
 
 
     @staticmethod
-    def format_pose(pose: list) -> list:
+    def format_pose(pose: list, frame_dimensions: Tuple[int, int]) -> list:
         formatted_keypoints = []
         for i in range(NUM_KEYPOINTS):
             keypoint_index = i * VALS_PER_KEYPOINT
-            formatted_keypoint = BlazeposeModel.format_keypoint(pose, keypoint_index)
+            formatted_keypoint = Blazepose.format_keypoint(pose, keypoint_index, frame_dimensions)
             formatted_keypoints.append(formatted_keypoint)
         return formatted_keypoints
 
 
     @staticmethod
-    def format_keypoint(pose: list, keypoint_index: int) -> dict:
+    def format_keypoint(pose: list, keypoint_index: int, frame_dimensions: Tuple[int, int]) -> dict:
         '''
         Format keypoint data in a more readable way.
 
@@ -99,9 +99,9 @@ class Blazepose(Model):
         Returns:
             Dictionary with newly formatted keypoint data.
         '''
-        xi, yi, zi, visi, presi = BlazeposeModel.get_keypoint_value_keys(keypoint_index)
-        x = pose[xi]
-        y = pose[yi]
+        xi, yi, zi, visi, presi = Blazepose.get_keypoint_value_keys(keypoint_index)
+        x = pose[xi]/255 * frame_dimensions[0]
+        y = pose[yi]/255 * frame_dimensions[1]
         z = pose[zi]
         visibility = pose[visi]
         presence = pose[presi]
@@ -125,11 +125,6 @@ class Blazepose(Model):
             (11, 23), (24, 23), (24, 26), (23, 25), (26, 28), (25, 27), (28, 32), 
             (28, 30), (30, 32), (27, 29), (27, 31), (29, 31)
         ]
-
-
-    @staticmethod
-    def get_pixel_coordinate(keypoint: Tuple[float, float], frame_dimensions: Tuple[int, int]) -> Tuple[int, int]:
-        return (int(keypoint[0]/255 * frame_dimensions[0]), int(keypoint[1]/255 * frame_dimensions[1]))
 
 
     @staticmethod

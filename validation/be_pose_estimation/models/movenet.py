@@ -40,19 +40,16 @@ class Movenet(Model):
 
 
     @staticmethod
-    def format_pose(pose: list) -> list:
+    def format_pose(pose: list, frame_dimensions: Tuple[int, int]) -> list:
+        print(frame_dimensions)
         format_keypoint = lambda i, kp: {
             'name': KEYPOINT_MAPPINGS.get(i),
-            'x': kp[1],
-            'y': kp[0],
+            'x': int(kp[1] * frame_dimensions[0]),
+            'y': int(kp[0] * frame_dimensions[1]),
             'confidence': kp[2]
         }
         return [format_keypoint(i, kp) for i, kp in enumerate(pose[0])]
 
-
-    @staticmethod
-    def get_pixel_coordinate(keypoint: Tuple[float, float], frame_dimensions: Tuple[int, int]) -> Tuple[int, int]:
-        return (int(keypoint[0] * frame_dimensions[0]), int(keypoint[1] * frame_dimensions[1]))
 
     @staticmethod
     def joint_connections() -> list:

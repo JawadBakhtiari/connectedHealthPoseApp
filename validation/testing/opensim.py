@@ -38,7 +38,8 @@ VIS = 0.40
 filepath = 'data/opensim_ik_results/20240926/sts_result.mot'
 
 ik = pd.read_csv(filepath, delim_whitespace=True, skiprows=10)
-lab_knee_angles = [180 - a for a in ik['knee_angle_r']]
+lab_knee_angles = ik['knee_angle_r']
+# lab_knee_angles = [180 - a for a in ik['knee_angle_r']]
 
 with open('../be_pose_estimation/data/results/20240926/uncalibrated_sts_mobile_thunder.json') as f:
     poses = json.load(f)
@@ -55,7 +56,7 @@ for pose in poses:
         #     or sigmoid(knee['visibility']) < VIS or sigmoid(knee['presence']) < PRES
         #     or sigmoid(ankle['visibility']) < VIS or sigmoid(ankle['presence']) < PRES):
         #     continue
-        mobile_knee_angles.append(calc_joint_angle(hip, knee, ankle))
+        mobile_knee_angles.append(180 - calc_joint_angle(hip, knee, ankle))
     except:
         continue
 

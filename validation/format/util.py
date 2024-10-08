@@ -22,3 +22,4 @@ def get_x_y_z_suffixes(lab_keypoint: str) -> list:
   if 'Shoulder' not in lab_keypoint:
     return [X_SUFFIX, Y_SUFFIX, Z_SUFFIX]
   return [SHOULDER_X_SUFFIX, SHOULDER_Y_SUFFIX, SHOULDER_Z_SUFFIX]
+

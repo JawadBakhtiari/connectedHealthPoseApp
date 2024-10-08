@@ -1,9 +1,8 @@
 import os
-import re
 import math
 import pandas as pd
 from datetime import datetime
-from typing import Union, Tuple
+from typing import Union
 from collections import defaultdict
 from . import const
 from .util import get_x_y_z_suffixes
@@ -14,26 +13,19 @@ class LabDataFormatter:
   for comparison with mobile data. 
   '''
 
-  def __init__(self, filepath: str) -> None:
+  def __init__(
+    self,
+    filepath: str,
+    exercise_start: float | None = None,
+    exercise_end: float | None = None
+  ) -> None:
     if not os.path.exists(filepath):
       raise FileNotFoundError(f"file '{filepath}' does not exist")
     self.recording_start = LabDataFormatter.__recording_start(filepath)
+    self.exercise_start = exercise_start
+    self.exercise_end = exercise_end
     self.data = self.__preprocess(filepath)
     self.nan_keypoints = defaultdict(int)
-
-
-  def get_exercise_start_end(self) -> Tuple[float, float]:
-    '''
-    Return the start and end time of exercise capture as 13 digit posix
-    timestamps (to match formatting of mobile data timestamps).
-
-    Returns:
-      (start: float, end: float)
-    '''
-    return (
-      int((self.recording_start + self.exercise_start) * 1000),
-      int((self.recording_start + self.exercise_end) * 1000)
-    )
 
 
   @staticmethod
@@ -49,23 +41,6 @@ class LabDataFormatter:
     start_time_str = headers.columns.tolist()[const.LAB_START_TIME_INDEX]
     start_time_dt = datetime.strptime(start_time_str, const.LAB_START_TIME_FORMAT)
     return start_time_dt.timestamp()
-
-
-  @staticmethod
-  def __exercise_start_end(data: pd.DataFrame) -> Tuple[float, float]:
-    '''
-    Return the start and end time of exercise capture, in terms of the number
-    of seconds elapsed since the recording started.
-
-    Returns:
-      (start: float, end: float)
-    '''
-    sync_cols = ['Name'] + [c for c in data.columns.tolist() if re.match(const.SYNC_MARKER_NAME, c)]
-    sync_data = data[sync_cols]
-    exercise_capture_rows = sync_data.iloc[:, 1:].isna().all(axis=1)
-    start = sync_data[exercise_capture_rows].iloc[0]['Name']
-    end = sync_data[exercise_capture_rows].iloc[-1]['Name']
-    return (float(start), float(end))
 
 
   def __preprocess(self, filepath: str) -> pd.DataFrame:
@@ -87,12 +62,13 @@ class LabDataFormatter:
     rows_with_data = ~data.iloc[:, 2:].isna().all(axis=1)
     data = data[rows_with_data][position_cols].iloc[3:]
 
-    # Set start and end of exercise capture + filter out rows not in this range
-    self.exercise_start, self.exercise_end = LabDataFormatter.__exercise_start_end(data)
-    timestamps = pd.to_numeric(data['Name'])
-    exercise_mask = (timestamps > self.exercise_start) & (timestamps < self.exercise_end)
+    # filter out rows not in exercise
+    if self.exercise_start and self.exercise_end:
+        timestamps = pd.to_numeric(data['Name'])
+        exercise_mask = (timestamps > self.exercise_start) & (timestamps < self.exercise_end)
+        data = data[exercise_mask]
 
-    return data[exercise_mask] 
+    return data
 
 
   @staticmethod
@@ -194,12 +170,14 @@ class LabDataFormatter:
     '''
     poses = []
     for _, row in self.data.iterrows():
-      timestamp = LabDataFormatter.__convert_elapsed_time(row['Name'])
-      if not timestamp:
+      time_since_start = LabDataFormatter.__convert_elapsed_time(row['Name'])
+      if not time_since_start:
         continue
+      if self.exercise_start:
+        time_since_start -= self.exercise_start
 
       pose = {
-        'timestamp': int((self.recording_start + timestamp) * 1000), 
+        'time_since_start': time_since_start,
         'keypoints': []
       }
 

@@ -4,7 +4,7 @@ import json
 import cv2
 from time import sleep
 from be_pose_estimation.models.movenet_thunder import MovenetThunder as model
-from exercises.spin import Spin as Exercise
+from exercises.timed_up_and_go import TimedUpAndGo as Exercise
 
 POSE_COLOR = (0, 0, 255)
 SUCCESS_COLOR = (0, 255, 0)
@@ -16,11 +16,11 @@ TEXT_SCALE = 3
 TEXT_COLOR = (255, 255, 255)
 TEXT_THICKNESS = 3
 TEXT_LINE_TYPE = cv2.LINE_AA
-CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240926/spin.mp4')
-with open('be_pose_estimation/data/results/20240926/uncalibrated_spin_thunder.json') as f:
+CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240926/tuag.mp4')
+with open('be_pose_estimation/data/results/20240926/uncalibrated_tuag_thunder.json') as f:
     POSES = json.load(f)
 
-exercise = Exercise(2)
+exercise = Exercise()
 EXERCISE_COMPLETED_TIME = exercise.run_check(POSES)
 
 for pose in POSES:
@@ -43,7 +43,7 @@ for pose in POSES:
     else:
         cv2.putText(overlay_image, f'{time_since_start:.2f}', TIME_POS, TEXT_FONT, TEXT_SCALE, TEXT_COLOR, TEXT_THICKNESS, TEXT_LINE_TYPE)
 
-    keypoints = [model.get_pixel_coordinate((kp['x'], kp['y']), frame_dims) for kp in pose['keypoints']]
+    keypoints = [(kp['x'], kp['y']) for kp in pose['keypoints']]
 
     # Visualize the keypoints and connections
     for kp in keypoints:
