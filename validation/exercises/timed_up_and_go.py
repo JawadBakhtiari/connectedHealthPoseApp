@@ -6,9 +6,8 @@ class TimedUpAndGo(Exercise):
     MAX_KNEE_EXTENSION = 170
     MAX_KNEE_FLEXION = 90
     TARGET_STS_REPS = 1
-    def __init__(self, is_lab_data: bool = False):
+    def __init__(self):
         super().__init__()
-        self.x = 'x' if not is_lab_data else 'z'
 
 
     def run_check(self, poses: list) -> float:
@@ -17,7 +16,7 @@ class TimedUpAndGo(Exercise):
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
             try:
-                knee_flexion = self.calc_joint_angle(self.x, pose['right_ankle'], pose['right_knee'], pose['right_hip'])
+                knee_flexion = self.calc_joint_angle('x', pose['left_ankle'], pose['left_knee'], pose['left_hip'])
             except:
                 continue
             if not check_seated:

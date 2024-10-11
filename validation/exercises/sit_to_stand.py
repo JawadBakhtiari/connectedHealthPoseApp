@@ -1,4 +1,3 @@
-import math
 import operator
 from exercises.exercise import Exercise
 
