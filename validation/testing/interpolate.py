@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from io import StringIO
 
-FILENAME = 'tuag.trc'
+FILENAME = 'shoulder_taps.trc'
 IN = f'data/{FILENAME}'
 OUT = f'data/interpolated_{FILENAME}'
 

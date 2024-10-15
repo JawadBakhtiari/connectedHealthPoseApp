@@ -4,23 +4,23 @@ import json
 import cv2
 from time import sleep
 from be_pose_estimation.models.movenet_thunder import MovenetThunder as model
-from exercises.timed_up_and_go import TimedUpAndGo as Exercise
+from exercises.shoulder_taps import ShoulderTaps as Exercise
 
 POSE_COLOR = (0, 0, 255)
 SUCCESS_COLOR = (0, 255, 0)
 TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX
 TIME_POS = (20, 100)
-REPS_POS = (650, 100)
+REPS_POS = (400, 100)
 TIME_AFTER_SUCCESS_POS = (20, 200)
-TEXT_SCALE = 3
+TEXT_SCALE = 2
 TEXT_COLOR = (255, 255, 255)
 TEXT_THICKNESS = 3
 TEXT_LINE_TYPE = cv2.LINE_AA
-CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240926/tuag.mp4')
-with open('be_pose_estimation/data/results/20240926/uncalibrated_tuag_thunder.json') as f:
+CAP = cv2.VideoCapture('example_data/random/shoulder_taps_test.mp4')
+with open('example_data/random/shoulder_taps_test.json') as f:
     POSES = json.load(f)
 
-exercise = Exercise()
+exercise = Exercise(13)
 EXERCISE_COMPLETED_TIME = exercise.run_check(POSES)
 
 for pose in POSES:
