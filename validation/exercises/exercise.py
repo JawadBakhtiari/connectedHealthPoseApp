@@ -5,10 +5,11 @@ from abc import ABC, abstractmethod
 class Exercise(ABC):
     '''
     Abstract base class for exercises, outlining methods that must be
-    implemented for use in exercise detection and visualisation of this.
+    implemented for use in exercise detection and visualisation.
     '''
     def __init__(self):
         self.rep_times = []
+        self.failing_intervals = []
 
 
     @abstractmethod
@@ -49,6 +50,20 @@ class Exercise(ABC):
         angle_radians = math.acos(cos_angle)
         angle_degrees = math.degrees(angle_radians)
         return angle_degrees
+
+
+    def is_failing_interval(self, query_time: float) -> bool:
+        '''
+        Return true if query_time is withing a failing interval,
+        False otherwise.
+
+        A failing interval is defined as any point in time where
+        the given exercise was not being performed correctly.
+        '''
+        for start,end in self.failing_intervals:
+            if query_time >= start and query_time <= end:
+                return True
+        return False
 
 
     def num_reps_completed(self, query_time: float) -> int:

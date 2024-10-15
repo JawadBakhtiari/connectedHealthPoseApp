@@ -4,7 +4,7 @@ import json
 import cv2
 from time import sleep
 from be_pose_estimation.models.movenet_thunder import MovenetThunder as model
-from exercises.shoulder_taps import ShoulderTaps as Exercise
+from exercises.balance import Balance as Exercise
 
 POSE_COLOR = (0, 0, 255)
 SUCCESS_COLOR = (0, 255, 0)
@@ -20,7 +20,7 @@ CAP = cv2.VideoCapture('example_data/random/shoulder_taps_test.mp4')
 with open('example_data/random/shoulder_taps_test.json') as f:
     POSES = json.load(f)
 
-exercise = Exercise(13)
+exercise = Exercise()
 EXERCISE_COMPLETED_TIME = exercise.run_check(POSES)
 
 for pose in POSES:
