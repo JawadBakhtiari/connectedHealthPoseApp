@@ -5,14 +5,9 @@ LAB_START_TIME_INDEX = 11
 
 SYNC_MARKER_NAME = r'Sync 001:Marker.*[.][345]\b'
 
-# Painfully, shoulder joints have different suffixes
-# to all other joints.
 X_SUFFIX = '.3'
 Y_SUFFIX = '.4'
 Z_SUFFIX = '.5'
-SHOULDER_X_SUFFIX = '.4'
-SHOULDER_Y_SUFFIX = '.5'
-SHOULDER_Z_SUFFIX = '.6'
 
 LSHOULDER = 'Skeleton 001:LSHO'
 RSHOULDER = 'Skeleton 001:RSHO'

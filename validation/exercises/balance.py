@@ -9,6 +9,8 @@ class Balance(Exercise):
 
 
     def run_check(self, poses: list) -> float:
+        failed_interval_start = None
+        failed_interval_end = None
         for pose in poses:
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
@@ -19,8 +21,20 @@ class Balance(Exercise):
             rknee = pose['right_knee']
             lknee = pose['left_knee']
             try:
-                print(self.calc_joint_angle('x', rshoulder, rhip, rknee))
+                rlat_spinal_flex = self.calc_joint_angle('x', rshoulder, rhip, rknee)
+                llat_spinal_flex = self.calc_joint_angle('x', lshoulder, lhip, lknee)
+                if (rlat_spinal_flex < Balance.LAT_SPINAL_FLEX_THRESHOLD
+                    or llat_spinal_flex < Balance.LAT_SPINAL_FLEX_THRESHOLD):
+                    if failed_interval_start:
+                        failed_interval_end = time_since_start
+                    else:
+                        failed_interval_start = time_since_start
+                elif failed_interval_start:
+                    if failed_interval_end:
+                        self.failing_intervals.append((failed_interval_start, failed_interval_end))
+                        failed_interval_end = None
+                    failed_interval_start = None
             except:
                 continue
-        return 2.0
+        return poses[-1]['time_since_start'] + 1
 

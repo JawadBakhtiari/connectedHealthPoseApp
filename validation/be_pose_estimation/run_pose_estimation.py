@@ -19,11 +19,11 @@ from models.movenet_thunder import MovenetThunder as model
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-VID_NAME = 'shoulder_taps'
-VIDEO_PATH = f'data/videos/20240926/{VID_NAME}.mp4'
+VID_NAME = 'five_sts_fail'
+VIDEO_PATH = f'../example_data/random/{VID_NAME}.mp4'
 OUT_FILE_NAME = f'{VID_NAME}_thunder.json'
 CALIBRATED_OUT_FILE_PATH = f'data/results/20240926/calibrated_{OUT_FILE_NAME}'
-UNCALIBRATED_OUT_FILE_PATH = f'data/results/20240926/uncalibrated_{OUT_FILE_NAME}'
+UNCALIBRATED_OUT_FILE_PATH = f'../example_data/random/{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
 ######################################################################
 ######################################################################

@@ -16,6 +16,8 @@ class SitToStand(Exercise):
 
     def run_check(self, poses: list) -> float:
         check_seated = True
+        failed_interval_start = None
+        failed_interval_end = None
         for pose in poses:
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
@@ -25,6 +27,15 @@ class SitToStand(Exercise):
                 # Hands must be on shoulders throughout exercise, so check
                 # that hands are above hips or the rep doesn't count.
                 check_seated = True
+                if failed_interval_start:
+                    failed_interval_end = time_since_start
+                else:
+                    failed_interval_start = time_since_start
+            elif failed_interval_start:
+                if failed_interval_end:
+                    self.failing_intervals.append((failed_interval_start, failed_interval_end))
+                    failed_interval_end = None
+                failed_interval_start = None
             knee_flexion = self.calc_joint_angle(self.x, pose['right_ankle'], pose['right_knee'], pose['right_hip'])
             if check_seated:
                 if knee_flexion <= SitToStand.MAX_KNEE_FLEXION:

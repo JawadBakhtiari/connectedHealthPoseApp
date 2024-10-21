@@ -1,3 +1,4 @@
+import operator
 from exercises.exercise import Exercise
 
 class Walk(Exercise):
@@ -6,36 +7,29 @@ class Walk(Exercise):
     a given ending position has been completed.
     '''
     REQUIRED_MATCHING_FRAMES = 3
-    FRAME_WIDTH = 1080
 
-    def __init__(self, start_x: int, end_x: int):
+    def __init__(self, end: int, is_lab_data: bool = False):
         '''
         Args:
-            start_x: pixel value for where the walk starts on the x axis.
-            end_x: pixel value for where the walk ends on the x axis.
+            end: value for where the walk ends on the relevant axis.
         '''
         super().__init__()
-
-        # Normalise pixel values for use with movenet thunder model
-        self.start_x = start_x / Walk.FRAME_WIDTH
-        self.end_x = end_x / Walk.FRAME_WIDTH
-
-
-    def cmp(self, x1: float, x2: float):
-        if self.end_x < self.start_x:
-            return x1 < self.end_x and x2 < self.end_x
-        else:
-            return x1 > self.end_x and x2 > self.end_x
-
+        self.end = end
+        self.y = 'y' if not is_lab_data else 'x'
+        self.is_lab_data = is_lab_data
+        self.height_comparator = operator.gt if not is_lab_data else operator.le
 
     def run_check(self, poses: list) -> float:
         matching_frames = 0
+        if self.is_lab_data:
+            pose = {kp['name']: kp for kp in poses[0]['keypoints']}
+            self.end = pose['left_ankle'][self.y] - self.end
         for pose in poses:
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
-            left_hip_x = pose['left_hip']['x']
-            right_hip_x = pose['right_hip']['x']
-            if self.cmp(left_hip_x, right_hip_x):
+            left_ankle_y = pose['left_ankle'][self.y]
+            right_ankle_y = pose['right_ankle'][self.y]
+            if self.height_comparator(left_ankle_y, self.end) and self.height_comparator(right_ankle_y, self.end):
                 matching_frames += 1
             else:
                 matching_frames = 0

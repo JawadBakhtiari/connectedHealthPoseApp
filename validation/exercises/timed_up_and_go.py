@@ -1,16 +1,19 @@
 from exercises.exercise import Exercise
+from exercises.walk import Walk
 
 class TimedUpAndGo(Exercise):
     '''
     '''
     MAX_KNEE_EXTENSION = 170
-    MAX_KNEE_FLEXION = 90
-    TARGET_STS_REPS = 1
-    def __init__(self):
+    MAX_KNEE_FLEXION = 80
+    def __init__(self, walk_distance: int, is_lab_data: bool = False):
         super().__init__()
+        self.walk = Walk(walk_distance)
 
 
     def run_check(self, poses: list) -> float:
+        self.walk.run_check(poses)
+        self.rep_times = self.walk.rep_times
         check_seated = False
         for pose in poses:
             time_since_start = pose['time_since_start']
@@ -25,7 +28,6 @@ class TimedUpAndGo(Exercise):
             elif knee_flexion <= TimedUpAndGo.MAX_KNEE_FLEXION:
                     check_seated = False
                     self.rep_times.append(time_since_start)
-                    if len(self.rep_times) == TimedUpAndGo.TARGET_STS_REPS:
-                        return time_since_start
+                    return time_since_start
         return poses[-1]['time_since_start'] + 1
 

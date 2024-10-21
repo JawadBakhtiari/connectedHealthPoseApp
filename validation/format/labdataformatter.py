@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Union
 from collections import defaultdict
 from . import const
-from .util import get_x_y_z_suffixes
 
 class LabDataFormatter:
   '''
@@ -106,10 +105,9 @@ class LabDataFormatter:
     Raises:
       Value error if x, y or z for given keypoint in given row are nan.
     '''
-    x_suffix, y_suffix, z_suffix = get_x_y_z_suffixes(lab_keypoint)
-    x = float(row[lab_keypoint + x_suffix])
-    y = float(row[lab_keypoint + y_suffix])
-    z = float(row[lab_keypoint + z_suffix])
+    x = float(row[lab_keypoint + const.X_SUFFIX])
+    y = float(row[lab_keypoint + const.Y_SUFFIX])
+    z = float(row[lab_keypoint + const.Z_SUFFIX])
 
     if math.isnan(x) or math.isnan(y) or math.isnan(z):
       raise ValueError(f'x: {x}, y: {y} or z: {z} value is not a number for keypoint {lab_keypoint}')
