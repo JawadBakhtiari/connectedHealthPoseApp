@@ -11,8 +11,8 @@ with open(lab_version) as f:
 with open(mobile_version) as f:
     mobile_poses = json.load(f)
 
-lab_exercise = Exercise()
-mobile_exercise = Exercise()
+lab_exercise = Exercise(2470, True)
+mobile_exercise = Exercise(1150)
 
 print(f'lab data    -> completed in {lab_exercise.run_check(lab_poses):.2f} seconds')
 print(f'mobile data -> completed in {mobile_exercise.run_check(mobile_poses):.2f} seconds')

@@ -5,10 +5,12 @@ class TimedUpAndGo(Exercise):
     '''
     '''
     MAX_KNEE_EXTENSION = 170
-    MAX_KNEE_FLEXION = 80
+    MOBILE_MAX_KNEE_FLEXION = 80
+    LAB_MAX_KNEE_FLEXION = 110
     def __init__(self, walk_distance: int, is_lab_data: bool = False):
         super().__init__()
         self.walk = Walk(walk_distance)
+        self.max_knee_flexion = TimedUpAndGo.LAB_MAX_KNEE_FLEXION if is_lab_data else TimedUpAndGo.MOBILE_MAX_KNEE_FLEXION
 
 
     def run_check(self, poses: list) -> float:
@@ -19,13 +21,14 @@ class TimedUpAndGo(Exercise):
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
             try:
-                knee_flexion = self.calc_joint_angle('x', pose['left_ankle'], pose['left_knee'], pose['left_hip'])
+                knee_flexion = self.calc_joint_angle('x', pose['right_ankle'], pose['right_knee'], pose['right_hip'])
+                # print(knee_flexion)
             except:
                 continue
             if not check_seated:
                 if knee_flexion >= TimedUpAndGo.MAX_KNEE_EXTENSION:
                     check_seated = True
-            elif knee_flexion <= TimedUpAndGo.MAX_KNEE_FLEXION:
+            elif knee_flexion <= self.max_knee_flexion:
                     check_seated = False
                     self.rep_times.append(time_since_start)
                     return time_since_start
