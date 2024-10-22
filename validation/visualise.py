@@ -4,7 +4,7 @@ import json
 import cv2
 from time import sleep
 from be_pose_estimation.models.movenet_thunder import MovenetThunder as model
-from exercises.timed_up_and_go import TimedUpAndGo as Exercise
+from exercises.tandem_stand import TandemStand as Exercise
 
 POSE_COLOR = (0, 165, 255)
 SUCCESS_COLOR = (0, 255, 0)
@@ -17,11 +17,11 @@ TEXT_SCALE = 2
 TEXT_COLOR = (255, 255, 255)
 TEXT_THICKNESS = 3
 TEXT_LINE_TYPE = cv2.LINE_AA
-CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240926/tuag.mp4')
-with open('be_pose_estimation/data/results/20240926/uncalibrated_tuag_thunder.json') as f:
+CAP = cv2.VideoCapture('be_pose_estimation/data/videos/20240926/sbta.mp4')
+with open('be_pose_estimation/data/results/20240926/uncalibrated_sbta_thunder.json') as f:
     POSES = json.load(f)
 
-exercise = Exercise(1150)
+exercise = Exercise()
 EXERCISE_COMPLETED_TIME = exercise.run_check(POSES)
 
 for pose in POSES:

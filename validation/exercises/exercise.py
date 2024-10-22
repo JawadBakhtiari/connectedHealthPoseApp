@@ -66,6 +66,10 @@ class Exercise(ABC):
         return False
 
 
+    def get_failing_intervals(self) -> list:
+        return self.failing_intervals
+
+
     def num_reps_completed(self, query_time: float) -> int:
         '''
         Return the number of reps of this exercise that have been completed
