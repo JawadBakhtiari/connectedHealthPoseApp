@@ -3,8 +3,8 @@ from exercises.exercise import Exercise
 class Balance(Exercise):
     '''
     '''
-    # LAT_SPINAL_FLEX_THRESHOLD = 160
-    LAT_SPINAL_FLEX_THRESHOLD = 170
+    LAT_SPINAL_FLEX_THRESHOLD = 160
+    # LAT_SPINAL_FLEX_THRESHOLD = 170
     def __init__(self):
         super().__init__()
 
