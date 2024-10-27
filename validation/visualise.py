@@ -4,7 +4,7 @@ import json
 import cv2
 from time import sleep
 from be_pose_estimation.models.movenet_thunder import MovenetThunder as model
-from exercises.tandem_stand import TandemStand as Exercise
+from exercises.bent_over_rows import BentOverRows as Exercise
 
 POSE_COLOR = (0, 165, 255)
 SUCCESS_COLOR = (0, 255, 0)
@@ -17,11 +17,11 @@ TEXT_SCALE = 2
 TEXT_COLOR = (255, 255, 255)
 TEXT_THICKNESS = 3
 TEXT_LINE_TYPE = cv2.LINE_AA
-CAP = cv2.VideoCapture('example_data/random/tandem_stand_balance.mp4')
-with open('example_data/random/tandem_stand_balance_thunder.json') as f:
+CAP = cv2.VideoCapture('example_data/random/bent_over_rows_test.mp4')
+with open('example_data/random/bent_over_rows_test_thunder.json') as f:
     POSES = json.load(f)
 
-exercise = Exercise()
+exercise = Exercise(10)
 EXERCISE_COMPLETED_TIME = exercise.run_check(POSES)
 
 for pose in POSES:

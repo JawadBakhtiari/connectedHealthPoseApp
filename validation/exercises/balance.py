@@ -24,7 +24,6 @@ class Balance(Exercise):
             try:
                 rlat_spinal_flex = self.calc_joint_angle('x', rshoulder, rhip, rknee)
                 llat_spinal_flex = self.calc_joint_angle('x', lshoulder, lhip, lknee)
-                print(rlat_spinal_flex, llat_spinal_flex)
                 if (rlat_spinal_flex < Balance.LAT_SPINAL_FLEX_THRESHOLD
                     or llat_spinal_flex < Balance.LAT_SPINAL_FLEX_THRESHOLD):
                     if failed_interval_start:

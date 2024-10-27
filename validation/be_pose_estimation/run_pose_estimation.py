@@ -20,11 +20,11 @@ from models.movenet_thunder import MovenetThunder as model
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-VID_NAME = 'tandem_walk'
-VIDEO_PATH = f'data/videos/20241023/{VID_NAME}.mp4'
+VID_NAME = 'bent_over_rows_test'
+VIDEO_PATH = f'../example_data/random/{VID_NAME}.mp4'
 OUT_FILE_NAME = f'{VID_NAME}_thunder.json'
 CALIBRATED_OUT_FILE_PATH = f'data/results/20241023/calibrated_{OUT_FILE_NAME}'
-UNCALIBRATED_OUT_FILE_PATH = f'data/results/20241023/{OUT_FILE_NAME}'
+UNCALIBRATED_OUT_FILE_PATH = f'../example_data/random/{OUT_FILE_NAME}'
 CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
 ######################################################################
 ######################################################################
