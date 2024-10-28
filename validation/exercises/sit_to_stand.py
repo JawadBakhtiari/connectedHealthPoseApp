@@ -1,3 +1,4 @@
+from enum import Enum
 import operator
 from exercises.exercise import Exercise
 
@@ -12,10 +13,15 @@ class SitToStand(Exercise):
         self.target_reps = target_reps
         self.height_comparator = operator.gt if not is_lab_data else operator.lt
         self.x = 'x' if not is_lab_data else 'z'
+        self.stage = SitToStand.Stage.STANDING
+
+
+    class Stage(Enum):
+        SEATED = 1
+        STANDING = 2
 
 
     def run_check(self, poses: list) -> float:
-        check_seated = True
         failed_interval_start = None
         failed_interval_end = None
         for pose in poses:
@@ -26,7 +32,7 @@ class SitToStand(Exercise):
             if (self.height_comparator(wrist_height, hip_height)):
                 # Hands must be on shoulders throughout exercise, so check
                 # that hands are above hips or the rep doesn't count.
-                check_seated = True
+                self.stage = SitToStand.Stage.STANDING
                 if failed_interval_start:
                     failed_interval_end = time_since_start
                 else:
@@ -37,11 +43,10 @@ class SitToStand(Exercise):
                     failed_interval_end = None
                 failed_interval_start = None
             knee_flexion = self.calc_joint_angle(self.x, pose['right_ankle'], pose['right_knee'], pose['right_hip'])
-            if check_seated:
-                if knee_flexion <= SitToStand.MAX_KNEE_FLEXION:
-                    check_seated = False
-            elif knee_flexion >= SitToStand.MAX_KNEE_EXTENSION:
-                check_seated = True
+            if self.stage == SitToStand.Stage.STANDING and knee_flexion <= SitToStand.MAX_KNEE_FLEXION:
+               self.stage = SitToStand.Stage.SEATED
+            elif self.stage == SitToStand.Stage.SEATED and knee_flexion >= SitToStand.MAX_KNEE_EXTENSION:
+                self.stage = SitToStand.Stage.STANDING
                 self.rep_times.append(time_since_start)
                 if len(self.rep_times) == self.target_reps:
                     return time_since_start
