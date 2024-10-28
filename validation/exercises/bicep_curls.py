@@ -51,7 +51,6 @@ class BicepCurls(Exercise):
                 if num_consecutive == BicepCurls.REQUIRED_CONSECUTIVE:
                     self.stage = BicepCurls.Stage.EXTENDING
                     self.rep_times.append(time_since_start)
-                    print(time_since_start)
                     if len(self.rep_times) == self.target_reps:
                         return time_since_start
                     num_consecutive = 0

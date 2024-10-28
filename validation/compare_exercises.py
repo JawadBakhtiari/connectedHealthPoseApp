@@ -3,19 +3,19 @@
 import matplotlib.pyplot as plt
 import sys
 import json
-from exercises.bicep_curls import BicepCurls as Exercise
+from exercises.side_bend import SideBend as Exercise
 
 show_error_graph = '-e' in sys.argv
-lab_version = 'example_data/20241023/bicep_curls.json'
-mobile_version = 'be_pose_estimation/data/results/20241023/bicep_curls_thunder.json'
+lab_version = 'example_data/20241023/side_bend.json'
+mobile_version = 'be_pose_estimation/data/results/20241023/side_bend_thunder.json'
 
 with open(lab_version) as f:
     lab_poses = json.load(f)
 with open(mobile_version) as f:
     mobile_poses = json.load(f)
 
-lab_exercise = Exercise(8, True)
-mobile_exercise = Exercise(8)
+lab_exercise = Exercise(14, True)
+mobile_exercise = Exercise(14)
 
 lab_finish_time = lab_exercise.run_check(lab_poses)
 mobile_finish_time = mobile_exercise.run_check(mobile_poses)
