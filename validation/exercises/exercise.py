@@ -10,6 +10,8 @@ class Exercise(ABC):
     def __init__(self):
         self.rep_times = []
         self.failing_intervals = []
+        self.failed_interval_start = None
+        self.failed_interval_end = None
 
 
     @abstractmethod
@@ -68,6 +70,29 @@ class Exercise(ABC):
 
     def get_failing_intervals(self) -> list:
         return self.failing_intervals
+
+
+    def handle_failed_interval(self, failing: bool, time_since_start: int) -> None:
+        '''
+        Store the start and end times of a failing interval for an exercise
+        and append this to the list of failing intervals when this interval
+        has ended.
+
+        Args:
+            failing:            whether or not the exercise is being failed at
+                                the current point in time.
+            time_since_start:   time since the exercise began, as a posix timestamp.
+        '''
+        if failing:
+            if self.failed_interval_start:
+                self.failed_interval_end = time_since_start
+            else:
+                self.failed_interval_start = time_since_start
+        elif self.failed_interval_start:
+            if self.failed_interval_end:
+                self.failing_intervals.append((self.failed_interval_start, self.failed_interval_end))
+                self.failed_interval_end = None
+            self.failed_interval_start = None
 
 
     def num_reps_completed(self, query_time: float) -> int:

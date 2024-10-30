@@ -3,6 +3,9 @@ from exercises.exercise import Exercise
 
 class BicepCurls(Exercise):
     '''
+    Identify repetitions of bicep curls.
+
+    Also identifies excessive shoulder flexion as poor form.
     '''
     MAX_ELBOW_EXTENSION = 140
     MAX_ELBOW_FLEXION = 65
@@ -23,28 +26,19 @@ class BicepCurls(Exercise):
 
     def run_check(self, poses: list) -> float:
         num_consecutive = 0
-        failing = False
-        failed_interval_start = None
-        failed_interval_end = None
         for pose in poses:
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
             elbow_flexion = self.calc_joint_angle(self.x, pose['right_wrist'], pose['right_elbow'], pose['right_shoulder'])
             shoulder_flexion = self.calc_joint_angle(self.x, pose['right_elbow'], pose['right_shoulder'], pose['right_hip'])
-            if shoulder_flexion >= BicepCurls.MAX_SHOULDER_FLEXION and shoulder_flexion <= BicepCurls.SHOULDER_FLEXION_CEILING:
-                failing = True
+
+            shoulder_too_flexed = (
+                shoulder_flexion >= BicepCurls.MAX_SHOULDER_FLEXION
+                and shoulder_flexion <= BicepCurls.SHOULDER_FLEXION_CEILING
+            )
+            self.handle_failed_interval(shoulder_too_flexed, time_since_start)
+            if shoulder_too_flexed:
                 self.stage = BicepCurls.Stage.EXTENDING
-                if not failed_interval_start:
-                    failed_interval_start = time_since_start
-                else:
-                    failed_interval_end = time_since_start
-                continue
-            else:
-                failing = False
-            if not failing and failed_interval_end:
-                self.failing_intervals.append((failed_interval_start, failed_interval_end))
-                failed_interval_start = None
-                failed_interval_end = None
 
             if self.stage == BicepCurls.Stage.FLEXING and elbow_flexion <= BicepCurls.MAX_ELBOW_FLEXION:
                 num_consecutive += 1

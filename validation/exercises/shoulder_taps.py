@@ -4,6 +4,10 @@ from exercises.balance import Balance
 
 class ShoulderTaps(Exercise):
     '''
+    Detect repetitions of the shoulder taps exercise.
+
+    Also detects whether the patient is too off balance while
+    performing this exercise.
     '''
     MOBILE_X_THRESHOLD = 120
     MOBILE_Y_THRESHOLD = 100

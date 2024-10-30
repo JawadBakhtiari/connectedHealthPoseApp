@@ -3,6 +3,8 @@ from exercises.walk import Walk
 
 class TimedUpAndGo(Exercise):
     '''
+    Detect key features of the timed up and go exercise, these being
+    when the walk is completed and when the patient sits back down.
     '''
     MAX_KNEE_EXTENSION = 170
     MOBILE_MAX_KNEE_FLEXION = 80
@@ -22,7 +24,6 @@ class TimedUpAndGo(Exercise):
             pose = {kp['name']: kp for kp in pose['keypoints']}
             try:
                 knee_flexion = self.calc_joint_angle('x', pose['right_ankle'], pose['right_knee'], pose['right_hip'])
-                # print(knee_flexion)
             except:
                 continue
             if not check_seated:
