@@ -28,8 +28,11 @@ class BentOverRows(Exercise):
         for pose in poses:
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
-            elbow_flexion = self.calc_joint_angle('x', pose['left_wrist'], pose['left_elbow'], pose['left_shoulder'])
-            hip_flexion = self.calc_joint_angle('x', pose['left_shoulder'], pose['left_hip'], pose['left_knee'])
+            try:
+                elbow_flexion = self.calc_joint_angle('x', pose['left_wrist'], pose['left_elbow'], pose['left_shoulder'])
+                hip_flexion = self.calc_joint_angle('x', pose['left_shoulder'], pose['left_hip'], pose['left_knee'])
+            except:
+                continue
 
             hips_not_flexed_enough = hip_flexion >= BentOverRows.MAX_HIP_EXTENSION
             self.handle_failed_interval(hips_not_flexed_enough, time_since_start)

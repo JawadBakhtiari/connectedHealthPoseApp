@@ -100,9 +100,9 @@ class Blazepose(Model):
             Dictionary with newly formatted keypoint data.
         '''
         xi, yi, zi, visi, presi = Blazepose.get_keypoint_value_keys(keypoint_index)
-        x = pose[xi]/255 * frame_dimensions[0]
-        y = pose[yi]/255 * frame_dimensions[1]
-        z = pose[zi]
+        x = int(pose[xi]/255 * frame_dimensions[0])
+        y = int(pose[yi]/255 * frame_dimensions[1])
+        z = int(pose[zi])
         visibility = pose[visi]
         presence = pose[presi]
 
