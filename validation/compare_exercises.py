@@ -3,25 +3,30 @@
 import matplotlib.pyplot as plt
 import sys
 import json
-from exercises.side_bend import SideBend as Exercise
+from exercises.dartboard import Dartboard as Exercise
 
 show_error_graph = '-e' in sys.argv
-lab_version = 'example_data/20241023/side_bend.json'
-mobile_version = 'be_pose_estimation/data/results/20241023/side_bend_thunder.json'
+lab_version = 'example_data/20241023/dartboard.json'
+mobile_version = 'be_pose_estimation/data/results/20241023/dartboard_thunder.json'
 
 with open(lab_version) as f:
     lab_poses = json.load(f)
 with open(mobile_version) as f:
     mobile_poses = json.load(f)
 
-lab_exercise = Exercise(14, True)
-mobile_exercise = Exercise(14)
+lab_exercise = Exercise(1, True)
+mobile_exercise = Exercise(1)
 
 lab_finish_time = lab_exercise.run_check(lab_poses)
 mobile_finish_time = mobile_exercise.run_check(mobile_poses)
 
 print(f'lab data    -> completed in {lab_finish_time:.2f} seconds')
+print(f'lab data    -> rep times: {lab_exercise.rep_times}')
+print(f'lab data    -> failed intervals: {len(lab_exercise.get_failing_intervals())}')
+print()
 print(f'mobile data -> completed in {mobile_finish_time:.2f} seconds')
+print(f'mobile data -> rep times: {mobile_exercise.rep_times}')
+print(f'mobile data -> failed intervals: {len(mobile_exercise.get_failing_intervals())}')
 
 if show_error_graph:
     fig, ax = plt.subplots()

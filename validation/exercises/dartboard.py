@@ -8,17 +8,29 @@ class Dartboard(Exercise):
     Also tracks being too off balance as poor form.
     Currently does nothing to identify mis-steps.
     '''
-    LAT_SPINAL_FLEX_THRESHOLD = 160
-    Y_TARGET_CHANGE_BACKWARD = 25
-    Y_TARGET_CHANGE_FORWARD = 55
-    X_TARGET_CHANGE = 200
-    FEET_TOGETHER_THRESHOLD = 30
+    LAT_SPINAL_FLEX_THRESHOLD_MOBILE = 160
+    LAT_SPINAL_FLEX_THRESHOLD_LAB = 142
+    Y_TARGET_CHANGE_BACKWARD_MOBILE = 25
+    Y_TARGET_CHANGE_FORWARD_MOBILE = 55
+    Y_TARGET_CHANGE_LAB = 400
+    X_TARGET_CHANGE_MOBILE = 200
+    X_TARGET_CHANGE_LAB = 400
+    FEET_TOGETHER_THRESHOLD_MOBILE = 30
+    FEET_TOGETHER_THRESHOLD_LAB = 60
     REQUIRED_CONSECUTIVE_FRAMES = 3
-    def __init__(self, target_reps: int):
+    def __init__(self, target_reps: int, is_lab_data: bool = False):
         super().__init__()
         self.goal = Dartboard.Goal.RIGHT_FORWARD
         self.stage = Dartboard.Stage.AWAY
+        self.is_lab_data = is_lab_data
         self.target_reps = target_reps * len(Dartboard.Goal)
+        self.x = 'z' if is_lab_data else 'x'
+        self.y = 'x' if is_lab_data else 'y'
+        self.y_target_change_forward =  Dartboard.Y_TARGET_CHANGE_LAB if is_lab_data else Dartboard.Y_TARGET_CHANGE_FORWARD_MOBILE
+        self.y_target_change_backward =  Dartboard.Y_TARGET_CHANGE_LAB if is_lab_data else Dartboard.Y_TARGET_CHANGE_BACKWARD_MOBILE
+        self.x_target_change = Dartboard.X_TARGET_CHANGE_LAB if is_lab_data else Dartboard.X_TARGET_CHANGE_MOBILE
+        self.lat_spinal_flex_threshold = Dartboard.LAT_SPINAL_FLEX_THRESHOLD_LAB if is_lab_data else Dartboard.LAT_SPINAL_FLEX_THRESHOLD_MOBILE
+        self.feet_together_threshold = Dartboard.FEET_TOGETHER_THRESHOLD_LAB if is_lab_data else Dartboard.FEET_TOGETHER_THRESHOLD_MOBILE
 
 
     class Goal(Enum):
@@ -52,36 +64,40 @@ class Dartboard(Exercise):
 
     def set_initial_values(self, pose: dict) -> None:
         initial_pose = {kp['name']: kp for kp in pose['keypoints']}
-        self.left_ankle_start_y = initial_pose['left_ankle']['y']
-        self.left_ankle_start_x = initial_pose['left_ankle']['x']
-        self.right_ankle_start_y = initial_pose['right_ankle']['y']
-        self.right_ankle_start_x = initial_pose['right_ankle']['x']
+        self.left_ankle_start_y = initial_pose['left_ankle'][self.y]
+        self.left_ankle_start_x = initial_pose['left_ankle'][self.x]
+        self.right_ankle_start_y = initial_pose['right_ankle'][self.y]
+        self.right_ankle_start_x = initial_pose['right_ankle'][self.x]
+
+
+    def get_diff(self, a: float, b: float) -> float:
+        return b - a if self.is_lab_data else a - b
 
 
     def stepped_correctly(self, pose: dict) -> bool:
         if self.goal == Dartboard.Goal.RIGHT_FORWARD:
-            right_ankle_y = pose['right_ankle']['y']
-            if right_ankle_y - self.right_ankle_start_y > Dartboard.Y_TARGET_CHANGE_FORWARD:
+            right_ankle_y = pose['right_ankle'][self.y]
+            if self.get_diff(right_ankle_y, self.right_ankle_start_y) > self.y_target_change_forward:
                 return True
         elif self.goal == Dartboard.Goal.RIGHT_SIDE:
-            right_ankle_x = pose['right_ankle']['x']
-            if self.right_ankle_start_x - right_ankle_x > Dartboard.X_TARGET_CHANGE:
+            right_ankle_x = pose['right_ankle'][self.x]
+            if self.right_ankle_start_x - right_ankle_x > self.x_target_change:
                 return True
         elif self.goal == Dartboard.Goal.RIGHT_BACK:
-            right_ankle_y = pose['right_ankle']['y']
-            if self.right_ankle_start_y - right_ankle_y > Dartboard.Y_TARGET_CHANGE_BACKWARD:
+            right_ankle_y = pose['right_ankle'][self.y]
+            if self.get_diff(self.right_ankle_start_y, right_ankle_y) > self.y_target_change_backward:
                 return True
         elif self.goal == Dartboard.Goal.LEFT_FORWARD:
-            left_ankle_y = pose['left_ankle']['y']
-            if left_ankle_y - self.left_ankle_start_y > Dartboard.Y_TARGET_CHANGE_FORWARD:
+            left_ankle_y = pose['left_ankle'][self.y]
+            if self.get_diff(left_ankle_y, self.left_ankle_start_y) > self.y_target_change_forward:
                 return True
         elif self.goal == Dartboard.Goal.LEFT_SIDE:
-            left_ankle_x = pose['left_ankle']['x']
-            if left_ankle_x - self.left_ankle_start_x > Dartboard.X_TARGET_CHANGE:
+            left_ankle_x = pose['left_ankle'][self.x]
+            if left_ankle_x - self.left_ankle_start_x > self.x_target_change:
                 return True
         elif self.goal == Dartboard.Goal.LEFT_BACK:
-            left_ankle_y = pose['left_ankle']['y']
-            if self.left_ankle_start_y - left_ankle_y > Dartboard.Y_TARGET_CHANGE_BACKWARD:
+            left_ankle_y = pose['left_ankle'][self.y]
+            if self.get_diff(self.left_ankle_start_y, left_ankle_y) > self.y_target_change_backward:
                 return True
         return False
 
@@ -93,25 +109,26 @@ class Dartboard(Exercise):
         lhip = pose['left_hip']
         rknee = pose['right_knee']
         lknee = pose['left_knee']
-        rlat_spinal_flex = self.calc_joint_angle('x', rshoulder, rhip, rknee)
-        llat_spinal_flex = self.calc_joint_angle('x', lshoulder, lhip, lknee)
+        rlat_spinal_flex = self.calc_joint_angle(self.x, rshoulder, rhip, rknee)
+        llat_spinal_flex = self.calc_joint_angle(self.x, lshoulder, lhip, lknee)
         if (self.goal == Dartboard.Goal.LEFT_SIDE
             or self.goal == Dartboard.Goal.RIGHT_SIDE):
             return False
         else:
-            return (rlat_spinal_flex < Dartboard.LAT_SPINAL_FLEX_THRESHOLD
-                    or llat_spinal_flex < Dartboard.LAT_SPINAL_FLEX_THRESHOLD)
+            return (rlat_spinal_flex < self.lat_spinal_flex_threshold
+                    or llat_spinal_flex < self.lat_spinal_flex_threshold)
 
 
     def feet_together(self, pose: dict) -> bool:
-        left_ankle_x = pose['left_ankle']['x']
-        left_ankle_y = pose['left_ankle']['y']
-        right_ankle_x = pose['right_ankle']['x']
-        right_ankle_y = pose['right_ankle']['y']
-        if (abs(left_ankle_x - self.left_ankle_start_x) <= Dartboard.FEET_TOGETHER_THRESHOLD
-            and abs(left_ankle_y - self.left_ankle_start_y) <= Dartboard.FEET_TOGETHER_THRESHOLD
-            and abs(right_ankle_x - self.right_ankle_start_x) <= Dartboard.FEET_TOGETHER_THRESHOLD
-            and abs(right_ankle_y - self.right_ankle_start_y) <= Dartboard.FEET_TOGETHER_THRESHOLD):
+        left_ankle_x = pose['left_ankle'][self.x]
+        left_ankle_y = pose['left_ankle'][self.y]
+        right_ankle_x = pose['right_ankle'][self.x]
+        right_ankle_y = pose['right_ankle'][self.y]
+        if (abs(left_ankle_x - self.left_ankle_start_x) <= self.feet_together_threshold
+            and abs(left_ankle_y - self.left_ankle_start_y) <= self.feet_together_threshold
+            and abs(right_ankle_x - self.right_ankle_start_x) <= self.feet_together_threshold
+            and abs(right_ankle_y - self.right_ankle_start_y) <= self.feet_together_threshold
+            ):
             return True
         return False
 
