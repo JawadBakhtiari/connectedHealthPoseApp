@@ -102,21 +102,11 @@ class Dartboard(Exercise):
         return False
 
 
-    def is_off_balance(self, pose: dict) -> bool:
-        rshoulder = pose['right_shoulder']
-        lshoulder = pose['left_shoulder']
-        rhip = pose['right_hip']
-        lhip = pose['left_hip']
-        rknee = pose['right_knee']
-        lknee = pose['left_knee']
-        rlat_spinal_flex = self.calc_joint_angle(self.x, rshoulder, rhip, rknee)
-        llat_spinal_flex = self.calc_joint_angle(self.x, lshoulder, lhip, lknee)
+    def is_off_balance(self, pose: dict, x: str = 'x', lat_spinal_flex_threshold: int = LAT_SPINAL_FLEX_THRESHOLD_MOBILE) -> bool:
         if (self.goal == Dartboard.Goal.LEFT_SIDE
             or self.goal == Dartboard.Goal.RIGHT_SIDE):
             return False
-        else:
-            return (rlat_spinal_flex < self.lat_spinal_flex_threshold
-                    or llat_spinal_flex < self.lat_spinal_flex_threshold)
+        return super().is_off_balance(pose, x, lat_spinal_flex_threshold)
 
 
     def feet_together(self, pose: dict) -> bool:
@@ -145,7 +135,7 @@ class Dartboard(Exercise):
                     self.stage = Dartboard.Stage.AWAY
                 continue
 
-            is_off_balance = self.is_off_balance(pose)
+            is_off_balance = self.is_off_balance(pose, self.x, self.lat_spinal_flex_threshold)
             self.handle_failed_interval(is_off_balance, time_since_start)
             if is_off_balance:
                 continue

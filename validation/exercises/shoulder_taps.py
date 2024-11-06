@@ -1,6 +1,5 @@
 from enum import Enum
 from exercises.exercise import Exercise
-from exercises.balance import Balance
 
 class ShoulderTaps(Exercise):
     '''
@@ -23,7 +22,6 @@ class ShoulderTaps(Exercise):
 
     def __init__(self, target_reps: int, is_lab_data: bool = False):
         super().__init__()
-        self.balance = Balance()
         self.target_reps = target_reps
         self.stage = ShoulderTaps.Stage.PENDING
         if is_lab_data:
@@ -34,39 +32,46 @@ class ShoulderTaps(Exercise):
             self.y_threshold = ShoulderTaps.MOBILE_Y_THRESHOLD
 
 
+    def check_rep(self, pose: dict, time_since_start) -> None:
+        rshoulder_x = pose['right_shoulder']['x']
+        rshoulder_y = pose['right_shoulder']['y']
+        lshoulder_x = pose['left_shoulder']['x']
+        lshoulder_y = pose['left_shoulder']['y']
+        rwrist_x = pose['right_wrist']['x']
+        rwrist_y = pose['right_wrist']['y']
+        lwrist_x = pose['left_wrist']['x']
+        lwrist_y = pose['left_wrist']['y']
+
+        if self.stage == ShoulderTaps.Stage.PENDING:
+            if (abs(lshoulder_x - rwrist_x) < self.x_threshold
+                and abs(lshoulder_y - rwrist_y) < self.y_threshold):
+                self.stage = ShoulderTaps.Stage.LSHOULDER_TAPPED
+                self.rep_times.append(time_since_start)
+            elif (abs(rshoulder_x - lwrist_x) < self.x_threshold
+                and abs(rshoulder_y - lwrist_y) < self.y_threshold):
+                self.stage = ShoulderTaps.Stage.RSHOULDER_TAPPED
+                self.rep_times.append(time_since_start)
+        elif self.stage == ShoulderTaps.Stage.LSHOULDER_TAPPED:
+            if (abs(lshoulder_x - rwrist_x) > self.x_threshold
+                or abs(lshoulder_y - rwrist_y) > self.y_threshold):
+                self.stage = ShoulderTaps.Stage.PENDING
+        elif self.stage == ShoulderTaps.Stage.RSHOULDER_TAPPED:
+            if (abs(rshoulder_x - lwrist_x) > self.x_threshold
+                or abs(rshoulder_y - lwrist_y) > self.y_threshold):
+                self.stage = ShoulderTaps.Stage.PENDING
+
+
     def run_check(self, poses: list) -> float:
-        self.balance.run_check(poses)
-        self.failing_intervals = self.balance.failing_intervals
         for pose in poses:
             time_since_start = pose['time_since_start']
             pose = {kp['name']: kp for kp in pose['keypoints']}
-            rshoulder_x = pose['right_shoulder']['x']
-            rshoulder_y = pose['right_shoulder']['y']
-            lshoulder_x = pose['left_shoulder']['x']
-            lshoulder_y = pose['left_shoulder']['y']
-            rwrist_x = pose['right_wrist']['x']
-            rwrist_y = pose['right_wrist']['y']
-            lwrist_x = pose['left_wrist']['x']
-            lwrist_y = pose['left_wrist']['y']
 
-            if self.stage == ShoulderTaps.Stage.PENDING:
-                if (abs(lshoulder_x - rwrist_x) < self.x_threshold
-                    and abs(lshoulder_y - rwrist_y) < self.y_threshold):
-                    self.stage = ShoulderTaps.Stage.LSHOULDER_TAPPED
-                    self.rep_times.append(time_since_start)
-                elif (abs(rshoulder_x - lwrist_x) < self.x_threshold
-                    and abs(rshoulder_y - lwrist_y) < self.y_threshold):
-                    self.stage = ShoulderTaps.Stage.RSHOULDER_TAPPED
-                    self.rep_times.append(time_since_start)
-            elif self.stage == ShoulderTaps.Stage.LSHOULDER_TAPPED:
-                if (abs(lshoulder_x - rwrist_x) > self.x_threshold
-                    or abs(lshoulder_y - rwrist_y) > self.y_threshold):
-                    self.stage = ShoulderTaps.Stage.PENDING
-            elif self.stage == ShoulderTaps.Stage.RSHOULDER_TAPPED:
-                if (abs(rshoulder_x - lwrist_x) > self.x_threshold
-                    or abs(rshoulder_y - lwrist_y) > self.y_threshold):
-                    self.stage = ShoulderTaps.Stage.PENDING
+            is_off_balance = self.is_off_balance(pose)
+            self.handle_failed_interval(is_off_balance, time_since_start)
+            if is_off_balance:
+                continue
 
+            self.check_rep(pose, time_since_start)
             if self.target_reps == len(self.rep_times):
                 return time_since_start
 

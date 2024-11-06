@@ -7,6 +7,7 @@ class Exercise(ABC):
     Abstract base class for exercises, outlining methods that must be
     implemented for use in exercise detection and visualisation.
     '''
+    LAT_SPINAL_FLEX_THRESHOLD = 160
     def __init__(self):
         self.rep_times = []
         self.failing_intervals = []
@@ -52,6 +53,33 @@ class Exercise(ABC):
         angle_radians = math.acos(cos_angle)
         angle_degrees = math.degrees(angle_radians)
         return angle_degrees
+
+
+    def is_off_balance(self, pose: dict, x: str = 'x', lat_spinal_flex_threshold: int = LAT_SPINAL_FLEX_THRESHOLD) -> bool:
+        '''
+        Return true if the patient is deemed to be off balance, false otherwise.
+
+        Args:
+            pose:                       the pose to be evaluated.
+            x:                          a character representing what the x axis is.
+            lat_spinal_flex_threshold:  the maximum spinal flexion allowed before
+                                        the patient should be deemed off balance.
+        Returns:
+            bool, true if the patient is off balance, false otherwise.
+        '''
+        rshoulder = pose['right_shoulder']
+        lshoulder = pose['left_shoulder']
+        rhip = pose['right_hip']
+        lhip = pose['left_hip']
+        rknee = pose['right_knee']
+        lknee = pose['left_knee']
+        try:
+            rlat_spinal_flex = self.calc_joint_angle(x, rshoulder, rhip, rknee)
+            llat_spinal_flex = self.calc_joint_angle(x, lshoulder, lhip, lknee)
+            return (rlat_spinal_flex < lat_spinal_flex_threshold
+                    or llat_spinal_flex < lat_spinal_flex_threshold)
+        except:
+            return False
 
 
     def is_failing_interval(self, query_time: float) -> bool:
