@@ -22,11 +22,11 @@ mobile_finish_time = mobile_exercise.run_check(mobile_poses)
 
 print(f'lab data    -> completed in {lab_finish_time:.2f} seconds')
 print(f'lab data    -> rep times: {lab_exercise.rep_times}')
-print(f'lab data    -> failed intervals: {len(lab_exercise.get_failing_intervals())}')
+print(f'lab data    -> failed intervals: {lab_exercise.get_failing_intervals()}')
 print()
 print(f'mobile data -> completed in {mobile_finish_time:.2f} seconds')
 print(f'mobile data -> rep times: {mobile_exercise.rep_times}')
-print(f'mobile data -> failed intervals: {len(mobile_exercise.get_failing_intervals())}')
+print(f'mobile data -> failed intervals: {mobile_exercise.get_failing_intervals()}')
 
 if show_error_graph:
     fig, ax = plt.subplots()

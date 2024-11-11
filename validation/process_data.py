@@ -119,6 +119,7 @@ def goto_start():
     opscr.display_options(DATA_OPTIONS, data_selection_preamble, on_enter_data_selection)
 ########################################################################
 ########################################################################
+
 def output_progress(
     action_title: str,
     file_count: int,
