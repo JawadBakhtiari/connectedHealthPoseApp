@@ -129,5 +129,5 @@ class Blazepose(Model):
 
     @staticmethod
     def path() -> str:
-        return 'data/models/blazepose.tflite'
+        return 'be_pose_estimation/data/models/blazepose.tflite'
 

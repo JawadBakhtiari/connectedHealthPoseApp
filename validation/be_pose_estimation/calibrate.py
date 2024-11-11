@@ -5,17 +5,21 @@
     required to undistort images taken by the camera. Save these to values to a file for access later.
 '''
 
+import sys
 import numpy as np
 import cv2
 import glob
 
+if len(sys.argv) != 3:
+    print(f'usage: {sys.argv[0]} <path/to/images> <path/to/output/file>')
+    exit(1)
+
 CORNER_ROWS = 7
 CORNER_COLS = 5
-IMAGES_PATH = 'data/calibration_images/20240904/side_cam/'
+IMAGES_PATH = sys.argv[1]
 IMAGES = IMAGES_PATH + '*.jpg'
-TEST_IMAGE_NAME = 'img1.jpg'
 IMAGE_DISPLAY_TIME = 5000
-OUT_FILE_PATH = 'data/camera_parameters/20240904/side_cam.npz'
+OUT_FILE_PATH = sys.argv[2]
 
 # Termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -45,24 +49,24 @@ for img in images:
 
 cv2.destroyAllWindows()
 
-ret, mtx, dst, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-test_img = cv2.imread(IMAGES_PATH + TEST_IMAGE_NAME)
-h, w = test_img.shape[:2]
-newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dst, (w,h), 1, (w,h))
-undst = cv2.undistort(test_img, mtx, dst, None, newcameramtx)
-
 # Save camera parameters
+ret, mtx, dst, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 np.savez_compressed(OUT_FILE_PATH, mtx=mtx, dst=dst)
 
 # Output an example image distorted and undistorted (and save these images)
-cv2.namedWindow('distorted', cv2.WND_PROP_FULLSCREEN)
-cv2.setWindowProperty('distorted', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-cv2.imshow('distorted', test_img)
-cv2.waitKey(IMAGE_DISPLAY_TIME)
-cv2.destroyAllWindows()
-cv2.namedWindow('undistorted', cv2.WND_PROP_FULLSCREEN)
-cv2.setWindowProperty('undistorted', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-cv2.imshow('undistorted', undst)
-cv2.waitKey(IMAGE_DISPLAY_TIME)
-cv2.destroyAllWindows()
+# test_img = cv2.imread(IMAGES_PATH + TEST_IMAGE_NAME)
+# h, w = test_img.shape[:2]
+# newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dst, (w,h), 1, (w,h))
+# undst = cv2.undistort(test_img, mtx, dst, None, newcameramtx)
+
+# cv2.namedWindow('distorted', cv2.WND_PROP_FULLSCREEN)
+# cv2.setWindowProperty('distorted', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+# cv2.imshow('distorted', test_img)
+# cv2.waitKey(IMAGE_DISPLAY_TIME)
+# cv2.destroyAllWindows()
+# cv2.namedWindow('undistorted', cv2.WND_PROP_FULLSCREEN)
+# cv2.setWindowProperty('undistorted', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+# cv2.imshow('undistorted', undst)
+# cv2.waitKey(IMAGE_DISPLAY_TIME)
+# cv2.destroyAllWindows()
 

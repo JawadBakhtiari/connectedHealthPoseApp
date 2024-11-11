@@ -6,5 +6,5 @@ class MovenetLightning(Movenet):
     '''
     @staticmethod
     def path() -> str:
-        return 'data/models/movenet_lighting.tflite'
+        return 'be_pose_estimation/data/models/movenet_lighting.tflite'
 

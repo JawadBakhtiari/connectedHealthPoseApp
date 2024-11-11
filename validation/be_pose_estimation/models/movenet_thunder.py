@@ -6,5 +6,5 @@ class MovenetThunder(Movenet):
     '''
     @staticmethod
     def path() -> str:
-        return 'data/models/movenet_thunder.tflite'
+        return 'be_pose_estimation/data/models/movenet_thunder.tflite'
 

@@ -11,21 +11,36 @@
 
 import os
 import cv2
+import sys
 import numpy as np
 import tensorflow as tf
 import json
-from models.blazepose import Blazepose as model
+
+if len(sys.argv) != 6:
+    print(f'usage: {sys.argv[0]} <exercise name> <model name> <path/to/exercise/video> <path/to/camera/parameter> <path/to/results/directory')
+    exit(1)
+
+exercise_name = sys.argv[1]
+model_name = sys.argv[2]
+exercise_video_dir = sys.argv[3]
+camera_params_path = sys.argv[4]
+result_dir = sys.argv[5]
+
+if model_name == 'blazepose':
+    from models.blazepose import Blazepose as model
+else:
+    from models.movenet_thunder import MovenetThunder as model
 
 ######################################################################
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-VID_NAME = 'bent_over_rows'
-VIDEO_PATH = f'data/videos/20241023/{VID_NAME}.mp4'
-OUT_FILE_NAME = f'{VID_NAME}_blazepose.json'
-CALIBRATED_OUT_FILE_PATH = f'data/results/20241023/calibrated_{OUT_FILE_NAME}'
-UNCALIBRATED_OUT_FILE_PATH = f'data/results/20241023/{OUT_FILE_NAME}'
-CAM_PARAMS = np.load('data/camera_parameters/20240904/side_cam.npz')
+
+EXERCISE_VIDEO_PATH = f'{exercise_video_dir}{exercise_name}.mp4'
+OUT_FILE_NAME = f'{exercise_name}_{model_name}.json'
+CALIBRATED_OUT_FILE_PATH = f'{result_dir}calibrated_{OUT_FILE_NAME}'
+UNCALIBRATED_OUT_FILE_PATH = f'{result_dir}{OUT_FILE_NAME}'
+CAM_PARAMS = np.load(camera_params_path)
 ######################################################################
 ######################################################################
 
@@ -56,7 +71,7 @@ def run_model(interpreter, image):
 ######################################################################
 ############################ RUN SCRIPT ##############################
 ######################################################################
-cap = cv2.VideoCapture(VIDEO_PATH)
+cap = cv2.VideoCapture(EXERCISE_VIDEO_PATH)
 interpreter = load_model(model.path())
 input_details = interpreter.get_input_details()
 input_shape = input_details[0]['shape']
@@ -68,8 +83,6 @@ while cap.isOpened():
     ret, dst_img = cap.read()
     if not ret:
         break
-
-    print(f'processing {dst_img} ...')
 
     time_since_start = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
     h, w = dst_img.shape[:2]
@@ -92,8 +105,8 @@ cap.release()
 cv2.destroyAllWindows()
 
 # Save results of pose estimation
-# with open(CALIBRATED_OUT_FILE_PATH, 'w') as json_file:
-#     json.dump(calibrated_video_poses, json_file, indent=4)
+with open(CALIBRATED_OUT_FILE_PATH, 'w') as json_file:
+    json.dump(calibrated_video_poses, json_file, indent=4)
 with open(UNCALIBRATED_OUT_FILE_PATH, 'w') as json_file:
     json.dump(uncalibrated_video_poses, json_file, indent=4)
 
