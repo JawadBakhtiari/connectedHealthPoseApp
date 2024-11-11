@@ -14,13 +14,15 @@ CONFIRMATION = ['continue', 'back']
 DATA_OPTIONS = ['run pose estimation', 'format lab data', 'all']
 MODELS = ['blazepose', 'thunder', 'all']
 MAX_EXERCISE_LEN = max(len(e) for e in EXERCISES)
-WELCOME = 'welcome to the data formatter :)'
-END_MESSAGE = 'formatting complete, press any key to exit'
+WELCOME = 'welcome to the data processor :)'
+END_MESSAGE = 'data processing complete, press any key to exit'
 EXERCISE_HEADER = 'select an exercise (or all)'
 DATA_SELECTION_HEADER = 'select data type to be formatted (or all)'
 MODELS_HEADER = 'select model for pose estimation'
 CALIBRATION_HEADER = 'select image calibration for pose estimation'
 LOG_FILE = 'format_log.txt'
+FORMATTING_ACTION_TITLE = 'formatting file'
+POSE_ESTIMATION_ACTION_TITLE = 'running pose estimation on file'
 
 if len(sys.argv) != 2:
     print(f'usage: {sys.argv[0]} <path/to/data/directory>')
@@ -118,13 +120,14 @@ def goto_start():
 ########################################################################
 ########################################################################
 def output_progress(
+    action_title: str,
     file_count: int,
     num_files: int,
     participant_count: int,
     num_participants: int,
     filename: str) -> None:
     stdscr.clear()
-    progress_text = f'processing file {file_count}/{num_files} for participant {participant_count}/{num_participants} ...'
+    progress_text = f'{action_title} {file_count}/{num_files} for participant {participant_count}/{num_participants} ...'
     stdscr.addstr(opscr.get_height() // 2, opscr.get_width() // 2 - (len(progress_text) // 2 + 2), progress_text)
     stdscr.refresh()
     print(f'processing {filename} ...')
@@ -149,12 +152,12 @@ def format_lab_data() -> None:
             file_count = 1
             num_files = len(os.listdir(in_dir))
             for filename in os.listdir(in_dir):
-                output_progress(file_count, num_files, participant_count, num_participants, filename)
+                output_progress(FORMATTING_ACTION_TITLE, file_count, num_files, participant_count, num_participants, filename)
                 format_lab_data_file(in_dir + filename, out_dir + filename[:len('.csv')] + '.json')
                 file_count += 1
         else:
             filename = '_'.join(selected_exercise.split()) + '.csv'
-            output_progress(1, 1, participant_count, num_participants, filename)
+            output_progress(FORMATTING_ACTION_TITLE, 1, 1, participant_count, num_participants, filename)
             format_lab_data_file(in_dir + filename, out_dir + selected_exercise + '.json')
         participant_count += 1
 
@@ -183,13 +186,13 @@ def run_pose_estimation() -> None:
             file_count = 1
             num_files = len(os.listdir(in_dir))
             for filename in os.listdir(in_dir):
-                output_progress(file_count, num_files, participant_count, num_participants, filename)
+                output_progress(POSE_ESTIMATION_ACTION_TITLE, file_count, num_files, participant_count, num_participants, filename)
                 subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, out_dir], stdout=log_file, stderr=log_file)
                 file_count += 1
         else:
-            filename = '_'.join(selected_exercise.split()) + '.json'
-            output_progress(1, 1, participant_count, num_participants, filename)
-            subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:len('.json')], selected_model, video_dir, primary_params, out_dir], stdout=log_file, stderr=log_file)
+            filename = '_'.join(selected_exercise.split()) + '.mp4'
+            output_progress(POSE_ESTIMATION_ACTION_TITLE, 1, 1, participant_count, num_participants, filename)
+            subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, out_dir], stdout=log_file, stderr=log_file)
         participant_count += 1
 
 
@@ -199,8 +202,8 @@ def run_formatting() -> None:
     elif selected_data == 'run pose estimation':
         run_pose_estimation()
     else:
-        format_lab_data()
         run_pose_estimation()
+        format_lab_data()
 
 ########################################################################
 ############################ run script ################################
