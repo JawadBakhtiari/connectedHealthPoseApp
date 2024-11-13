@@ -16,15 +16,16 @@ import numpy as np
 import tensorflow as tf
 import json
 
-if len(sys.argv) != 6:
-    print(f'usage: {sys.argv[0]} <exercise name> <model name> <path/to/exercise/video> <path/to/camera/parameter> <path/to/results/directory')
+if len(sys.argv) != 7:
+    print(f'usage: {sys.argv[0]} <exercise name> <model name> <path/to/exercise/video> <path/to/camera/parameter> <path/to/uncalibrated/results/directory> <path/to/calibrated/results/directory>')
     exit(1)
 
 exercise_name = sys.argv[1]
 model_name = sys.argv[2]
 exercise_video_dir = sys.argv[3]
 camera_params_path = sys.argv[4]
-result_dir = sys.argv[5]
+uncal_result_dir = sys.argv[5]
+cal_result_dir = sys.argv[6]
 
 if model_name == 'blazepose':
     from models.blazepose import Blazepose as model
@@ -35,11 +36,10 @@ else:
 ############################# CONSTANTS ##############################
 ######################### change as needed ###########################
 ######################################################################
-
 EXERCISE_VIDEO_PATH = f'{exercise_video_dir}{exercise_name}.mp4'
 OUT_FILE_NAME = f'{exercise_name}_{model_name}.json'
-CALIBRATED_OUT_FILE_PATH = f'{result_dir}calibrated_{OUT_FILE_NAME}'
-UNCALIBRATED_OUT_FILE_PATH = f'{result_dir}{OUT_FILE_NAME}'
+CALIBRATED_OUT_FILE_PATH = f'{cal_result_dir}{OUT_FILE_NAME}'
+UNCALIBRATED_OUT_FILE_PATH = f'{uncal_result_dir}{OUT_FILE_NAME}'
 CAM_PARAMS = np.load(camera_params_path)
 ######################################################################
 ######################################################################

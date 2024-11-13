@@ -181,19 +181,21 @@ def run_pose_estimation() -> None:
     num_participants = len(os.listdir(video_dir))
     for pid in os.listdir(video_dir):
         in_dir = video_dir + pid + '/'
-        out_dir = target_dir + '/mobile/poses/backend/' + pid + '/'
-        os.makedirs(os.path.dirname(out_dir), exist_ok=True)
+        uncal_out_dir = target_dir + '/mobile/poses/backend/uncalibrated/' + pid + '/'
+        cal_out_dir = target_dir + '/mobile/poses/backend/calibrated/' + pid + '/'
+        os.makedirs(os.path.dirname(uncal_out_dir), exist_ok=True)
+        os.makedirs(os.path.dirname(cal_out_dir), exist_ok=True)
         if selected_exercise == 'all':
             file_count = 1
             num_files = len(os.listdir(in_dir))
             for filename in os.listdir(in_dir):
                 output_progress(POSE_ESTIMATION_ACTION_TITLE, file_count, num_files, participant_count, num_participants, filename)
-                subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, out_dir], stdout=log_file, stderr=log_file)
+                subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, uncal_out_dir, cal_out_dir], stdout=log_file, stderr=log_file)
                 file_count += 1
         else:
             filename = '_'.join(selected_exercise.split()) + '.mp4'
             output_progress(POSE_ESTIMATION_ACTION_TITLE, 1, 1, participant_count, num_participants, filename)
-            subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, out_dir], stdout=log_file, stderr=log_file)
+            subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, uncal_out_dir, cal_out_dir], stdout=log_file, stderr=log_file)
         participant_count += 1
 
 
