@@ -158,27 +158,44 @@ def compare_results(pose_dir: str, lab_file_path: str, exercise_name: str) -> No
             print(f'mobile data -> rep times: {mobile_exercise.rep_times}', file=results_file)
             print(f'mobile data -> failed intervals: {mobile_exercise.get_failing_intervals()}', file=results_file)
 
+def validate_exercise(lab_file: str, current_lab_dir: str, pid: str) -> None:
+    exercise_name = lab_file[:-len('.json')]
+    print(f'================================================================', file=results_file)
+    print(f'======================= VALIDATING {exercise_name} ========================', file=results_file)
+    print(f'================================================================\n', file=results_file)
+    lab_file_path = current_lab_dir + lab_file
+    if selected_pose_data in ['uncalibrated backend', 'all']:
+        print('---------------- uncalibrated backend results ------------------', file=results_file)
+        compare_results(uncal_backend_pose_dir + pid + '/', lab_file_path, exercise_name)
+        print('----------------------------------------------------------------\n', file=results_file)
+    if selected_pose_data in ['calibrated backend', 'all']:
+        print('----------------- calibrated backend results -------------------', file=results_file)
+        compare_results(cal_backend_pose_dir + pid + '/', lab_file_path, exercise_name)
+        print('----------------------------------------------------------------\n', file=results_file)
+    if selected_pose_data in ['mobile', 'all']:
+        print('---------------------- frontend results ------------------------', file=results_file)
+        compare_results(mobile_pose_dir + pid + '/', lab_file_path, exercise_name)
+        print('----------------------------------------------------------------\n', file=results_file)
+    print(f'================================================================', file=results_file)
+    print(f'================================================================\n', file=results_file)
+
 def run_validation() -> None:
     formatted_lab_data_dir = target_dir + '/lab/formatted/'
     participant_count = 1
     num_participants = len(os.listdir(formatted_lab_data_dir))
     for pid in os.listdir(formatted_lab_data_dir):
-        file_count = 1
         current_lab_dir = formatted_lab_data_dir + pid + '/'
-        num_files = len(os.listdir(current_lab_dir))
-        mobile_pose_dir = target_dir + '/mobile/poses/frontend/' + pid + '/'
-        for lab_file in os.listdir(current_lab_dir):
-            output_progress('validating exercise', file_count, num_files, participant_count, num_participants, lab_file)
-            exercise_name = lab_file[:-len('.json')]
-            lab_file_path = current_lab_dir + lab_file
-            if selected_pose_data in ['uncalibrated backend', 'all']:
-                print('-------------------- uncalibrated backend results ---------------------', file=results_file)
-                compare_results(uncal_backend_pose_dir + pid + '/', lab_file_path, exercise_name)
-            elif selected_pose_data in ['calibrated backend', 'all']:
-                compare_results(cal_backend_pose_dir + pid + '/', lab_file_path, exercise_name)
-            elif selected_pose_data in ['mobile', 'all']:
-                compare_results(mobile_pose_dir + pid + '/', lab_file_path, exercise_name)
-            file_count += 1
+        if selected_exercise == 'all':
+            num_files = len(os.listdir(current_lab_dir))
+            file_count = 1
+            for lab_file in os.listdir(current_lab_dir):
+                output_progress('validating exercise', file_count, num_files, participant_count, num_participants, lab_file)
+                validate_exercise(lab_file, current_lab_dir, pid)
+                file_count += 1
+        else:
+            lab_file = '_'.join(selected_exercise.split()) + '.json'
+            output_progress('validating exercise', 1, 1, participant_count, num_participants, lab_file)
+            validate_exercise(lab_file, current_lab_dir, pid)
         participant_count += 1
 
 

@@ -20,7 +20,6 @@ EXERCISE_HEADER = 'select an exercise (or all)'
 DATA_SELECTION_HEADER = 'select data type to be formatted (or all)'
 MODELS_HEADER = 'select model for pose estimation'
 CALIBRATION_HEADER = 'select image calibration for pose estimation'
-LOG_FILE = 'format_log.txt'
 FORMATTING_ACTION_TITLE = 'formatting file'
 POSE_ESTIMATION_ACTION_TITLE = 'running pose estimation on file'
 
@@ -30,7 +29,7 @@ if len(sys.argv) != 2:
 target_dir = sys.argv[1]
 
 # redirect output to a log file
-log_file = open(LOG_FILE, 'w')
+log_file = open(target_dir + '/results/format_log.txt', 'w')
 sys.stdout = log_file
 
 # initialise curses (screen handling library)
