@@ -54,8 +54,8 @@ def load_model(model_path):
     return interpreter
 
 def preprocess_image(image, input_shape):
-    image = image.astype(model.image_type())
     image = cv2.resize(image, (input_shape[1], input_shape[2]))
+    image = image.astype(model.image_type())
     return np.expand_dims(image, axis=0)
 
 def run_model(interpreter, image):
@@ -95,11 +95,11 @@ while cap.isOpened():
     calibrated_image_pose = run_model(interpreter, preprocess_image(undst_img, input_shape))
     calibrated_video_poses.append({
         'time_since_start': time_since_start,
-        'keypoints': model.format_pose(calibrated_image_pose.tolist()[0], (w,h))
+        'keypoints': model.format_pose(calibrated_image_pose[0].tolist(), (w,h))
     })
     uncalibrated_video_poses.append({
         'time_since_start': time_since_start,
-        'keypoints': model.format_pose(uncalibrated_image_pose.tolist()[0], (w,h))
+        'keypoints': model.format_pose(uncalibrated_image_pose[0].tolist(), (w,h))
     })
 cap.release()
 cv2.destroyAllWindows()
