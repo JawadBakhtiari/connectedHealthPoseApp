@@ -14,17 +14,34 @@ class GridSteps(Exercise):
     'failure' of the exercise for the duration of the time spent off
     balance.
     '''
+    LAT_SPINAL_FLEX_THRESHOLD_MOBILE = 160
+    LAT_SPINAL_FLEX_THRESHOLD_LAB = 145
+    X_TARGET_CHANGE_MOBILE = 250
+    X_TARGET_CHANGE_LAB = 300
+    Y_TARGET_CHANGE_MOBILE = 30
+    Y_TARGET_CHANGE_LAB = 400
+    X_FEET_TOGETHER_MOBILE = 60
+    X_FEET_TOGETHER_LAB = 250
+    Y_FEET_TOGETHER_MOBILE = 20
+    Y_FEET_TOGETHER_LAB = 50
+    X_FEET_CLOSE_MOBILE = 80
+    X_FEET_CLOSE_LAB = 200
+    Y_FEET_CLOSE_MOBILE = 30
+    Y_FEET_CLOSE_LAB = 80
     REQUIRED_CONSECUTIVE_FRAMES = 3
     def __init__(self, target_reps: int, is_lab_data: bool = False):
         super().__init__()
         self.target_reps = target_reps
         self.x = 'z' if is_lab_data else 'x'
         self.y = 'x' if is_lab_data else 'y'
-        self.feet_together_threshold_x = 60
-        self.feet_together_threshold_y = 20
-        self.x_target_change = 250
-        self.y_target_change = 30
+        self.x_feet_together = GridSteps.X_FEET_TOGETHER_LAB if is_lab_data else GridSteps.X_FEET_TOGETHER_MOBILE
+        self.y_feet_together = GridSteps.Y_FEET_TOGETHER_LAB if is_lab_data else GridSteps.Y_FEET_TOGETHER_MOBILE
+        self.x_feet_close = GridSteps.X_FEET_CLOSE_LAB if is_lab_data else GridSteps.X_FEET_CLOSE_MOBILE
+        self.y_feet_close = GridSteps.Y_FEET_CLOSE_LAB if is_lab_data else GridSteps.Y_FEET_CLOSE_MOBILE
+        self.x_target_change = GridSteps.X_TARGET_CHANGE_LAB if is_lab_data else GridSteps.X_TARGET_CHANGE_MOBILE
+        self.y_target_change = GridSteps.Y_TARGET_CHANGE_LAB if is_lab_data else GridSteps.Y_TARGET_CHANGE_MOBILE
         self.stage = GridSteps.Stage.TOGETHER
+        self.lat_spinal_flex_threshold = GridSteps.LAT_SPINAL_FLEX_THRESHOLD_LAB if is_lab_data else GridSteps.LAT_SPINAL_FLEX_THRESHOLD_MOBILE
 
 
     class Stage(Enum):
@@ -47,19 +64,27 @@ class GridSteps(Exercise):
             self.stage = GridSteps.Stage.TOGETHER
 
 
-    def feet_together(self, pose: dict) -> bool:
+    def feet_within_distance(self, pose: dict, x_dist: int, y_dist: int) -> bool:
         left_ankle_x = pose['left_ankle'][self.x]
         left_ankle_y = pose['left_ankle'][self.y]
         right_ankle_x = pose['right_ankle'][self.x]
         right_ankle_y = pose['right_ankle'][self.y]
-        if (abs(left_ankle_x - right_ankle_x) <= self.feet_together_threshold_x
-            and abs(left_ankle_y - right_ankle_y) <= self.feet_together_threshold_y):
+        if (abs(left_ankle_x - right_ankle_x) <= x_dist
+            and abs(left_ankle_y - right_ankle_y) <= y_dist):
             self.left_ankle_x = left_ankle_x
             self.right_ankle_x = right_ankle_x
             self.left_ankle_y = left_ankle_y
             self.right_ankle_y = right_ankle_y
             return True
         return False
+
+
+    def feet_together(self, pose: dict) -> bool:
+        return self.feet_within_distance(pose, self.x_feet_together, self.y_feet_together)
+
+
+    def feet_close_balance(self, pose:dict) -> bool:
+        return self.feet_within_distance(pose, self.x_feet_close, self.y_feet_close)
 
 
     def is_successful_step(self, pose: dict) -> bool:
@@ -93,8 +118,11 @@ class GridSteps(Exercise):
 
             if self.is_successful_step(pose):
                 consecutive_frames += 1
-            if self.stage != GridSteps.Stage.TOGETHER:
-                self.handle_failed_interval(self.is_off_balance(pose, self.x), time_since_start)
+            if self.feet_close_balance(pose):
+                # Only check balance if feet are close - an outward step is too
+                # difficult to disctinguish from being off balance.
+                is_off_balance = self.is_off_balance(pose, self.x, self.lat_spinal_flex_threshold)
+                self.handle_failed_interval(is_off_balance, time_since_start)
 
             if consecutive_frames == GridSteps.REQUIRED_CONSECUTIVE_FRAMES:
                 if self.stage == GridSteps.Stage.APART:

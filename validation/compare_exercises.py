@@ -3,19 +3,19 @@
 import matplotlib.pyplot as plt
 import sys
 import json
-from exercises.dartboard import Dartboard as Exercise
+from exercises.grid_steps import GridSteps as Exercise
 
 show_error_graph = '-e' in sys.argv
-lab_version = 'example_data/20241023/dartboard.json'
-mobile_version = 'be_pose_estimation/data/results/20241023/dartboard_thunder.json'
+lab_version = 'example_data/20241023/grid_steps.json'
+mobile_version = 'be_pose_estimation/data/results/20241023/grid_steps_thunder.json'
 
 with open(lab_version) as f:
     lab_poses = json.load(f)
 with open(mobile_version) as f:
     mobile_poses = json.load(f)
 
-lab_exercise = Exercise(1, True)
-mobile_exercise = Exercise(1)
+lab_exercise = Exercise(10, True)
+mobile_exercise = Exercise(10)
 
 lab_finish_time = lab_exercise.run_check(lab_poses)
 mobile_finish_time = mobile_exercise.run_check(mobile_poses)
