@@ -5,14 +5,13 @@ import sys
 import json
 import curses
 from exercises.exercise import Exercise
-from options_screen import OptionsScreen
+from screen.options_screen import OptionsScreen
+from screen.util import output_progress
+from screen import const
 
 WELCOME = 'welcome to the validator :)'
 POSE_DATA_OPTIONS = ['mobile', 'calibrated backend', 'uncalibrated backend', 'all']
-EXERCISES = ['bent over rows', 'bicep curls', 'dartboard', 'shoulder taps', 'side bend', 'spin', 'tandem stand', 'tandem walk', 'timed up and go', 'walk', 'all']
-EXERCISE_HEADER = 'select an exercise (or all)'
 POSE_DATA_HEADER = 'select the type of pose data to be compared with lab data'
-CONFIRMATION = ['continue', 'back']
 END_MESSAGE = 'validation complete, press any key to exit'
 
 if len(sys.argv) != 2:
@@ -46,7 +45,7 @@ def add_header_text(header: str, options: list) -> None:
     )
 
 def exercise_preamble() -> None:
-    add_header_text(EXERCISE_HEADER, EXERCISES)
+    add_header_text(const.EXERCISE_HEADER, const.EXERCISES)
 
 def pose_data_preamble() -> None:
     add_header_text(POSE_DATA_HEADER, POSE_DATA_OPTIONS)
@@ -54,7 +53,7 @@ def pose_data_preamble() -> None:
 def confirmation_preamble() -> None:
     exercise = 'all exercises' if selected_exercise == 'all' else selected_exercise
     confirmation_text = f'run validation for \'{selected_pose_data}\' data on {exercise}?'
-    add_header_text(confirmation_text, CONFIRMATION)
+    add_header_text(confirmation_text, const.CONFIRMATION)
 ########################################################################
 ########################################################################
 
@@ -62,10 +61,10 @@ def confirmation_preamble() -> None:
 ############################# jumps ####################################
 ########################################################################
 def goto_exercises():
-    opscr.display_options(EXERCISES, exercise_preamble, on_enter_exercise)
+    opscr.display_options(const.EXERCISES, exercise_preamble, on_enter_exercise)
 
 def goto_confirmation():
-    opscr.display_options(CONFIRMATION, confirmation_preamble, on_enter_confirmation)
+    opscr.display_options(const.CONFIRMATION, confirmation_preamble, on_enter_confirmation)
 
 def goto_start():
     opscr.display_instructions(WELCOME)
@@ -78,7 +77,7 @@ def goto_start():
 ########################################################################
 def on_enter_exercise() -> None:
     global selected_exercise
-    selected_exercise = EXERCISES[opscr.get_current_row()]
+    selected_exercise = const.EXERCISES[opscr.get_current_row()]
     goto_confirmation()
 
 def on_enter_pose_data() -> None:
@@ -87,7 +86,7 @@ def on_enter_pose_data() -> None:
     goto_exercises()
 
 def on_enter_confirmation() -> None:
-    if CONFIRMATION[opscr.get_current_row()] == "continue":
+    if const.CONFIRMATION[opscr.get_current_row()] == "continue":
         run_validation()
         stdscr.clear()
         stdscr.addstr(opscr.get_height() // 2, opscr.get_width() // 2 - (len(END_MESSAGE) // 2 + 2), END_MESSAGE)
@@ -100,46 +99,13 @@ def on_enter_confirmation() -> None:
 ########################################################################
 ########################################################################
 
-def output_progress(
-    action_title: str,
-    file_count: int,
-    num_files: int,
-    participant_count: int,
-    num_participants: int,
-    filename: str) -> None:
-    stdscr.clear()
-    progress_text = f'{action_title} {file_count}/{num_files} for participant {participant_count}/{num_participants} ...'
-    stdscr.addstr(opscr.get_height() // 2, opscr.get_width() // 2 - (len(progress_text) // 2 + 2), progress_text)
-    stdscr.refresh()
-    print(f'processing {filename} ...')
-
-from exercises.bent_over_rows import BentOverRows
-from exercises.bicep_curls import BicepCurls
-from exercises.dartboard import Dartboard
-from exercises.shoulder_taps import ShoulderTaps
-from exercises.side_bend import SideBend
-from exercises.spin import Spin
-from exercises.tandem_stand import TandemStand
-from exercises.tandem_walk import TandemWalk
-from exercises.timed_up_and_go import TimedUpAndGo
-from exercises.walk import Walk
-EXERCISES_TO_CLASSES = {
-    'bent over rows': (BentOverRows, 12),
-    'bicep curls': (BicepCurls, 12),
-    'dartboard': (Dartboard, 1),
-    'shoulder taps': (ShoulderTaps, 12),
-    'side bend': (SideBend, 12),
-    'spin': (Spin, 1),
-    'tandem stand': (TandemStand, None),
-    'tandem walk': (TandemWalk, 1600),
-    'timed up and go': (TimedUpAndGo, 1600),
-    'walk': (Walk, 1600),
-}
-
+########################################################################
+########################### validation #################################
+########################################################################
 def compare_results(pose_dir: str, lab_file_path: str, exercise_name: str) -> None:
     for pose_file in os.listdir(pose_dir):
         if pose_file.startswith(exercise_name):
-            Exercise, arg = EXERCISES_TO_CLASSES[' '.join(exercise_name.split('_'))]
+            Exercise, arg = const.EXERCISES_TO_CLASSES[' '.join(exercise_name.split('_'))]
             lab_exercise = Exercise(arg, True)
             mobile_exercise = Exercise(arg)
             with open(lab_file_path) as f:
@@ -189,19 +155,14 @@ def run_validation() -> None:
             num_files = len(os.listdir(current_lab_dir))
             file_count = 1
             for lab_file in os.listdir(current_lab_dir):
-                output_progress('validating exercise', file_count, num_files, participant_count, num_participants, lab_file)
+                output_progress(stdscr, opscr.get_height(), opscr.get_width(), 'validating exercise', file_count, num_files, participant_count, num_participants, lab_file)
                 validate_exercise(lab_file, current_lab_dir, pid)
                 file_count += 1
         else:
             lab_file = '_'.join(selected_exercise.split()) + '.json'
-            output_progress('validating exercise', 1, 1, participant_count, num_participants, lab_file)
+            output_progress(stdscr, opscr.get_height(), opscr.get_width(), 'validating exercise', 1, 1, participant_count, num_participants, lab_file)
             validate_exercise(lab_file, current_lab_dir, pid)
         participant_count += 1
-
-
-
-
-
 
 ########################################################################
 ############################ run script ################################

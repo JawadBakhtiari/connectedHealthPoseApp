@@ -6,8 +6,10 @@ import json
 from exercises.grid_steps import GridSteps as Exercise
 
 show_error_graph = '-e' in sys.argv
-lab_version = 'example_data/20241023/grid_steps.json'
-mobile_version = 'be_pose_estimation/data/results/20241023/grid_steps_thunder.json'
+exercise = 'grid_steps'
+model = 'thunder'
+lab_version = f'example_data/20241023/{exercise}.json'
+mobile_version = f'be_pose_estimation/data/results/20241023/{exercise}_{model}.json'
 
 with open(lab_version) as f:
     lab_poses = json.load(f)
@@ -32,20 +34,17 @@ if show_error_graph:
     fig, ax = plt.subplots()
 
     for (start, end) in mobile_exercise.get_failing_intervals():
-        ax.hlines(y=1, xmin=start, xmax=end, color='blue', linewidth=2, label='mobile')
+        ax.hlines(y=0.8, xmin=start, xmax=end, color='red', linewidth=4, label='mobile')
 
     for (start, end) in lab_exercise.get_failing_intervals():
-        ax.hlines(y=2, xmin=start, xmax=end, color='green', linewidth=2, label='lab')
+        ax.hlines(y=0.9, xmin=start, xmax=end, color='red', linewidth=4, label='lab')
 
-    ax.set_yticks([1, 2])
+    ax.set_yticks([0.8, 0.9])
     ax.set_yticklabels(['mobile', 'lab'])
     ax.set_xlabel('time')
-    ax.set_title('exercise failed intervals (mobile vs lab)')
-
-    # Remove duplicate labels in the legend
-    handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
-    plt.legend(by_label.values(), by_label.keys())
+    ax.set_title(f'{' '.join(exercise.split('_'))} failed intervals')
+    ax.set_ylim(0.25, 1.5)
 
     plt.grid(True)
     plt.show()
+

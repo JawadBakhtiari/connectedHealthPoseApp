@@ -2,6 +2,13 @@ import curses
 from typing import Callable
 
 class OptionsScreen():
+    '''
+    Display a provided list of options to the user and allow them to toggle
+    through these options.
+
+    Allow the selection of an option, and run provided functionality when
+    this occurs.
+    '''
     KEY_UP = 'k'
     KEY_DOWN = 'j'
     KEY_QUIT = 'q'
@@ -36,6 +43,14 @@ class OptionsScreen():
 
 
     def display_options(self, options: list, preamble: Callable, on_enter: Callable) -> None:
+        '''
+        Display options to the user and handle the selection of one of these options.
+
+        Args:
+            options:    list of options to be displayed.
+            preamble:   function to be run to display any desired text before the options.
+            on_enter:   function to be called when one of the options is selected.
+        '''
         curses.curs_set(0)
         self.current_row = 0
 
