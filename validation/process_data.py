@@ -127,6 +127,9 @@ def format_lab_data_file(filepath: str, out_file: str) -> None:
         json.dump(formatted_data, f, indent=4)
 
 
+
+
+
 def format_lab_data() -> None:
     print('formatting lab data...')
     raw_lab_data_dir = target_dir + '/lab/raw/'

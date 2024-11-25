@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import curses
+import matplotlib.pyplot as plt
 from exercises.exercise import Exercise
 from screen.options_screen import OptionsScreen
 from screen.util import output_progress
@@ -21,7 +22,9 @@ target_dir = sys.argv[1]
 uncal_backend_pose_dir = target_dir + '/mobile/poses/backend/uncalibrated/'
 cal_backend_pose_dir = target_dir + '/mobile/poses/backend/calibrated/'
 mobile_pose_dir = target_dir + '/mobile/poses/frontend/'
-os.makedirs(os.path.dirname(target_dir + '/results/'), exist_ok=True)
+
+error_graphs_dir = target_dir + '/results/error_graphs/'
+os.makedirs(os.path.dirname(target_dir + '/results/error_graphs/'), exist_ok=True)
 results_file = open(target_dir + '/results/results.txt', 'w')
 
 # initialise curses (screen handling library)
@@ -102,7 +105,33 @@ def on_enter_confirmation() -> None:
 ########################################################################
 ########################### validation #################################
 ########################################################################
-def compare_results(pose_dir: str, lab_file_path: str, exercise_name: str) -> None:
+def create_error_graph(
+    exercise_name: str,
+    mobile_exercise: Exercise,
+    lab_exercise: Exercise,
+    pid: str,
+    data_type: str
+    ) -> None:
+    _, ax = plt.subplots()
+
+    for (start, end) in mobile_exercise.get_failing_intervals():
+        ax.hlines(y=0.8, xmin=start, xmax=end, color='red', linewidth=4, label='mobile')
+    for (start, end) in lab_exercise.get_failing_intervals():
+        ax.hlines(y=0.9, xmin=start, xmax=end, color='red', linewidth=4, label='lab')
+
+    ax.set_yticks([0.8, 0.9])
+    ax.set_yticklabels(['mobile', 'lab'])
+    ax.set_xlabel('time')
+    ax.set_title(f'{' '.join(exercise_name.split('_'))} failed intervals')
+    ax.set_ylim(0.25, 1.5)
+    plt.grid(True)
+
+    graph_dir = error_graphs_dir + f'{pid}/{data_type}/'
+    os.makedirs(os.path.dirname(graph_dir), exist_ok=True)
+    plt.savefig(graph_dir + f'/{exercise_name}.png', dpi=300, bbox_inches='tight')
+
+def compare_results(lab_file_path: str, exercise_name: str, pid: str, data_type: str) -> None:
+    pose_dir = cal_backend_pose_dir + pid + '/'
     for pose_file in os.listdir(pose_dir):
         if pose_file.startswith(exercise_name):
             Exercise, arg = const.EXERCISES_TO_CLASSES[' '.join(exercise_name.split('_'))]
@@ -115,6 +144,8 @@ def compare_results(pose_dir: str, lab_file_path: str, exercise_name: str) -> No
 
             lab_finish_time = lab_exercise.run_check(lab_poses)
             mobile_finish_time = mobile_exercise.run_check(mobile_poses)
+
+            create_error_graph(exercise_name, mobile_exercise, lab_exercise, pid, data_type)
 
             print(f'lab data    -> completed in {lab_finish_time:.2f} seconds', file=results_file)
             print(f'lab data    -> rep times: {lab_exercise.rep_times}', file=results_file)
@@ -132,15 +163,15 @@ def validate_exercise(lab_file: str, current_lab_dir: str, pid: str) -> None:
     lab_file_path = current_lab_dir + lab_file
     if selected_pose_data in ['uncalibrated backend', 'all']:
         print('---------------- uncalibrated backend results ------------------', file=results_file)
-        compare_results(uncal_backend_pose_dir + pid + '/', lab_file_path, exercise_name)
+        compare_results(lab_file_path, exercise_name, pid, 'uncalibrated')
         print('----------------------------------------------------------------\n', file=results_file)
     if selected_pose_data in ['calibrated backend', 'all']:
         print('----------------- calibrated backend results -------------------', file=results_file)
-        compare_results(cal_backend_pose_dir + pid + '/', lab_file_path, exercise_name)
+        compare_results(lab_file_path, exercise_name, pid, 'calibrated')
         print('----------------------------------------------------------------\n', file=results_file)
     if selected_pose_data in ['mobile', 'all']:
         print('---------------------- frontend results ------------------------', file=results_file)
-        compare_results(mobile_pose_dir + pid + '/', lab_file_path, exercise_name)
+        compare_results(mobile_pose_dir + pid + '/', lab_file_path, exercise_name, 'mobile')
         print('----------------------------------------------------------------\n', file=results_file)
     print(f'================================================================', file=results_file)
     print(f'================================================================\n', file=results_file)

@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from io import StringIO
 
-FILENAME = 'exercises.trc'
+FILENAME = 'sts.trc'
 IN = f'data/{FILENAME}'
 OUT = f'data/interpolated_{FILENAME}'
 
@@ -34,12 +34,15 @@ data_no_names.fillna(method='bfill', inplace=True)  # Backfill remaining NaN val
 
 # Add the joint names row back to the DataFrame
 data_fixed = pd.concat([pd.DataFrame([joint_names_row]), data_no_names], ignore_index=True)
+data_fixed.iloc[1, 0] = ''
+data_fixed.iloc[1, 1] = ''
 
 # Write the output file
-with open(OUT, 'w') as file:
+with open(OUT, 'w') as f:
     # Write header lines back
-    file.writelines(header_lines)
-    # Write interpolated data
-    data_fixed.to_csv(file, sep='\t', index=False, header=False)
+    f.writelines(header_lines)
+
+    # Write data rows
+    data_fixed.to_csv(f, sep='\t', index=False, header=False)
 
 print(f'Interpolation (hopefully) worked ... check output in {OUT}')
