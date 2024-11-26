@@ -34,6 +34,7 @@ EXERCISES = [
     'dartboard',
     'shoulder taps',
     'side bend',
+    'sit to stand',
     'spin',
     'tandem stand',
     'tandem walk',
