@@ -3,9 +3,14 @@
 import os
 import sys
 import json
+import math
 import curses
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.interpolate import PchipInterpolator
 from exercises.exercise import Exercise
+from redirect_output import redirect_output
 from screen.options_screen import OptionsScreen
 from screen.util import output_progress
 from screen import const
@@ -171,7 +176,7 @@ def validate_exercise(lab_file: str, current_lab_dir: str, pid: str) -> None:
         print('----------------------------------------------------------------\n', file=results_file)
     if selected_pose_data in ['mobile', 'all']:
         print('---------------------- frontend results ------------------------', file=results_file)
-        compare_results(mobile_pose_dir + pid + '/', lab_file_path, exercise_name, 'mobile')
+        compare_results(mobile_pose_dir + pid + '/', exercise_name, pid, 'mobile')
         print('----------------------------------------------------------------\n', file=results_file)
     print(f'================================================================', file=results_file)
     print(f'================================================================\n', file=results_file)
@@ -183,17 +188,88 @@ def run_validation() -> None:
     for pid in os.listdir(formatted_lab_data_dir):
         current_lab_dir = formatted_lab_data_dir + pid + '/'
         if selected_exercise == 'all':
+            validate_sts()
             num_files = len(os.listdir(current_lab_dir))
             file_count = 1
             for lab_file in os.listdir(current_lab_dir):
                 output_progress(stdscr, opscr.get_height(), opscr.get_width(), 'validating exercise', file_count, num_files, participant_count, num_participants, lab_file)
                 validate_exercise(lab_file, current_lab_dir, pid)
                 file_count += 1
+        elif selected_exercise == 'sit to stand':
+            validate_sts()
         else:
             lab_file = '_'.join(selected_exercise.split()) + '.json'
             output_progress(stdscr, opscr.get_height(), opscr.get_width(), 'validating exercise', 1, 1, participant_count, num_participants, lab_file)
             validate_exercise(lab_file, current_lab_dir, pid)
         participant_count += 1
+
+def validate_sts_dir(mobile_data_type: str) -> None:
+    mobile_dir = target_dir + f'/mobile/poses/backend/{mobile_data_type}/'
+    for pid in os.listdir(mobile_dir):
+        for pose_file in os.listdir(mobile_dir + f'{pid}/'):
+            if pose_file.startswith('sts'):
+                lab_filepath = target_dir + f'/lab/sts/formatted/{pid}/sts.mot'
+                mobile_filepath = mobile_dir + f'{pid}/{pose_file}'
+                generate_sts_comparison_graph(lab_filepath, mobile_filepath, pid, mobile_data_type)
+
+def validate_sts() -> None:
+    if selected_pose_data in ['uncalibrated backend', 'all']:
+        validate_sts_dir('uncalibrated')
+    if selected_pose_data in ['calibrated backend', 'all']:
+        validate_sts_dir('calibrated')
+    if selected_pose_data in ['mobile', 'all']:
+        validate_sts_dir('frontend')
+
+def calc_joint_angle(initial_side: dict, vertex: dict, terminal_side: dict):
+    v1 = (vertex['x'] - initial_side['x'], vertex['y'] - initial_side['y'])
+    v2 = (vertex['x'] - terminal_side['x'], vertex['y'] - terminal_side['y'])
+
+    dot_product = v1[0] * v2[0] + v1[1] * v2[1]
+    magnitude_v1 = math.sqrt(v1[0] ** 2 + v1[1] ** 2)
+    magnitude_v2 = math.sqrt(v2[0] ** 2 + v2[1] ** 2)
+
+    cos_angle = dot_product / (magnitude_v1 * magnitude_v2)
+    angle_radians = math.acos(cos_angle)
+    angle_degrees = math.degrees(angle_radians)
+    return angle_degrees
+
+def generate_sts_comparison_graph(
+    lab_filepath: str,
+    mobile_filepath: str,
+    pid: str,
+    mobile_data_type: str
+    ) -> None:
+    save_dir = target_dir + f'/results/sts_graphs/{pid}/'
+    os.makedirs(save_dir, exist_ok=True)
+    with open(os.devnull, 'w') as null:
+        with redirect_output(null):
+            ik = pd.read_csv(lab_filepath, delim_whitespace=True, skiprows=10)
+    lab_knee_angles = ik['knee_angle_r']
+    with open(mobile_filepath) as f:
+        poses = json.load(f)
+
+    mobile_knee_angles = []
+    for pose in poses:
+        pose = {kp['name']: kp for kp in pose['keypoints']}
+        try:
+            hip = pose['right_hip']
+            knee = pose['right_knee']
+            ankle = pose['right_ankle']
+            mobile_knee_angles.append(180 - calc_joint_angle(hip, knee, ankle))
+        except:
+            continue
+
+    time_lab = np.linspace(0, 1, len(lab_knee_angles))
+    time_mobile = np.linspace(0, 1, len(mobile_knee_angles))
+    interpolator = PchipInterpolator(time_mobile, mobile_knee_angles)
+    interpolated_mobile_knee_angles = interpolator(time_lab)
+    plt.plot(time_lab, lab_knee_angles, label='opensim')
+    plt.plot(time_lab, interpolated_mobile_knee_angles, label='pose_estimation')
+    plt.xlabel('Relative Time')
+    plt.ylabel('Knee Flexion Angle')
+    plt.title(f'opensim vs pose estimation ({mobile_data_type})')
+    plt.legend()
+    plt.savefig(f'{save_dir}{mobile_data_type}.png')
 
 ########################################################################
 ############################ run script ################################
