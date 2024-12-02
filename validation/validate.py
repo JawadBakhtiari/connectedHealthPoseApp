@@ -204,13 +204,19 @@ def run_validation() -> None:
         participant_count += 1
 
 def validate_sts_dir(mobile_data_type: str) -> None:
-    mobile_dir = target_dir + f'/mobile/poses/backend/{mobile_data_type}/'
+    mobile_dir = mobile_data_type if mobile_data_type == 'frontend' else f'backend/{mobile_data_type}'
+    mobile_dir = target_dir + f'/mobile/poses/{mobile_dir}/'
     for pid in os.listdir(mobile_dir):
         for pose_file in os.listdir(mobile_dir + f'{pid}/'):
             if pose_file.startswith('sts'):
                 lab_filepath = target_dir + f'/lab/sts/formatted/{pid}/sts.mot'
                 mobile_filepath = mobile_dir + f'{pid}/{pose_file}'
-                generate_sts_comparison_graph(lab_filepath, mobile_filepath, pid, mobile_data_type)
+                generate_sts_comparison_graph(
+                    lab_filepath,
+                    mobile_filepath,
+                    pid,
+                    mobile_data_type + pose_file[len('sts'):-len('.json')]
+                )
 
 def validate_sts() -> None:
     if selected_pose_data in ['uncalibrated backend', 'all']:
