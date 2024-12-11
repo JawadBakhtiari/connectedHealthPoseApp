@@ -35,6 +35,7 @@ if len(sys.argv) != 2:
 target_dir = sys.argv[1]
 
 # redirect output to a log file
+os.makedirs(target_dir + '/results/', exist_ok=True)
 log_file = open(target_dir + '/results/format_log.txt', 'w')
 sys.stdout = log_file
 sys.stderr = log_file
@@ -256,12 +257,32 @@ def run_pose_estimation() -> None:
             file_count = 1
             num_files = len(os.listdir(in_dir))
             for filename in os.listdir(in_dir):
-                output_progress(POSE_ESTIMATION_ACTION_TITLE, file_count, num_files, participant_count, num_participants, filename)
+                output_progress(
+                    stdscr,
+                    opscr.get_height(),
+                    opscr.get_width(),
+                    POSE_ESTIMATION_ACTION_TITLE,
+                    file_count,
+                    num_files,
+                    participant_count,
+                    num_participants,
+                    filename
+                )
                 subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, uncal_out_dir, cal_out_dir], stdout=log_file, stderr=log_file)
                 file_count += 1
         else:
             filename = '_'.join(selected_exercise.split()) + '.mp4'
-            output_progress(POSE_ESTIMATION_ACTION_TITLE, 1, 1, participant_count, num_participants, filename)
+            output_progress(
+                stdscr,
+                opscr.get_height(),
+                opscr.get_width(),
+                POSE_ESTIMATION_ACTION_TITLE,
+                1,
+                1,
+                participant_count,
+                num_participants,
+                filename
+            )
             subprocess.run(['python3', 'be_pose_estimation/run_pose_estimation.py', filename[:-len('.mp4')], selected_model, in_dir, primary_params, uncal_out_dir, cal_out_dir], stdout=log_file, stderr=log_file)
         participant_count += 1
 

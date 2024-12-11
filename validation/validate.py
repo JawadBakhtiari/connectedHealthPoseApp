@@ -26,7 +26,7 @@ if len(sys.argv) != 2:
 target_dir = sys.argv[1]
 uncal_backend_pose_dir = target_dir + '/mobile/poses/backend/uncalibrated/'
 cal_backend_pose_dir = target_dir + '/mobile/poses/backend/calibrated/'
-mobile_pose_dir = target_dir + '/mobile/poses/frontend/'
+frontend_pose_dir = target_dir + '/mobile/poses/frontend/'
 
 error_graphs_dir = target_dir + '/results/error_graphs/'
 os.makedirs(os.path.dirname(target_dir + '/results/error_graphs/'), exist_ok=True)
@@ -127,7 +127,7 @@ def create_error_graph(
     ax.set_yticks([0.8, 0.9])
     ax.set_yticklabels(['mobile', 'lab'])
     ax.set_xlabel('time')
-    ax.set_title(f'{' '.join(exercise_name.split('_'))} failed intervals')
+    ax.set_title(f'{" ".join(exercise_name.split("_"))} failed intervals')
     ax.set_ylim(0.25, 1.5)
     plt.grid(True)
 
@@ -135,16 +135,16 @@ def create_error_graph(
     os.makedirs(os.path.dirname(graph_dir), exist_ok=True)
     plt.savefig(graph_dir + f'/{exercise_name}.png', dpi=300, bbox_inches='tight')
 
-def compare_results(lab_file_path: str, exercise_name: str, pid: str, data_type: str) -> None:
-    pose_dir = cal_backend_pose_dir + pid + '/'
-    for pose_file in os.listdir(pose_dir):
+def compare_results(lab_file_path: str, mobile_dir: str, exercise_name: str, pid: str, data_type: str) -> None:
+    for pose_file in os.listdir(mobile_dir):
         if pose_file.startswith(exercise_name):
+            print(mobile_dir + pose_file, file=results_file)
             Exercise, arg = const.EXERCISES_TO_CLASSES[' '.join(exercise_name.split('_'))]
-            lab_exercise = Exercise(arg, True)
-            mobile_exercise = Exercise(arg)
+            lab_exercise = Exercise(arg, True) if arg else Exercise(True)
+            mobile_exercise = Exercise(arg) if arg else Exercise()
             with open(lab_file_path) as f:
                 lab_poses = json.load(f)
-            with open(pose_dir + pose_file) as f:
+            with open(mobile_dir + pose_file) as f:
                 mobile_poses = json.load(f)
 
             lab_finish_time = lab_exercise.run_check(lab_poses)
@@ -168,15 +168,18 @@ def validate_exercise(lab_file: str, current_lab_dir: str, pid: str) -> None:
     lab_file_path = current_lab_dir + lab_file
     if selected_pose_data in ['uncalibrated backend', 'all']:
         print('---------------- uncalibrated backend results ------------------', file=results_file)
-        compare_results(lab_file_path, exercise_name, pid, 'uncalibrated')
+        mobile_dir = uncal_backend_pose_dir + pid + '/'
+        compare_results(lab_file_path, mobile_dir, exercise_name, pid, 'uncalibrated')
         print('----------------------------------------------------------------\n', file=results_file)
     if selected_pose_data in ['calibrated backend', 'all']:
         print('----------------- calibrated backend results -------------------', file=results_file)
-        compare_results(lab_file_path, exercise_name, pid, 'calibrated')
+        mobile_dir = cal_backend_pose_dir + pid + '/'
+        compare_results(lab_file_path, mobile_dir, exercise_name, pid, 'calibrated')
         print('----------------------------------------------------------------\n', file=results_file)
     if selected_pose_data in ['mobile', 'all']:
         print('---------------------- frontend results ------------------------', file=results_file)
-        compare_results(mobile_pose_dir + pid + '/', exercise_name, pid, 'mobile')
+        mobile_dir =  frontend_pose_dir + pid + '/'
+        compare_results(lab_file_path, mobile_dir, exercise_name, pid, 'mobile')
         print('----------------------------------------------------------------\n', file=results_file)
     print(f'================================================================', file=results_file)
     print(f'================================================================\n', file=results_file)

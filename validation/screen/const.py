@@ -21,11 +21,11 @@ EXERCISES_TO_CLASSES = {
     'dartboard': (Dartboard, 1),
     'shoulder taps': (ShoulderTaps, 12),
     'side bend': (SideBend, 12),
-    'spin': (Spin, 1),
+    'spin': (Spin, 2),
     'tandem stand': (TandemStand, None),
     'tandem walk': (TandemWalk, 1600),
     'timed up and go': (TimedUpAndGo, 1600),
-    'walk': (Walk, 1600),
+    'walk': (Walk, 1000),
 }
 
 EXERCISES = [

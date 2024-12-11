@@ -12,7 +12,7 @@ class BentOverRows(Exercise):
     MAX_ELBOW_FLEXION = 90
     MAX_HIP_EXTENSION = 110
     REQUIRED_CONSECUTIVE = 3
-    def __init__(self, target_reps: int):
+    def __init__(self, target_reps: int, is_lab_data: bool = False):
         super().__init__()
         self.target_reps = target_reps
         self.stage = BentOverRows.Stage.FLEXING

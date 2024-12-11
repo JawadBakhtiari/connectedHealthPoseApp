@@ -3,21 +3,21 @@
 import matplotlib.pyplot as plt
 import sys
 import json
-from exercises.grid_steps import GridSteps as Exercise
+from exercises.walk import Walk as Exercise
 
 show_error_graph = '-e' in sys.argv
-exercise = 'grid_steps'
+exercise = 'walk'
 model = 'thunder'
-lab_version = f'example_data/20241023/{exercise}.json'
-mobile_version = f'be_pose_estimation/data/results/20241023/{exercise}_{model}.json'
+lab_version = f'example_data/20241204/lab/formatted/test_id/{exercise}.json'
+mobile_version = f'example_data/20241204/mobile/poses/backend/uncalibrated/test_id/{exercise}_{model}.json'
 
 with open(lab_version) as f:
     lab_poses = json.load(f)
 with open(mobile_version) as f:
     mobile_poses = json.load(f)
 
-lab_exercise = Exercise(10, True)
-mobile_exercise = Exercise(10)
+lab_exercise = Exercise(1000, True)
+mobile_exercise = Exercise(1000)
 
 lab_finish_time = lab_exercise.run_check(lab_poses)
 mobile_finish_time = mobile_exercise.run_check(mobile_poses)
@@ -42,7 +42,7 @@ if show_error_graph:
     ax.set_yticks([0.8, 0.9])
     ax.set_yticklabels(['mobile', 'lab'])
     ax.set_xlabel('time')
-    ax.set_title(f'{' '.join(exercise.split('_'))} failed intervals')
+    ax.set_title(f'{" ".join(exercise.split("_"))} failed intervals')
     ax.set_ylim(0.25, 1.5)
 
     plt.grid(True)

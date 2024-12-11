@@ -1,4 +1,5 @@
 __pycache__
 *.txt
 data/
+example_data/
 *.Identifier
