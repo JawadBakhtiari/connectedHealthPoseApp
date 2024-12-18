@@ -2,7 +2,7 @@ import os
 import math
 import pandas as pd
 from datetime import datetime
-from typing import Union
+from typing import Tuple, Union
 from collections import defaultdict
 from . import const
 
@@ -21,10 +21,40 @@ class LabDataFormatter:
     if not os.path.exists(filepath):
       raise FileNotFoundError(f"file '{filepath}' does not exist")
     self.recording_start = LabDataFormatter.__recording_start(filepath)
-    self.exercise_start = exercise_start
-    self.exercise_end = exercise_end
+    if exercise_start and exercise_end:
+      self.exercise_start = exercise_start
+      self.exercise_end = exercise_end
+    else:
+      self.exercise_start, self.exercise_end = LabDataFormatter.__get_exercise_times(filepath)
     self.data = self.__preprocess(filepath)
     self.nan_keypoints = defaultdict(int)
+
+
+  @staticmethod
+  def __get_exercise_times(filepath: str) -> Tuple[float, float]:
+    '''
+    Args:
+      filepath: path to csv file containing motion capture lab data.
+
+    Returns:
+      Tuple representing time exercise starts and ends, in format
+      (exercise_start_time, exercise_end_time)
+    '''
+    data = pd.read_csv(filepath, skiprows=2, low_memory=False)
+
+    sync_marker_cols = [
+      col for col in data.columns
+      if col.startswith('Marker') and str(data.iloc[0, data.columns.get_loc(col)]).startswith('Sync')
+    ] + ['Type']
+
+    data = data[sync_marker_cols]
+
+    sync_hidden_index = data.loc[(data.drop('Type', axis=1).isnull().all(axis=1))].index[0]
+    sync_revealed_index = data.loc[sync_hidden_index + 1:, :].loc[(data.drop('Type', axis=1).notnull().all(axis=1))].index[0]
+
+    sync_hidden_time = data.loc[sync_hidden_index, 'Type']
+    sync_revealed_time = data.loc[sync_revealed_index, 'Type']
+    return (sync_hidden_time, sync_revealed_time)
 
 
   @staticmethod
