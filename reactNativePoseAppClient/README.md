@@ -35,3 +35,15 @@ npx expo install --fix
 ```
 yarn upgrade-interactive --latest
 ```
+
+# Install on ios device
+
+```
+npx expo run:ios --device
+```
+
+# Run server
+
+```
+npx expo start --dev-client
+```

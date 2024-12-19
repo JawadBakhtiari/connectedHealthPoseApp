@@ -32,28 +32,17 @@ const SignupSchema = Yup.object().shape({
     .min(3, "Too Short!")
     .max(100, "Too Long!")
     .required("Please enter a session name."),
-  // .matches(/^[0-9]+$/, "Must be only digits"),
   session_description: Yup.string()
     .min(3, "Too Short!")
     .max(100, "Too Long!")
     .required("Please enter a session name."),
-  // .required("Please enter full name."),
-
-  // email: Yup.string()
-  //   .email("Invalid email")
-  //   .required("Please enter your email"),
-
-  // mobile: Yup.string()
-  //   .min(8, "Too Short!")
-  //   .max(20, "Too Long!")
-  //   .matches(/^[0-9]+$/, "Must be only digits"),
 });
 
 export default function HomeScreen({ navigation }) {
   return (
     <Formik
       initialValues={{
-        code: "192.168.251.198:8000", // Enter IP Address and port of back-end i.e 192.168.0.137:8000
+        code: "3.104.215.22:8000", // Enter IP Address and port of back-end i.e 192.168.0.137:8000
         first_name: "Ahmad",
         last_name: "Bakhtiari",
         session_name: "Elbow Physio",
@@ -157,12 +146,9 @@ export default function HomeScreen({ navigation }) {
 
             {/* Button*/}
             <TouchableOpacity
-              onPress={
-                () => {
-                  handleSubmit();
-                }
-                // navigation.navigate("Second", { language: "french" })
-              }
+              onPress={() => {
+                handleSubmit();
+              }}
               style={[
                 styles.submitBtn,
                 { backgroundColor: isValid ? "#B05D5D" : "#BB9393" },
@@ -183,8 +169,7 @@ const sendUserInit = async (values, navigation) => {
   let uid = "";
   let sid = "";
 
-  // console.log("http://django:8000/data/api/init_user/");
-
+  // Initilize and Retrieve User
   try {
     const response = await Axios.post(
       "http://" + code + "/data/api/init_user/",
@@ -193,15 +178,14 @@ const sendUserInit = async (values, navigation) => {
         last_name: values.last_name,
       }
     ).then((response) => {
-      // console.log(response.data.uid);
       uid = response.data.uid;
     });
-    // Empty Data
     console.log("Sending User Details");
   } catch (err) {
     console.log(err);
   }
 
+  // Initilize and Retrieve Session
   try {
     const response = await Axios.post(
       "http://" + code + "/data/session/init/",
@@ -212,19 +196,14 @@ const sendUserInit = async (values, navigation) => {
         },
       }
     ).then((response) => {
-      // console.log(response.data.sid);
       sid = response.data.sid;
     });
-    // Empty Data
     console.log("Sending Session Details");
   } catch (err) {
     console.log(err);
   }
 
-  // console.log(uid);
-  console.log(sid);
-
-  navigation.navigate("Second", { code: code, sid: sid, uid: uid });
+  navigation.navigate("VisionCamera", { code: code, sid: sid, uid: uid });
 };
 
 const styles = StyleSheet.create({
@@ -258,7 +237,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   submitBtn: {
-    //backgroundColor: "#395B64",
     padding: 10,
     borderRadius: 15,
     justifyContent: "center",
