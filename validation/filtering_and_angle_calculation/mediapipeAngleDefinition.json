@@ -1,0 +1,82 @@
+{
+	"RightKneeAngle":
+	{
+		"Anker1": 24,
+		"ActualJoint":26,
+		"Anker2":28,
+		"AltAnker1": "",
+		"AltAnker2": 30
+	},
+	"LeftKneeAngle":
+	{
+		"Anker1": 23,
+		"ActualJoint":25,
+		"Anker2":27,
+		"AltAnker1": "",
+		"AltAnker2": 29
+	},
+	"LeftShoulderAngle":
+	{
+		"Anker1": 12,
+		"ActualJoint":11,
+		"Anker2":13,
+		"AltAnker1": "",
+		"AltAnker2": ""
+	},
+	"RightShoulderAngle":
+	{
+		"Anker1": 11,
+		"ActualJoint":12,
+		"Anker2":14,
+		"AltAnker1": "",
+		"AltAnker2": ""
+	},
+	"LeftElbowAngle":
+	{
+		"Anker1": 11,
+		"ActualJoint":13,
+		"Anker2":15,
+		"AltAnker1": "",
+		"AltAnker2": 17
+	},
+	"RightElbowAngle":
+	{
+		"Anker1": 12,
+		"ActualJoint":14,
+		"Anker2":16,
+		"AltAnker1": "",
+		"AltAnker2": 18
+	},
+	"LeftHipAngle":
+	{
+		"Anker1": 11,
+		"ActualJoint":23,
+		"Anker2":25,
+		"AltAnker1": "",
+		"AltAnker2": ""
+	},
+	"RightHipAngle":
+	{
+		"Anker1": 12,
+		"ActualJoint":24,
+		"Anker2":26,
+		"AltAnker1": "",
+		"AltAnker2": ""
+	},
+	"RightAnkleAngle":
+	{
+		"Anker1": 26,
+		"ActualJoint":28,
+		"Anker2":32,
+		"AltAnker1": "",
+		"AltAnker2": "" 
+	},
+	"LeftAnkleAngle":
+	{
+		"Anker1": 25,
+		"ActualJoint":27,
+		"Anker2":31,
+		"AltAnker1": "",
+		"AltAnker2": "" 
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"RightKneeAngle":
+	{
+		"Anker1": "RTHI",
+		"ActualJoint":"RKNE",
+		"Anker2":"RTIB",
+		"AltAnker1": "RASI",
+		"AltAnker2": "RANK",
+		"NeutralPosition": 180
+	},
+	"LeftKneeAngle":
+	{
+		"Anker1": "LTHI",
+		"ActualJoint":"LKNE",
+		"Anker2":"LTIB",
+		"AltAnker1": "LASI",
+		"AltAnker2": "LANK"
+	},
+	"LeftShoulderAngle":
+	{
+		"Anker1": "RSHO",
+		"ActualJoint":"LSHO",
+		"Anker2":"LUPA",
+		"AltAnker1": "",
+		"AltAnker2": "LELB"
+	},
+	"RightShoulderAngle":
+	{
+		"Anker1": "LSHO",
+		"ActualJoint":"RSHO",
+		"Anker2":"RUPA",
+		"AltAnker1": "",
+		"AltAnker2": "RELB"
+	},
+	"LeftElbowAngle":
+	{
+		"Anker1": "LUPA",
+		"ActualJoint":"LELB",
+		"Anker2":"LFRM",
+		"AltAnker1": "LSHO",
+		"AltAnker2": "LWRB"
+	},
+	"RightElbowAngle":
+	{
+		"Anker1": "RUPA",
+		"ActualJoint":"RELB",
+		"Anker2":"RFRM",
+		"AltAnker1": "RSHO",
+		"AltAnker2": "RWRB"
+	},
+	"LeftHipAngle":
+	{
+		"Anker1": "LSHO",
+		"ActualJoint":"LASI",
+		"Anker2":"LTHI",
+		"AltAnker1": "STRN",
+		"AltAnker2": "LKNE"
+	},
+	"RightHipAngle":
+	{
+		"Anker1": "RSHO",
+		"ActualJoint":"RASI",
+		"Anker2":"RTHI",
+		"AltAnker1": "STRN",
+		"AltAnker2": "RKNE"
+	},
+	"RightAnkleAngle":
+	{
+		"Anker1": "RTIB",
+		"ActualJoint":"RANK",
+		"Anker2":"RTOE",
+		"AltAnker1": "",
+		"AltAnker2": "" 
+	},
+	"LeftAnkleAngle":
+	{
+		"Anker1": "LTIB",
+		"ActualJoint":"LANK",
+		"Anker2":"LTOE",
+		"AltAnker1": "",
+		"AltAnker2": "" 
+	}
+}
